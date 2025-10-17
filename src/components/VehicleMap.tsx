@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoibG92YWJsZS1kZW1vIiwiYSI6ImNsejBhMjN4czA1MWkya3M5ZGJ4c3lqN3cifQ.8P8L8vVXqLqZKqZqZqZqZg';
 
-if (!import.meta.env.VITE_MAPBOX_TOKEN) {
-  console.warn('VITE_MAPBOX_TOKEN not configured, using demo token with limitations');
+// Check if Mapbox token is configured
+if (!MAPBOX_TOKEN || MAPBOX_TOKEN === 'pk.eyJ1IjoibG92YWJsZS1kZW1vIiwiYSI6ImNsejBhMjN4czA1MWkya3M5ZGJ4c3lqN3cifQ.8P8L8vVXqLqZKqZqZqZqZg') {
+  console.error('⚠️ MAPBOX TOKEN REQUERIDO: Obtén tu token en https://account.mapbox.com/access-tokens/');
 }
 
 mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -176,8 +177,23 @@ const VehicleMap = ({
     }
   };
 
+  // Show warning if using demo token
+  const isDemoToken = !import.meta.env.VITE_MAPBOX_TOKEN || MAPBOX_TOKEN === 'pk.eyJ1IjoibG92YWJsZS1kZW1vIiwiYSI6ImNsejBhMjN4czA1MWkya3M5ZGJ4c3lqN3cifQ.8P8L8vVXqLqZKqZqZqZqZg';
+
   return (
     <div className="space-y-4">
+      {isDemoToken && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <p className="text-sm text-yellow-800">
+            <strong>⚠️ Configuración requerida:</strong> Para usar el mapa, necesitas agregar tu token de Mapbox.
+            <br />
+            1. Obtén un token gratis en <a href="https://account.mapbox.com/access-tokens/" target="_blank" rel="noopener" className="underline">Mapbox</a>
+            <br />
+            2. Agrega <code className="bg-yellow-100 px-1 rounded">VITE_MAPBOX_TOKEN=tu_token_aqui</code> en el archivo .env
+          </p>
+        </div>
+      )}
+      
       {!readOnly && (
         <div className="space-y-2">
           <Label htmlFor="address">Buscar dirección</Label>
