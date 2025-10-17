@@ -1,34 +1,82 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Car, Map } from "lucide-react";
+import { Car, Map, Menu, X } from "lucide-react";
+import { useState } from "react";
 
 const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+    <nav className="fixed top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center space-x-2">
           <Car className="h-6 w-6 text-primary" />
           <span className="text-xl font-bold">AndaYa</span>
         </Link>
         
-        <div className="flex items-center gap-4">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-2 lg:gap-4">
           <Link to="/explorar">
-            <Button variant="ghost">Explorar carros</Button>
+            <Button variant="ghost" size="sm" className="text-sm lg:text-base">
+              Explorar carros
+            </Button>
           </Link>
           <Link to="/mapa">
-            <Button variant="ghost">
+            <Button variant="ghost" size="sm" className="text-sm lg:text-base">
               <Map className="h-4 w-4 mr-2" />
               Ver mapa
             </Button>
           </Link>
           <Link to="/login">
-            <Button variant="outline">Iniciar sesión</Button>
+            <Button variant="outline" size="sm" className="text-sm lg:text-base">
+              Iniciar sesión
+            </Button>
           </Link>
           <Link to="/registro">
-            <Button>Registrarse</Button>
+            <Button size="sm" className="text-sm lg:text-base">
+              Registrarse
+            </Button>
           </Link>
         </div>
+
+        {/* Mobile Menu Button */}
+        <button 
+          className="md:hidden p-2 hover:bg-accent/10 rounded-lg transition-colors"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Toggle menu"
+        >
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
       </div>
+
+      {/* Mobile Navigation */}
+      {isOpen && (
+        <div className="md:hidden border-t border-border/40 bg-background/98 backdrop-blur-lg animate-fade-in">
+          <div className="container px-4 py-4 space-y-2">
+            <Link to="/explorar" onClick={() => setIsOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start text-base" size="lg">
+                Explorar carros
+              </Button>
+            </Link>
+            <Link to="/mapa" onClick={() => setIsOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start text-base" size="lg">
+                <Map className="h-5 w-5 mr-2" />
+                Ver mapa
+              </Button>
+            </Link>
+            <Link to="/login" onClick={() => setIsOpen(false)}>
+              <Button variant="outline" className="w-full text-base" size="lg">
+                Iniciar sesión
+              </Button>
+            </Link>
+            <Link to="/registro" onClick={() => setIsOpen(false)}>
+              <Button className="w-full text-base" size="lg">
+                Registrarse
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
