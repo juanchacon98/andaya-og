@@ -59,8 +59,8 @@ const Register = () => {
       // Assign role using the secure function
       if (data.user) {
         const { error: roleError } = await supabase.rpc("assign_initial_role", {
-          user_id: data.user.id,
-          role: userType,
+          _user_id: data.user.id,
+          _role: userType,
         });
 
         if (roleError) throw roleError;

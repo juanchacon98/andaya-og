@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Car } from "lucide-react";
+import { Car, Map } from "lucide-react";
 
 const Navbar = () => {
   return (
@@ -14,6 +14,12 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           <Link to="/explorar">
             <Button variant="ghost">Explorar carros</Button>
+          </Link>
+          <Link to="/mapa">
+            <Button variant="ghost">
+              <Map className="h-4 w-4 mr-2" />
+              Ver mapa
+            </Button>
           </Link>
           <Link to="/login">
             <Button variant="outline">Iniciar sesión</Button>
