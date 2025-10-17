@@ -5,8 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
-// Set your Mapbox token here - user needs to add their own
-mapboxgl.accessToken = 'pk.eyJ1IjoibG92YWJsZS1kZW1vIiwiYSI6ImNsejBhMjN4czA1MWkya3M5ZGJ4c3lqN3cifQ.8P8L8vVXqLqZKqZqZqZqZg';
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoibG92YWJsZS1kZW1vIiwiYSI6ImNsejBhMjN4czA1MWkya3M5ZGJ4c3lqN3cifQ.8P8L8vVXqLqZKqZqZqZqZg';
+
+if (!import.meta.env.VITE_MAPBOX_TOKEN) {
+  console.warn('VITE_MAPBOX_TOKEN not configured, using demo token with limitations');
+}
+
+mapboxgl.accessToken = MAPBOX_TOKEN;
 
 interface VehicleMapProps {
   initialLat?: number;
@@ -94,12 +99,24 @@ const VehicleMap = ({
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
           `;
 
-          const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-            <div style="padding: 8px;">
-              <h3 style="font-weight: bold; margin-bottom: 4px;">${vehicle.title}</h3>
-              <p style="color: hsl(var(--primary));">$${vehicle.price_per_day.toLocaleString()}/día</p>
-            </div>
-          `);
+          // Create popup content safely using DOM methods to prevent XSS
+          const popupDiv = document.createElement('div');
+          popupDiv.style.padding = '8px';
+
+          const title = document.createElement('h3');
+          title.style.fontWeight = 'bold';
+          title.style.marginBottom = '4px';
+          title.textContent = vehicle.title; // Safe - sets text, not HTML
+
+          const price = document.createElement('p');
+          price.style.color = 'hsl(var(--primary))';
+          price.textContent = `$${vehicle.price_per_day.toLocaleString()}/día`;
+
+          popupDiv.appendChild(title);
+          popupDiv.appendChild(price);
+
+          const popup = new mapboxgl.Popup({ offset: 25 })
+            .setDOMContent(popupDiv);
 
           new mapboxgl.Marker(el)
             .setLngLat([vehicle.lng, vehicle.lat])

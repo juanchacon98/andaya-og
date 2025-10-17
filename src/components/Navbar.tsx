@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Car, Map, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   return (
     <nav className="fixed top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -27,16 +29,24 @@ const Navbar = () => {
               Ver mapa
             </Button>
           </Link>
-          <Link to="/login">
-            <Button variant="outline" size="sm" className="text-sm lg:text-base">
-              Iniciar sesión
+          {user ? (
+            <Button onClick={signOut} variant="outline" size="sm" className="text-sm lg:text-base">
+              Cerrar Sesión
             </Button>
-          </Link>
-          <Link to="/registro">
-            <Button size="sm" className="text-sm lg:text-base">
-              Registrarse
-            </Button>
-          </Link>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="outline" size="sm" className="text-sm lg:text-base">
+                  Iniciar sesión
+                </Button>
+              </Link>
+              <Link to="/registro">
+                <Button size="sm" className="text-sm lg:text-base">
+                  Registrarse
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -64,16 +74,32 @@ const Navbar = () => {
                 Ver mapa
               </Button>
             </Link>
-            <Link to="/login" onClick={() => setIsOpen(false)}>
-              <Button variant="outline" className="w-full text-base" size="lg">
-                Iniciar sesión
+            {user ? (
+              <Button 
+                onClick={() => {
+                  signOut();
+                  setIsOpen(false);
+                }} 
+                variant="outline" 
+                className="w-full text-base" 
+                size="lg"
+              >
+                Cerrar Sesión
               </Button>
-            </Link>
-            <Link to="/registro" onClick={() => setIsOpen(false)}>
-              <Button className="w-full text-base" size="lg">
-                Registrarse
-              </Button>
-            </Link>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setIsOpen(false)}>
+                  <Button variant="outline" className="w-full text-base" size="lg">
+                    Iniciar sesión
+                  </Button>
+                </Link>
+                <Link to="/registro" onClick={() => setIsOpen(false)}>
+                  <Button className="w-full text-base" size="lg">
+                    Registrarse
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

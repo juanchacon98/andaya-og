@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,36 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Car } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { z } from "zod";
+
+const registerSchema = z.object({
+  email: z.string()
+    .trim()
+    .email({ message: "Email inválido" })
+    .max(255, { message: "Email muy largo" }),
+  
+  password: z.string()
+    .min(8, { message: "La contraseña debe tener al menos 8 caracteres" })
+    .max(72, { message: "La contraseña es muy larga" })
+    .regex(/[A-Z]/, { message: "Debe tener al menos una mayúscula" })
+    .regex(/[a-z]/, { message: "Debe tener al menos una minúscula" })
+    .regex(/[0-9]/, { message: "Debe tener al menos un número" })
+    .regex(/[^A-Za-z0-9]/, { message: "Debe tener al menos un símbolo" }),
+  
+  fullName: z.string()
+    .trim()
+    .min(2, { message: "Nombre muy corto" })
+    .max(100, { message: "Nombre muy largo" })
+    .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/, { 
+      message: "Solo se permiten letras y espacios" 
+    }),
+  
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Las contraseñas no coinciden",
+  path: ["confirmPassword"],
+});
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -17,38 +47,35 @@ const Register = () => {
   const [userType, setUserType] = useState<"renter" | "owner">("renter");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (password !== confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Las contraseñas no coinciden",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (password.length < 8) {
-      toast({
-        title: "Error",
-        description: "La contraseña debe tener al menos 8 caracteres",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
 
     try {
-      // Sign up user
-      const { data, error } = await supabase.auth.signUp({
+      // Validate inputs
+      const validated = registerSchema.parse({
         email,
         password,
+        fullName,
+        confirmPassword
+      });
+
+      setIsLoading(true);
+
+      // Sign up user
+      const { data, error } = await supabase.auth.signUp({
+        email: validated.email,
+        password: validated.password,
         options: {
           data: {
-            full_name: fullName,
+            full_name: validated.fullName,
           },
           emailRedirectTo: `${window.location.origin}/`,
         },
@@ -73,11 +100,19 @@ const Register = () => {
 
       navigate("/login");
     } catch (error: any) {
-      toast({
-        title: "Error al registrarse",
-        description: error.message || "Ocurrió un error durante el registro",
-        variant: "destructive",
-      });
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Error de validación",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error al registrarse",
+          description: error.message || "Ocurrió un error durante el registro",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
