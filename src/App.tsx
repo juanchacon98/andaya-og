@@ -12,6 +12,9 @@ import Explore from "./pages/Explore";
 import MapExplore from "./pages/MapExplore";
 import CarDetail from "./pages/CarDetail";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +32,9 @@ const App = () => (
             <Route path="/explorar" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
             <Route path="/mapa" element={<ProtectedRoute><MapExplore /></ProtectedRoute>} />
             <Route path="/carro/:id" element={<ProtectedRoute><CarDetail /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/usuarios" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
+            <Route path="/admin/configuracion" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
