@@ -32,9 +32,9 @@ const AdminExchangeRates = () => {
     eur_usd_fallback_rate: 1.10
   });
 
-  const bcvUsd = useExchangeRate({ provider: 'bcv', code: 'USD' });
-  const bcvEur = useExchangeRate({ provider: 'bcv', code: 'EUR' });
-  const paraleloUsd = useExchangeRate({ provider: 'paralelo', code: 'USD' });
+  const bcvUsd = useExchangeRate({ provider: 'yadio', code: 'USD' });
+  const bcvEur = useExchangeRate({ provider: 'yadio', code: 'EUR' });
+  const paraleloUsd = useExchangeRate({ provider: 'bcv', code: 'USD' });
 
   useEffect(() => {
     checkAdminAccess();
@@ -181,7 +181,7 @@ const AdminExchangeRates = () => {
           <Card className="border-border">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">BCV - USD</CardTitle>
+                <CardTitle className="text-lg">Yadio - USD</CardTitle>
                 {bcvUsd.stale && (
                   <Badge variant="outline" className="bg-yellow-500/10 text-yellow-700 border-yellow-500/20">
                     Desactualizada
@@ -209,7 +209,7 @@ const AdminExchangeRates = () => {
           <Card className="border-border">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">BCV - EUR</CardTitle>
+                <CardTitle className="text-lg">Yadio - EUR</CardTitle>
                 {bcvEur.stale && (
                   <Badge variant="outline" className="bg-yellow-500/10 text-yellow-700 border-yellow-500/20">
                     Desactualizada
@@ -237,7 +237,7 @@ const AdminExchangeRates = () => {
           <Card className="border-border">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Paralelo - USD</CardTitle>
+                <CardTitle className="text-lg">BCV - USD (Fallback)</CardTitle>
                 {paraleloUsd.stale && (
                   <Badge variant="outline" className="bg-yellow-500/10 text-yellow-700 border-yellow-500/20">
                     Desactualizada
@@ -309,9 +309,8 @@ const AdminExchangeRates = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="yadio">Yadio</SelectItem>
                     <SelectItem value="bcv">BCV</SelectItem>
-                    <SelectItem value="paralelo">Paralelo</SelectItem>
-                    <SelectItem value="monitor">Monitor Dólar</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
