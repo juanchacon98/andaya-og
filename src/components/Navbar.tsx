@@ -59,9 +59,16 @@ const Navbar = () => {
             </Button>
           </Link>
           {user ? (
-            <Button onClick={signOut} variant="outline" size="sm" className="text-sm lg:text-base">
-              Cerrar Sesión
-            </Button>
+            <>
+              <Link to="/perfil">
+                <Button variant="ghost" size="sm" className="text-sm lg:text-base">
+                  Mi perfil
+                </Button>
+              </Link>
+              <Button onClick={signOut} variant="outline" size="sm" className="text-sm lg:text-base">
+                Cerrar Sesión
+              </Button>
+            </>
           ) : (
             <>
               <Link to="/login">
@@ -112,17 +119,24 @@ const Navbar = () => {
               </Button>
             </Link>
             {user ? (
-              <Button 
-                onClick={() => {
-                  signOut();
-                  setIsOpen(false);
-                }} 
-                variant="outline" 
-                className="w-full text-base" 
-                size="lg"
-              >
-                Cerrar Sesión
-              </Button>
+              <>
+                <Link to="/perfil" onClick={() => setIsOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start text-base" size="lg">
+                    Mi perfil
+                  </Button>
+                </Link>
+                <Button 
+                  onClick={() => {
+                    signOut();
+                    setIsOpen(false);
+                  }} 
+                  variant="outline" 
+                  className="w-full text-base" 
+                  size="lg"
+                >
+                  Cerrar Sesión
+                </Button>
+              </>
             ) : (
               <>
                 <Link to="/login" onClick={() => setIsOpen(false)}>

@@ -19,6 +19,7 @@ import AdminVehicles from "./pages/admin/AdminVehicles";
 import AdminReservations from "./pages/admin/AdminReservations";
 import AdminPayments from "./pages/admin/AdminPayments";
 import AdminReports from "./pages/admin/AdminReports";
+import UserDashboard from "./pages/UserDashboard";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/admin/pagos" element={<ProtectedRoute><AdminPayments /></ProtectedRoute>} />
             <Route path="/admin/reportes" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
             <Route path="/admin/configuracion" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
+            <Route path="/perfil" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
