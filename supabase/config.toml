@@ -1,1 +1,22 @@
 project_id = "avwpsnpiucctywaplzse"
+
+[functions.admin-list-users]
+verify_jwt = true
+
+[functions.admin-set-role]
+verify_jwt = true
+
+[functions.admin-update-profile]
+verify_jwt = true
+
+[functions.admin-send-verification]
+verify_jwt = true
+
+[functions.admin-reset-password]
+verify_jwt = true
+
+[functions.admin-revoke-sessions]
+verify_jwt = true
+
+[functions.admin-kyc-update-status]
+verify_jwt = true

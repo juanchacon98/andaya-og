@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Car, UserCheck, RefreshCw, Edit } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { UserEditDialog } from "@/components/admin/UserEditDialog";
 
 interface UserData {
   id: string;
@@ -36,6 +37,8 @@ const AdminUsers = () => {
   const [filteredUsers, setFilteredUsers] = useState<UserData[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAdminAccess();
@@ -278,7 +281,14 @@ const AdminUsers = () => {
                               }
                             </TableCell>
                             <TableCell>
-                              <Button variant="ghost" size="sm">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedUserId(user.id);
+                                  setEditDialogOpen(true);
+                                }}
+                              >
                                 <Edit className="h-4 w-4" />
                               </Button>
                             </TableCell>
@@ -396,6 +406,13 @@ const AdminUsers = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <UserEditDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          userId={selectedUserId}
+          onUpdate={fetchAllUsers}
+        />
       </div>
     </AdminLayout>
   );
