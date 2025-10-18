@@ -59,7 +59,7 @@ export function MapLocationPicker({ lat, lng, onLocationChange, city }: MapLocat
           </div>
         </div>
 
-        {lat !== null && lng !== null && typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng) && (
+        {lat != null && lng != null && typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng) && (
           <div className="mt-3 text-sm text-muted-foreground">
             <p>📍 Ubicación seleccionada: {lat.toFixed(6)}, {lng.toFixed(6)}</p>
           </div>
