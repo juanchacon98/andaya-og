@@ -1,10 +1,15 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Star, MapPin, Calendar, Users, Fuel, Settings, ArrowLeft } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Star, MapPin, Calendar as CalendarIcon, Users, Fuel, Settings, ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +19,8 @@ const CarDetail = () => {
   const { id } = useParams();
   const [car, setCar] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [startDate, setStartDate] = useState<Date>();
+  const [endDate, setEndDate] = useState<Date>();
 
   useEffect(() => {
     if (id) {
@@ -198,22 +205,72 @@ const CarDetail = () => {
                 <div className="mb-4 space-y-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Fecha de inicio</label>
-                    <div className="flex items-center gap-2 rounded-md border p-3">
-                      <Calendar className="h-5 w-5 text-muted-foreground" />
-                      <span className="text-sm">Selecciona una fecha</span>
-                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !startDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {startDate ? format(startDate, "PPP", { locale: es }) : "Selecciona una fecha"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={startDate}
+                          onSelect={setStartDate}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Fecha de devolución</label>
-                    <div className="flex items-center gap-2 rounded-md border p-3">
-                      <Calendar className="h-5 w-5 text-muted-foreground" />
-                      <span className="text-sm">Selecciona una fecha</span>
-                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !endDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {endDate ? format(endDate, "PPP", { locale: es }) : "Selecciona una fecha"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={endDate}
+                          onSelect={setEndDate}
+                          disabled={(date) => date < (startDate || new Date())}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
                 
-                <Button className="mb-4 w-full" size="lg">
+                <Button 
+                  className="mb-4 w-full" 
+                  size="lg"
+                  onClick={() => {
+                    if (!startDate || !endDate) {
+                      toast.error("Por favor selecciona ambas fechas");
+                      return;
+                    }
+                    toast.success("Funcionalidad de reserva próximamente");
+                  }}
+                >
                   Reservar ahora
                 </Button>
                 
