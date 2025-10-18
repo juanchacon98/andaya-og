@@ -44,6 +44,27 @@ const Footer = () => {
           </div>
           
           <div>
+            <h3 className="mb-4 font-semibold">Legal</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/politica-verificacion" className="text-muted-foreground hover:text-foreground">
+                  Política de Verificación
+                </Link>
+              </li>
+              <li>
+                <Link to="/tratamiento-datos" className="text-muted-foreground hover:text-foreground">
+                  Tratamiento de Datos
+                </Link>
+              </li>
+              <li>
+                <Link to="/terminos" className="text-muted-foreground hover:text-foreground">
+                  Términos del Servicio
+                </Link>
+              </li>
+            </ul>
+          </div>
+          
+          <div>
             <h3 className="mb-4 font-semibold">Síguenos</h3>
             <div className="flex gap-4">
               <a href="#" className="text-muted-foreground hover:text-foreground">
