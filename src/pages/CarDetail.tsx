@@ -24,6 +24,7 @@ const CarDetail = () => {
   const [endDate, setEndDate] = useState<Date>();
   const [isBooking, setIsBooking] = useState(false);
   const [unavailableDates, setUnavailableDates] = useState<string[]>([]);
+  const [pendingDates, setPendingDates] = useState<string[]>([]);
 
   useEffect(() => {
     if (id) {
@@ -63,29 +64,40 @@ const CarDetail = () => {
 
   const fetchUnavailableDates = async () => {
     try {
-      // Obtener reservas aprobadas/activas para este vehículo
+      // Obtener reservas aprobadas/activas y pendientes para este vehículo
       const { data: reservations, error } = await supabase
         .from("reservations")
-        .select("start_date, end_date")
+        .select("start_date, end_date, status")
         .eq("vehicle_id", id)
-        .in("status", ["approved", "finished"]);
+        .in("status", ["approved", "finished", "pending"]);
 
       if (error) throw error;
 
       // Convertir rangos de reservas a array de fechas individuales
       const blockedDates: string[] = [];
+      const pendingReservationDates: string[] = [];
+      
       reservations?.forEach((reservation) => {
         const start = new Date(reservation.start_date);
         const end = new Date(reservation.end_date);
         const current = new Date(start);
         
+        const dates: string[] = [];
         while (current <= end) {
-          blockedDates.push(format(current, "yyyy-MM-dd"));
+          dates.push(format(current, "yyyy-MM-dd"));
           current.setDate(current.getDate() + 1);
+        }
+
+        // Separate by status
+        if (reservation.status === "pending") {
+          pendingReservationDates.push(...dates);
+        } else {
+          blockedDates.push(...dates);
         }
       });
 
       setUnavailableDates(blockedDates);
+      setPendingDates(pendingReservationDates);
     } catch (error) {
       console.error("Error loading availability:", error);
     }
@@ -321,6 +333,7 @@ const CarDetail = () => {
                     value={{ startDate, endDate }}
                     minDate={new Date()}
                     unavailableDates={unavailableDates}
+                    pendingDates={pendingDates}
                     onChange={({ startDate: start, endDate: end }) => {
                       setStartDate(start);
                       setEndDate(end);

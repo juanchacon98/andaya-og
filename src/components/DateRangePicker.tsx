@@ -15,7 +15,8 @@ interface DateRangePickerProps {
   value?: DateRange;
   minDate?: Date;
   maxDate?: Date;
-  unavailableDates?: string[]; // Array de fechas ISO (yyyy-MM-dd) bloqueadas
+  unavailableDates?: string[]; // Array de fechas ISO (yyyy-MM-dd) bloqueadas (rojo)
+  pendingDates?: string[]; // Array de fechas ISO (yyyy-MM-dd) pendientes (amarillo)
   onChange: (range: DateRange) => void;
   onConfirm?: (range: DateRange) => void;
 }
@@ -25,6 +26,7 @@ export const DateRangePicker = ({
   minDate = new Date(),
   maxDate,
   unavailableDates = [],
+  pendingDates = [],
   onChange,
   onConfirm,
 }: DateRangePickerProps) => {
@@ -41,6 +43,7 @@ export const DateRangePicker = ({
 
   // Convertir fechas no disponibles a objetos Date
   const unavailableDateObjects = unavailableDates.map(dateStr => new Date(dateStr));
+  const pendingDateObjects = pendingDates.map(dateStr => new Date(dateStr));
 
   const handleDateClick = (date: Date) => {
     const normalizedDate = startOfDay(date);
@@ -83,14 +86,30 @@ export const DateRangePicker = ({
     );
   };
 
+  const isDatePending = (date: Date): boolean => {
+    return pendingDateObjects.some(pendingDate => 
+      isSameDay(date, pendingDate)
+    );
+  };
+
   const hasUnavailableDatesInRange = (start: Date, end: Date): boolean => {
-    return unavailableDateObjects.some(unavailableDate => {
+    const hasUnavailable = unavailableDateObjects.some(unavailableDate => {
       try {
         return isWithinInterval(unavailableDate, { start, end });
       } catch {
         return false;
       }
     });
+
+    const hasPending = pendingDateObjects.some(pendingDate => {
+      try {
+        return isWithinInterval(pendingDate, { start, end });
+      } catch {
+        return false;
+      }
+    });
+
+    return hasUnavailable || hasPending;
   };
 
   const isDateDisabled = (date: Date): boolean => {
@@ -108,6 +127,11 @@ export const DateRangePicker = ({
 
     // Deshabilitar fechas no disponibles
     if (isDateUnavailable(normalizedDate)) {
+      return true;
+    }
+
+    // Deshabilitar fechas pendientes
+    if (isDatePending(normalizedDate)) {
       return true;
     }
 
@@ -170,6 +194,8 @@ export const DateRangePicker = ({
     end: endDate ? [endDate] : [],
     range: (date: Date) => isInRange(date),
     disabled: isDateDisabled,
+    unavailable: (date: Date) => isDateUnavailable(date),
+    pending: (date: Date) => isDatePending(date),
   };
 
   const modifiersClassNames = {
@@ -177,6 +203,8 @@ export const DateRangePicker = ({
     end: "bg-primary text-primary-foreground rounded-r-md hover:bg-primary hover:text-primary-foreground",
     range: "bg-primary/10 text-foreground",
     disabled: "text-muted-foreground opacity-50 cursor-not-allowed",
+    unavailable: "!bg-destructive/20 !text-destructive line-through",
+    pending: "!bg-yellow-100 dark:!bg-yellow-900/30 !text-yellow-900 dark:!text-yellow-100",
     today: "font-bold",
   };
 
@@ -243,13 +271,29 @@ export const DateRangePicker = ({
         />
       </div>
 
+      {/* Leyenda de colores */}
+      <div className="flex flex-wrap gap-4 text-xs">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-primary/10 border border-primary/20"></div>
+          <span className="text-muted-foreground">Disponible</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-500/20"></div>
+          <span className="text-muted-foreground">Pendiente de aprobación</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-destructive/20 border border-destructive/30"></div>
+          <span className="text-muted-foreground">No disponible</span>
+        </div>
+      </div>
+
       {/* Mensaje de advertencia si hay fechas bloqueadas en el rango */}
       {startDate && hoverDate && !endDate && hasUnavailableDatesInRange(
         isBefore(startDate, hoverDate) ? startDate : hoverDate,
         isAfter(startDate, hoverDate) ? startDate : hoverDate
       ) && (
         <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          El rango seleccionado contiene fechas no disponibles
+          El rango seleccionado contiene fechas no disponibles o pendientes de aprobación
         </div>
       )}
 

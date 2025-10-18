@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { VehiclePendingRequests } from "./VehiclePendingRequests";
 
 interface Reservation {
   id: string;
@@ -306,6 +307,20 @@ export const VehicleStatsDialog = ({
           <DialogDescription>{vehicleTitle}</DialogDescription>
         </DialogHeader>
 
+        <Tabs defaultValue="stats" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="stats">Estadísticas</TabsTrigger>
+            <TabsTrigger value="requests">
+              Solicitudes
+              {reservations.filter(r => r.status === "pending").length > 0 && (
+                <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center">
+                  {reservations.filter(r => r.status === "pending").length}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="stats" className="mt-6">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
@@ -499,6 +514,28 @@ export const VehicleStatsDialog = ({
             </ScrollArea>
           </div>
         )}
+          </TabsContent>
+
+          <TabsContent value="requests" className="mt-6">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Cargando solicitudes...
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <VehiclePendingRequests
+                vehicleId={vehicleId}
+                vehicleTitle={vehicleTitle}
+                reservations={reservations.filter(r => r.status === "pending")}
+                onUpdate={fetchReservationsAndStats}
+              />
+            )}
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
