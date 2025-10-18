@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MapPin } from "lucide-react";
+import { MapPin, ExternalLink } from "lucide-react";
 
 interface MapLocationPickerProps {
   lat: number | null;
@@ -66,13 +66,25 @@ export function MapLocationPicker({ lat, lng, onLocationChange, city }: MapLocat
         )}
       </div>
 
-      <div className="text-xs text-muted-foreground">
+      <a 
+        href="https://www.google.com/maps" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 text-xs text-primary hover:underline"
+      >
+        <MapPin className="h-3 w-3" />
+        Abrir Google Maps para obtener coordenadas
+        <ExternalLink className="h-3 w-3" />
+      </a>
+      
+      <div className="text-xs text-muted-foreground bg-muted/30 rounded p-3">
         <p className="font-medium mb-1">💡 Cómo obtener las coordenadas:</p>
         <ol className="list-decimal list-inside space-y-1 ml-2">
-          <li>Abre Google Maps y busca la ubicación</li>
-          <li>Haz clic derecho en el punto exacto</li>
-          <li>Las coordenadas aparecen en la parte superior</li>
-          <li>Cópialas aquí (el primer número es latitud, el segundo longitud)</li>
+          <li>Haz clic en el enlace de arriba para abrir Google Maps</li>
+          <li>Busca la ubicación de recogida</li>
+          <li>Haz clic derecho en el punto exacto del mapa</li>
+          <li>Las coordenadas aparecen arriba, haz clic para copiarlas</li>
+          <li>Pégalas aquí (primer número = latitud, segundo = longitud)</li>
         </ol>
       </div>
     </div>
