@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,9 +17,52 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CarCard from "@/components/CarCard";
 import heroImage from "@/assets/hero-turo-style.jpg";
+import { supabase } from "@/integrations/supabase/client";
 
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const [recommendedCars, setRecommendedCars] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchRecommendedVehicles();
+  }, []);
+
+  const fetchRecommendedVehicles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("vehicles")
+        .select(`
+          *,
+          vehicle_photos!vehicle_photos_vehicle_id_fkey (url)
+        `)
+        .eq("status", "active")
+        .order("rating_avg", { ascending: false })
+        .limit(6);
+
+      if (error) throw error;
+
+      const formattedVehicles = (data || []).map((vehicle: any) => ({
+        id: vehicle.id,
+        image: vehicle.vehicle_photos?.[0]?.url || "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800",
+        brand: vehicle.brand,
+        model: vehicle.model,
+        year: vehicle.year,
+        pricePerDay: vehicle.price_per_day,
+        location: `${vehicle.city || "Venezuela"}`,
+        rating: vehicle.rating_avg || 5.0,
+        type: vehicle.type as "sedan" | "suv" | "compact",
+      }));
+
+      setRecommendedCars(formattedVehicles.slice(0, 3));
+    } catch (error) {
+      console.error("Error fetching vehicles:", error);
+      // Usar datos de respaldo en caso de error
+      setRecommendedCars([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const categories = [
     { name: "Todos", icon: null },
@@ -27,42 +70,6 @@ const Home = () => {
     { name: "Mensual", icon: CalendarDays },
     { name: "Cerca", icon: Navigation },
     { name: "Entregados", icon: Package },
-  ];
-
-  const recommendedCars = [
-    {
-      id: "1",
-      image: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800",
-      brand: "Toyota",
-      model: "Corolla",
-      year: 2022,
-      pricePerDay: 150000,
-      location: "Caracas, Venezuela",
-      rating: 4.9,
-      type: "sedan" as const,
-    },
-    {
-      id: "2",
-      image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800",
-      brand: "Honda",
-      model: "CR-V",
-      year: 2023,
-      pricePerDay: 200000,
-      location: "Valencia, Venezuela",
-      rating: 5.0,
-      type: "suv" as const,
-    },
-    {
-      id: "3",
-      image: "https://images.unsplash.com/photo-1583267746897-c5df1e5c3b28?w=800",
-      brand: "Chevrolet",
-      model: "Spark",
-      year: 2021,
-      pricePerDay: 100000,
-      location: "Maracaibo, Venezuela",
-      rating: 4.8,
-      type: "compact" as const,
-    },
   ];
 
   return (
@@ -198,9 +205,22 @@ const Home = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recommendedCars.map((car) => (
-              <CarCard key={car.id} {...car} />
-            ))}
+            {loading ? (
+              <div className="col-span-full flex justify-center py-10">
+                <div className="text-center">
+                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+                  <p className="mt-2 text-sm text-muted-foreground">Cargando vehículos...</p>
+                </div>
+              </div>
+            ) : recommendedCars.length === 0 ? (
+              <div className="col-span-full text-center py-10">
+                <p className="text-lg text-muted-foreground">No hay vehículos disponibles en este momento</p>
+              </div>
+            ) : (
+              recommendedCars.map((car) => (
+                <CarCard key={car.id} {...car} />
+              ))
+            )}
           </div>
 
           <div className="text-center mt-12">

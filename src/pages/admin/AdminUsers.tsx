@@ -133,7 +133,7 @@ const AdminUsers = () => {
   const getKycBadgeVariant = (status: string | null) => {
     if (!status) return "outline";
     switch (status) {
-      case "approved": return "success";
+      case "verified": return "success";
       case "pending": return "warning";
       case "rejected": return "destructive";
       default: return "outline";
@@ -143,7 +143,7 @@ const AdminUsers = () => {
   const getKycLabel = (status: string | null) => {
     if (!status) return "N/A";
     const labels: Record<string, string> = {
-      approved: "Aprobado",
+      verified: "Verificado",
       pending: "Pendiente",
       rejected: "Rechazado"
     };

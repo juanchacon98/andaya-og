@@ -21,8 +21,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Eye, CheckCircle, XCircle } from "lucide-react";
+import { Search, Filter, Eye, CheckCircle, XCircle, Edit, Pause } from "lucide-react";
 import { toast } from "sonner";
+import { VehicleEditDialog } from "@/components/admin/VehicleEditDialog";
+import { VehicleRejectDialog } from "@/components/admin/VehicleRejectDialog";
 
 interface Vehicle {
   id: string;
@@ -48,6 +50,9 @@ const AdminVehicles = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  const [rejectingVehicleId, setRejectingVehicleId] = useState<string | null>(null);
+  const [rejectingVehicleName, setRejectingVehicleName] = useState("");
 
   useEffect(() => {
     checkAdminAccess();
@@ -114,6 +119,23 @@ const AdminVehicles = () => {
 
   const updateVehicleStatus = async (id: string, newStatus: string) => {
     try {
+      // Si se está aprobando, verificar KYC del propietario
+      if (newStatus === "active") {
+        const vehicle = vehicles.find(v => v.id === id);
+        if (!vehicle) return;
+
+        const { data: kycData, error: kycError } = await supabase
+          .from("kyc_verifications")
+          .select("status")
+          .eq("user_id", vehicle.owner_id)
+          .maybeSingle();
+
+        if (kycError || !kycData || kycData.status !== "verified") {
+          toast.error("No se puede aprobar: el propietario no tiene KYC verificado");
+          return;
+        }
+      }
+
       const { error } = await supabase
         .from("vehicles")
         .update({ status: newStatus as "active" | "paused" | "pending_review" | "rejected" })
@@ -121,7 +143,13 @@ const AdminVehicles = () => {
 
       if (error) throw error;
 
-      toast.success(`Vehículo ${newStatus === "active" ? "aprobado" : "rechazado"}`);
+      const statusLabels: Record<string, string> = {
+        active: "aprobado",
+        paused: "pausado",
+        rejected: "rechazado"
+      };
+
+      toast.success(`Vehículo ${statusLabels[newStatus] || "actualizado"}`);
       fetchVehicles();
     } catch (error) {
       console.error("Error updating vehicle:", error);
@@ -143,7 +171,7 @@ const AdminVehicles = () => {
     switch (status) {
       case "active": return "Activo";
       case "pending_review": return "Pendiente";
-      case "inactive": return "Inactivo";
+      case "paused": return "Pausado";
       case "rejected": return "Rechazado";
       default: return status;
     }
@@ -193,7 +221,7 @@ const AdminVehicles = () => {
                   <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="active">Activos</SelectItem>
                   <SelectItem value="pending_review">Pendientes</SelectItem>
-                  <SelectItem value="inactive">Inactivos</SelectItem>
+                  <SelectItem value="paused">Pausados</SelectItem>
                   <SelectItem value="rejected">Rechazados</SelectItem>
                 </SelectContent>
               </Select>
@@ -241,32 +269,75 @@ const AdminVehicles = () => {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
+                          {/* Ver detalles */}
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => navigate(`/carro/${vehicle.id}`)}
+                            title="Ver detalles"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
+                          
+                          {/* Editar - disponible para todos los estados */}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setEditingVehicle(vehicle)}
+                            title="Editar vehículo"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          
+                          {/* Acciones según estado */}
                           {vehicle.status === "pending_review" && (
                             <>
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="text-green-600 hover:text-green-700"
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
                                 onClick={() => updateVehicleStatus(vehicle.id, "active")}
+                                title="Aprobar"
                               >
                                 <CheckCircle className="h-4 w-4" />
                               </Button>
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="text-red-600 hover:text-red-700"
-                                onClick={() => updateVehicleStatus(vehicle.id, "rejected")}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => {
+                                  setRejectingVehicleId(vehicle.id);
+                                  setRejectingVehicleName(`${vehicle.brand} ${vehicle.model}`);
+                                }}
+                                title="Rechazar"
                               >
                                 <XCircle className="h-4 w-4" />
                               </Button>
                             </>
+                          )}
+                          
+                          {vehicle.status === "active" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"
+                              onClick={() => updateVehicleStatus(vehicle.id, "paused")}
+                              title="Pausar"
+                            >
+                              <Pause className="h-4 w-4" />
+                            </Button>
+                          )}
+                          
+                          {vehicle.status === "paused" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                              onClick={() => updateVehicleStatus(vehicle.id, "active")}
+                              title="Activar"
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                            </Button>
                           )}
                         </div>
                       </TableCell>
@@ -277,6 +348,22 @@ const AdminVehicles = () => {
             </div>
           </CardContent>
         </Card>
+        
+        {/* Diálogos */}
+        <VehicleEditDialog
+          vehicle={editingVehicle}
+          open={!!editingVehicle}
+          onOpenChange={(open) => !open && setEditingVehicle(null)}
+          onSuccess={fetchVehicles}
+        />
+        
+        <VehicleRejectDialog
+          vehicleId={rejectingVehicleId}
+          vehicleName={rejectingVehicleName}
+          open={!!rejectingVehicleId}
+          onOpenChange={(open) => !open && setRejectingVehicleId(null)}
+          onSuccess={fetchVehicles}
+        />
       </div>
     </AdminLayout>
   );

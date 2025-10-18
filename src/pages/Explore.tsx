@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,84 +7,61 @@ import { Label } from "@/components/ui/label";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CarCard from "@/components/CarCard";
-import carSedan from "@/assets/car-sedan.jpg";
-import carSuv from "@/assets/car-suv.jpg";
-import carCompact from "@/assets/car-compact.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Explore = () => {
   const [location, setLocation] = useState("");
   const [vehicleType, setVehicleType] = useState("all");
   const [priceRange, setPriceRange] = useState([0]);
+  const [cars, setCars] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for cars
-  const cars = [
-    {
-      id: "1",
-      image: carSedan,
-      brand: "Honda",
-      model: "Civic",
-      year: 2023,
-      pricePerDay: 45,
-      location: "Bogotá, Colombia",
-      rating: 4.8,
-      type: "Sedán",
-    },
-    {
-      id: "2",
-      image: carSuv,
-      brand: "Mazda",
-      model: "CX-5",
-      year: 2022,
-      pricePerDay: 65,
-      location: "Medellín, Colombia",
-      rating: 4.9,
-      type: "SUV",
-    },
-    {
-      id: "3",
-      image: carCompact,
-      brand: "Chevrolet",
-      model: "Spark",
-      year: 2024,
-      pricePerDay: 30,
-      location: "Cali, Colombia",
-      rating: 4.7,
-      type: "Compacto",
-    },
-    {
-      id: "4",
-      image: carSedan,
-      brand: "Toyota",
-      model: "Corolla",
-      year: 2023,
-      pricePerDay: 50,
-      location: "Cartagena, Colombia",
-      rating: 4.9,
-      type: "Sedán",
-    },
-    {
-      id: "5",
-      image: carSuv,
-      brand: "Nissan",
-      model: "Qashqai",
-      year: 2022,
-      pricePerDay: 60,
-      location: "Barranquilla, Colombia",
-      rating: 4.6,
-      type: "SUV",
-    },
-    {
-      id: "6",
-      image: carCompact,
-      brand: "Kia",
-      model: "Picanto",
-      year: 2024,
-      pricePerDay: 35,
-      location: "Pereira, Colombia",
-      rating: 4.8,
-      type: "Compacto",
-    },
-  ];
+  useEffect(() => {
+    fetchVehicles();
+  }, []);
+
+  const fetchVehicles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("vehicles")
+        .select(`
+          *,
+          vehicle_photos!vehicle_photos_vehicle_id_fkey (url)
+        `)
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      const formattedVehicles = (data || []).map((vehicle: any) => ({
+        id: vehicle.id,
+        image: vehicle.vehicle_photos?.[0]?.url || "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800",
+        brand: vehicle.brand,
+        model: vehicle.model,
+        year: vehicle.year,
+        pricePerDay: vehicle.price_per_day,
+        location: `${vehicle.city || "Venezuela"}`,
+        rating: vehicle.rating_avg || 5.0,
+        type: vehicle.type,
+      }));
+
+      setCars(formattedVehicles);
+    } catch (error: any) {
+      console.error("Error fetching vehicles:", error);
+      toast.error("Error al cargar vehículos");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filtrar vehículos
+  const filteredCars = cars.filter(car => {
+    const matchesLocation = !location || car.location.toLowerCase().includes(location.toLowerCase());
+    const matchesType = vehicleType === "all" || car.type === vehicleType;
+    const matchesPrice = priceRange[0] === 0 || car.pricePerDay <= priceRange[0];
+    return matchesLocation && matchesType && matchesPrice;
+  });
 
   return (
     <div className="min-h-screen">
@@ -116,23 +93,26 @@ const Explore = () => {
                   <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="sedan">Sedán</SelectItem>
                   <SelectItem value="suv">SUV</SelectItem>
-                  <SelectItem value="compact">Compacto</SelectItem>
+                  <SelectItem value="hatchback">Hatchback</SelectItem>
                   <SelectItem value="van">Van</SelectItem>
+                  <SelectItem value="pickup">Pickup</SelectItem>
+                  <SelectItem value="coupe">Coupé</SelectItem>
+                  <SelectItem value="moto">Moto</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="price">Precio máximo por día: ${priceRange[0]}</Label>
-              <Slider
-                id="price"
-                min={0}
-                max={200}
-                step={5}
-                value={priceRange}
-                onValueChange={setPriceRange}
-                className="mt-2"
-              />
+            <Label htmlFor="price">Precio máximo por día: Bs. {priceRange[0] === 0 ? "Sin límite" : priceRange[0].toLocaleString()}</Label>
+            <Slider
+              id="price"
+              min={0}
+              max={500}
+              step={10}
+              value={priceRange}
+              onValueChange={setPriceRange}
+              className="mt-2"
+            />
             </div>
           </div>
           
@@ -142,15 +122,32 @@ const Explore = () => {
         </div>
 
         {/* Results */}
-        <div className="mb-4 text-muted-foreground">
-          Mostrando {cars.length} vehículos
-        </div>
-        
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {cars.map((car) => (
-            <CarCard key={car.id} {...car} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="text-center">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+              <p className="mt-2 text-sm text-muted-foreground">Cargando vehículos...</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="mb-4 text-muted-foreground">
+              Mostrando {filteredCars.length} vehículos
+            </div>
+            
+            {filteredCars.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-lg text-muted-foreground">No se encontraron vehículos que coincidan con tu búsqueda</p>
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredCars.map((car) => (
+                  <CarCard key={car.id} {...car} />
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
       
       <Footer />
