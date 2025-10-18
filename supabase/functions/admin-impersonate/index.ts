@@ -97,10 +97,13 @@ serve(async (req) => {
       });
     }
 
-    // Generate temporary JWT for target user
+    // Generate temporary JWT for target user with correct redirect URL
     const { data: tokenData, error: tokenError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: targetUser.user.email!,
+      options: {
+        redirectTo: `${req.headers.get('origin') || 'https://e3b2816f-485f-4cdf-9dc3-b86a29adbeba.lovableproject.com'}/`
+      }
     });
 
     if (tokenError || !tokenData) {
