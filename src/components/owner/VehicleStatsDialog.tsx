@@ -454,11 +454,11 @@ export const VehicleStatsDialog = ({
                                   href={`https://wa.me/${reservation.profiles.phone.replace(/\D/g, "")}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                                  className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors font-medium"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <MessageCircle className="h-3 w-3" />
-                                  {reservation.profiles.phone}
+                                  Contactar por WhatsApp
                                 </a>
                               ) : (
                                 <p className="text-xs text-muted-foreground">
