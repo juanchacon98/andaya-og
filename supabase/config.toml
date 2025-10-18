@@ -24,6 +24,9 @@ verify_jwt = true
 [functions.admin-impersonate]
 verify_jwt = true
 
+[functions.notify-kyc-submission]
+verify_jwt = true
+
 [functions.fx-refresh]
 verify_jwt = false
 

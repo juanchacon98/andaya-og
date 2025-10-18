@@ -35,7 +35,44 @@ export function KYCTab({ user, onUpdate }: KYCTabProps) {
         .maybeSingle();
 
       if (error) throw error;
-      setKycData(data);
+      
+      // If we have data with file paths, generate signed URLs
+      if (data) {
+        const signedUrls: any = {};
+        
+        if (data.id_front_url) {
+          const { data: signedData } = await supabase.storage
+            .from('kyc_documents')
+            .createSignedUrl(data.id_front_url, 3600); // 1 hour expiry
+          signedUrls.id_front_url = signedData?.signedUrl;
+        }
+        
+        if (data.id_back_url) {
+          const { data: signedData } = await supabase.storage
+            .from('kyc_documents')
+            .createSignedUrl(data.id_back_url, 3600);
+          signedUrls.id_back_url = signedData?.signedUrl;
+        }
+        
+        if (data.license_front_url) {
+          const { data: signedData } = await supabase.storage
+            .from('kyc_documents')
+            .createSignedUrl(data.license_front_url, 3600);
+          signedUrls.license_front_url = signedData?.signedUrl;
+        }
+        
+        if (data.license_back_url) {
+          const { data: signedData } = await supabase.storage
+            .from('kyc_documents')
+            .createSignedUrl(data.license_back_url, 3600);
+          signedUrls.license_back_url = signedData?.signedUrl;
+        }
+        
+        setKycData({ ...data, ...signedUrls });
+      } else {
+        setKycData(data);
+      }
+      
       if (data) {
         setNewStatus(data.status);
         setRejectionReason(data.rejection_reason || "");
@@ -150,6 +187,55 @@ export function KYCTab({ user, onUpdate }: KYCTabProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Document Images */}
+          <div className="space-y-4">
+            <div>
+              <Label>Documentos de Identidad</Label>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                {kycData.id_front_url && (
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Cédula - Frontal</p>
+                    <a href={kycData.id_front_url} target="_blank" rel="noopener noreferrer">
+                      <img src={kycData.id_front_url} alt="ID Front" className="w-full h-32 object-cover rounded border hover:opacity-80 transition-opacity" />
+                    </a>
+                  </div>
+                )}
+                {kycData.id_back_url && (
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Cédula - Reverso</p>
+                    <a href={kycData.id_back_url} target="_blank" rel="noopener noreferrer">
+                      <img src={kycData.id_back_url} alt="ID Back" className="w-full h-32 object-cover rounded border hover:opacity-80 transition-opacity" />
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {(kycData.license_front_url || kycData.license_back_url) && (
+              <div>
+                <Label>Licencia de Conducir</Label>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  {kycData.license_front_url && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Licencia - Frontal</p>
+                      <a href={kycData.license_front_url} target="_blank" rel="noopener noreferrer">
+                        <img src={kycData.license_front_url} alt="License Front" className="w-full h-32 object-cover rounded border hover:opacity-80 transition-opacity" />
+                      </a>
+                    </div>
+                  )}
+                  {kycData.license_back_url && (
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Licencia - Reverso</p>
+                      <a href={kycData.license_back_url} target="_blank" rel="noopener noreferrer">
+                        <img src={kycData.license_back_url} alt="License Back" className="w-full h-32 object-cover rounded border hover:opacity-80 transition-opacity" />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           {kycData.id_number && (
             <div>
               <Label>Número de Cédula</Label>
