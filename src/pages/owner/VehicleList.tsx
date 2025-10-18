@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Edit, Pause, Play, Trash2 } from "lucide-react";
+import { Plus, Edit, Pause, Play, Trash2, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
@@ -28,27 +29,40 @@ export default function VehicleList() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [kycStatus, setKycStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchVehicles();
+    fetchData();
   }, [user]);
 
-  const fetchVehicles = async () => {
+  const fetchData = async () => {
     if (!user) return;
     
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // Fetch vehicles
+      const { data: vehiclesData, error: vehiclesError } = await supabase
         .from('vehicles')
         .select('*')
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setVehicles(data || []);
+      if (vehiclesError) throw vehiclesError;
+      setVehicles(vehiclesData || []);
+
+      // Fetch KYC status
+      const { data: kycData, error: kycError } = await supabase
+        .from('kyc_verifications')
+        .select('status')
+        .eq('user_id', user.id)
+        .single();
+
+      if (kycError && kycError.code !== 'PGRST116') throw kycError;
+      setKycStatus(kycData?.status || null);
     } catch (error) {
-      console.error('Error fetching vehicles:', error);
-      toast.error('Error al cargar vehículos');
+      console.error('Error fetching data:', error);
+      toast.error('Error al cargar información');
     } finally {
       setLoading(false);
     }
@@ -122,6 +136,8 @@ export default function VehicleList() {
     </Table>
   );
 
+  const isKycVerified = kycStatus === 'verified';
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -144,23 +160,67 @@ export default function VehicleList() {
               <h1 className="text-3xl font-bold">Mis Vehículos</h1>
               <p className="text-muted-foreground">Gestiona tus publicaciones</p>
             </div>
-            <Link to="/owner/vehicles/new">
-              <Button className="gap-2">
+            {isKycVerified ? (
+              <Link to="/owner/vehicles/new">
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Agregar nuevo vehículo
+                </Button>
+              </Link>
+            ) : (
+              <Button disabled className="gap-2">
                 <Plus className="h-4 w-4" />
-                Publicar vehículo
+                Agregar nuevo vehículo
               </Button>
-            </Link>
+            )}
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Tus Vehículos</CardTitle>
-              <CardDescription>
-                Total: {vehicles.length} vehículo{vehicles.length !== 1 ? 's' : ''}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="all" className="w-full">
+          {vehicles.length === 0 && !isKycVerified && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Para poder publicar tus vehículos, primero debes completar tu verificación de identidad.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {vehicles.length === 0 && isKycVerified && (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <p className="text-lg text-muted-foreground mb-4">No tienes vehículos publicados</p>
+                <Link to="/owner/vehicles/new">
+                  <Button size="lg" className="gap-2">
+                    <Plus className="h-5 w-5" />
+                    Publicar mi primer vehículo
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          )}
+
+          {vehicles.length === 0 && !isKycVerified && (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <p className="text-lg text-muted-foreground mb-4">No tienes vehículos publicados</p>
+                <Link to="/kyc">
+                  <Button size="lg" className="gap-2">
+                    Verificar mi identidad
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          )}
+
+          {vehicles.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Tus Vehículos</CardTitle>
+                <CardDescription>
+                  Total: {vehicles.length} vehículo{vehicles.length !== 1 ? 's' : ''}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="all" className="w-full">
                 <TabsList className="grid w-full grid-cols-5">
                   <TabsTrigger value="all">Todos ({vehicles.length})</TabsTrigger>
                   <TabsTrigger value="active">Activos ({filterVehicles('active').length})</TabsTrigger>
@@ -185,12 +245,13 @@ export default function VehicleList() {
                   <VehicleTable vehicles={filterVehicles('paused')} />
                 </TabsContent>
 
-                <TabsContent value="rejected" className="mt-4">
-                  <VehicleTable vehicles={filterVehicles('rejected')} />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+                  <TabsContent value="rejected" className="mt-4">
+                    <VehicleTable vehicles={filterVehicles('rejected')} />
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </main>
 
