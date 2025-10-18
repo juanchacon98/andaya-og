@@ -53,7 +53,7 @@ const AdminDashboard = () => {
         supabase.from("vehicles").select("id", { count: "exact", head: true }),
         supabase.from("reservations").select("id", { count: "exact", head: true }).eq("status", "approved"),
         supabase.from("payments").select("amount_total"),
-        supabase.from("kyc_verifications").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("kyc_verifications").select("user_id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("incidents").select("id", { count: "exact", head: true })
       ]);
 

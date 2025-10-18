@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,7 +31,6 @@ import {
   Shield
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Link } from 'react-router-dom';
 
 interface Profile {
   id: string;
@@ -72,6 +72,7 @@ interface UserRole {
 
 export default function UserDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [userRoles, setUserRoles] = useState<string[]>([]);
   const [upcomingReservations, setUpcomingReservations] = useState<Reservation[]>([]);
@@ -290,13 +291,20 @@ export default function UserDashboard() {
               </div>
               
               <div className="flex gap-2">
-                <Button variant="outline" size="icon">
-                  <Bell className="h-5 w-5" />
-                </Button>
-                <Button variant="outline" size="icon">
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => navigate('/perfil')}
+                  title="Mensajes"
+                >
                   <MessageSquare className="h-5 w-5" />
                 </Button>
-                <Button variant="outline" size="icon">
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => navigate('/perfil')}
+                  title="Configuración"
+                >
                   <Settings className="h-5 w-5" />
                 </Button>
               </div>

@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Search, DollarSign } from "lucide-react";
+import { formatBs } from "@/lib/currency";
+import { ExchangeRateDisplay } from "@/components/admin/ExchangeRateDisplay";
 
 interface Payment {
   id: string;
@@ -155,8 +157,11 @@ const AdminPayments = () => {
               <div>
                 <p className="text-sm text-muted-foreground font-medium">Ingresos Totales</p>
                 <p className="text-3xl font-bold text-foreground">
-                  ${(totalRevenue / 1000000).toFixed(2)}M COP
+                  {formatBs(totalRevenue)}
                 </p>
+                {totalRevenue > 0 && (
+                  <ExchangeRateDisplay amountBs={totalRevenue} />
+                )}
               </div>
             </div>
           </CardContent>
@@ -204,9 +209,9 @@ const AdminPayments = () => {
                       <TableCell>{payment.reservation?.renter?.full_name || "N/A"}</TableCell>
                       <TableCell className="capitalize">{payment.method}</TableCell>
                       <TableCell className="font-semibold">
-                        ${payment.amount_total.toLocaleString()}
+                        {formatBs(payment.amount_total)}
                       </TableCell>
-                      <TableCell>${payment.upfront?.toLocaleString() || 0}</TableCell>
+                      <TableCell>{payment.upfront ? formatBs(payment.upfront) : '-'}</TableCell>
                       <TableCell>{payment.installments || "N/A"}</TableCell>
                       <TableCell>
                         <Badge variant={getStatusColor(payment.status) as any}>
