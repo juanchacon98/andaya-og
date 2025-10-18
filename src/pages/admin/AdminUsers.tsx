@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -15,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, ArrowLeft, Car, UserCheck } from "lucide-react";
+import { Search, Car, UserCheck } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Profile {
@@ -54,38 +52,24 @@ const AdminUsers = () => {
   }, [search, users]);
 
   const checkAdminAccess = async () => {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    console.log("Admin check - Current user:", user?.id, user?.email);
-    
-    if (userError) {
-      console.error("Error getting user:", userError);
-      navigate("/login");
-      return;
-    }
+    const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      console.log("No user found, redirecting to login");
       navigate("/login");
       return;
     }
 
-    const { data: roles, error: rolesError } = await supabase
+    const { data: roles } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id);
-
-    console.log("User roles found:", roles);
-    console.log("Roles error:", rolesError);
 
     const hasAdminRole = roles?.some(r => 
       r.role === "admin_primary" || r.role === "admin_security"
     );
 
     if (!hasAdminRole) {
-      console.log("User does not have admin role, redirecting to home");
       navigate("/");
-    } else {
-      console.log("Admin access granted");
     }
   };
 
@@ -167,210 +151,198 @@ const AdminUsers = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-          <p className="mt-2 text-sm text-muted-foreground">Cargando usuarios...</p>
+      <AdminLayout>
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+            <p className="mt-2 text-sm text-muted-foreground">Cargando usuarios...</p>
+          </div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <main className="flex-1 pt-24 pb-12 bg-gradient-to-b from-background to-secondary/30">
-        <div className="container px-4 mx-auto">
-          <div className="mb-8">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate("/admin")}
-              className="mb-4"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver al Dashboard
-            </Button>
-            <h1 className="text-4xl font-bold mb-2">Gestión de Usuarios</h1>
-            <p className="text-muted-foreground">
-              Administra todos los usuarios de la plataforma
-            </p>
-          </div>
-
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por nombre, ID o teléfono..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Tabs defaultValue="todos" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 max-w-md">
-              <TabsTrigger value="todos">Todos ({filteredUsers.length})</TabsTrigger>
-              <TabsTrigger value="propietarios">
-                <Car className="mr-2 h-4 w-4" />
-                Propietarios ({owners.length})
-              </TabsTrigger>
-              <TabsTrigger value="arrendatarios">
-                <UserCheck className="mr-2 h-4 w-4" />
-                Arrendatarios ({renters.length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="todos" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Todos los Usuarios</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Nombre</TableHead>
-                          <TableHead>Teléfono</TableHead>
-                          <TableHead>Roles</TableHead>
-                          <TableHead>KYC</TableHead>
-                          <TableHead>Vehículos</TableHead>
-                          <TableHead>Reservas</TableHead>
-                          <TableHead>Registro</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredUsers.map((user) => (
-                          <TableRow key={user.id}>
-                            <TableCell className="font-medium">
-                              {user.full_name || "Sin nombre"}
-                            </TableCell>
-                            <TableCell>{user.phone || "N/A"}</TableCell>
-                            <TableCell>
-                              <div className="flex gap-1 flex-wrap">
-                                {user.roles.length > 0 ? (
-                                  user.roles.map((role) => (
-                                    <Badge key={role} className={getRoleColor(role)}>
-                                      {role}
-                                    </Badge>
-                                  ))
-                                ) : (
-                                  <Badge variant="outline">Sin rol</Badge>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge className={getKycColor(user.kyc_status)}>
-                                {user.kyc_status || "N/A"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{user.vehicles_count}</TableCell>
-                            <TableCell>{user.reservations_count}</TableCell>
-                            <TableCell>
-                              {new Date(user.created_at).toLocaleDateString()}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="propietarios" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Propietarios de Vehículos</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Nombre</TableHead>
-                          <TableHead>Teléfono</TableHead>
-                          <TableHead>KYC</TableHead>
-                          <TableHead>Vehículos</TableHead>
-                          <TableHead>Registro</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {owners.map((user) => (
-                          <TableRow key={user.id}>
-                            <TableCell className="font-medium">
-                              {user.full_name || "Sin nombre"}
-                            </TableCell>
-                            <TableCell>{user.phone || "N/A"}</TableCell>
-                            <TableCell>
-                              <Badge className={getKycColor(user.kyc_status)}>
-                                {user.kyc_status || "N/A"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{user.vehicles_count}</TableCell>
-                            <TableCell>
-                              {new Date(user.created_at).toLocaleDateString()}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="arrendatarios" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Arrendatarios</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Nombre</TableHead>
-                          <TableHead>Teléfono</TableHead>
-                          <TableHead>KYC</TableHead>
-                          <TableHead>Reservas</TableHead>
-                          <TableHead>Registro</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {renters.map((user) => (
-                          <TableRow key={user.id}>
-                            <TableCell className="font-medium">
-                              {user.full_name || "Sin nombre"}
-                            </TableCell>
-                            <TableCell>{user.phone || "N/A"}</TableCell>
-                            <TableCell>
-                              <Badge className={getKycColor(user.kyc_status)}>
-                                {user.kyc_status || "N/A"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{user.reservations_count}</TableCell>
-                            <TableCell>
-                              {new Date(user.created_at).toLocaleDateString()}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+    <AdminLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Gestión de Usuarios</h1>
+          <p className="text-muted-foreground mt-1">
+            Administra todos los usuarios de la plataforma
+          </p>
         </div>
-      </main>
 
-      <Footer />
-    </div>
+        <Card className="border-border">
+          <CardContent className="p-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nombre, ID o teléfono..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Tabs defaultValue="todos" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 max-w-md">
+            <TabsTrigger value="todos">Todos ({filteredUsers.length})</TabsTrigger>
+            <TabsTrigger value="propietarios">
+              <Car className="mr-2 h-4 w-4" />
+              Propietarios ({owners.length})
+            </TabsTrigger>
+            <TabsTrigger value="arrendatarios">
+              <UserCheck className="mr-2 h-4 w-4" />
+              Arrendatarios ({renters.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="todos" className="mt-6">
+            <Card className="border-border">
+              <CardHeader>
+                <CardTitle>Todos los Usuarios</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nombre</TableHead>
+                        <TableHead>Teléfono</TableHead>
+                        <TableHead>Roles</TableHead>
+                        <TableHead>KYC</TableHead>
+                        <TableHead>Vehículos</TableHead>
+                        <TableHead>Reservas</TableHead>
+                        <TableHead>Registro</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredUsers.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">
+                            {user.full_name || "Sin nombre"}
+                          </TableCell>
+                          <TableCell>{user.phone || "N/A"}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-1 flex-wrap">
+                              {user.roles.length > 0 ? (
+                                user.roles.map((role) => (
+                                  <Badge key={role} className={getRoleColor(role)}>
+                                    {role}
+                                  </Badge>
+                                ))
+                              ) : (
+                                <Badge variant="outline">Sin rol</Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={getKycColor(user.kyc_status)}>
+                              {user.kyc_status || "N/A"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{user.vehicles_count}</TableCell>
+                          <TableCell>{user.reservations_count}</TableCell>
+                          <TableCell>
+                            {new Date(user.created_at).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="propietarios" className="mt-6">
+            <Card className="border-border">
+              <CardHeader>
+                <CardTitle>Propietarios de Vehículos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nombre</TableHead>
+                        <TableHead>Teléfono</TableHead>
+                        <TableHead>KYC</TableHead>
+                        <TableHead>Vehículos</TableHead>
+                        <TableHead>Registro</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {owners.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">
+                            {user.full_name || "Sin nombre"}
+                          </TableCell>
+                          <TableCell>{user.phone || "N/A"}</TableCell>
+                          <TableCell>
+                            <Badge className={getKycColor(user.kyc_status)}>
+                              {user.kyc_status || "N/A"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{user.vehicles_count}</TableCell>
+                          <TableCell>
+                            {new Date(user.created_at).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="arrendatarios" className="mt-6">
+            <Card className="border-border">
+              <CardHeader>
+                <CardTitle>Arrendatarios</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nombre</TableHead>
+                        <TableHead>Teléfono</TableHead>
+                        <TableHead>KYC</TableHead>
+                        <TableHead>Reservas</TableHead>
+                        <TableHead>Registro</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {renters.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">
+                            {user.full_name || "Sin nombre"}
+                          </TableCell>
+                          <TableCell>{user.phone || "N/A"}</TableCell>
+                          <TableCell>
+                            <Badge className={getKycColor(user.kyc_status)}>
+                              {user.kyc_status || "N/A"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{user.reservations_count}</TableCell>
+                          <TableCell>
+                            {new Date(user.created_at).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AdminLayout>
   );
 };
 
