@@ -445,13 +445,24 @@ export const VehicleStatsDialog = ({
                       return (
                         <TableRow key={reservation.id}>
                           <TableCell>
-                            <div>
+                            <div className="space-y-1">
                               <p className="font-medium">
                                 {reservation.profiles?.full_name || "Cliente"}
                               </p>
-                              {reservation.profiles?.phone && (
-                                <p className="text-xs text-muted-foreground">
+                              {reservation.profiles?.phone ? (
+                                <a
+                                  href={`https://wa.me/${reservation.profiles.phone.replace(/\D/g, "")}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <MessageCircle className="h-3 w-3" />
                                   {reservation.profiles.phone}
+                                </a>
+                              ) : (
+                                <p className="text-xs text-muted-foreground">
+                                  Sin contacto disponible
                                 </p>
                               )}
                             </div>
