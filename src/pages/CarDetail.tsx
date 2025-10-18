@@ -149,7 +149,7 @@ const CarDetail = () => {
       if (error) throw error;
 
       toast.success("¡Reserva creada exitosamente!");
-      navigate("/dashboard");
+      navigate(`/reserva-exitosa?id=${data.id}`);
     } catch (error: any) {
       console.error("Error creating reservation:", error);
       toast.error("Error al crear la reserva: " + error.message);

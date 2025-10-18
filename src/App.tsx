@@ -29,6 +29,7 @@ import KYC from "./pages/KYC";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import VehicleList from "./pages/owner/VehicleList";
 import VehicleWizard from "./pages/owner/VehicleWizard";
+import ReservationSuccess from "./pages/ReservationSuccess";
 import PoliticaVerificacion from "./pages/PoliticaVerificacion";
 import TratamientoDatos from "./pages/TratamientoDatos";
 import Terminos from "./pages/Terminos";
@@ -67,6 +68,7 @@ function AppContent() {
             <Route path="/admin/auditoria" element={<ProtectedRoute><AdminAuditLogs /></ProtectedRoute>} />
             <Route path="/admin/configuracion" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
             <Route path="/perfil" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
+            <Route path="/reserva-exitosa" element={<ProtectedRoute><ReservationSuccess /></ProtectedRoute>} />
             <Route path="/kyc" element={<ProtectedRoute><KYC /></ProtectedRoute>} />
             <Route path="/owner" element={<ProtectedRoute><OwnerDashboard /></ProtectedRoute>} />
             <Route path="/owner/vehicles" element={<ProtectedRoute><VehicleList /></ProtectedRoute>} />
