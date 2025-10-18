@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ReservationDetailsDialog } from '@/components/ReservationDetailsDialog';
 import { ModifyReservationDialog } from '@/components/ModifyReservationDialog';
+import { VehicleStatsDialog } from '@/components/owner/VehicleStatsDialog';
 import { 
   User, 
   Car, 
@@ -77,6 +78,8 @@ interface Vehicle {
   status: string;
   rating_avg: number;
   city: string | null;
+  reservations_30d?: number;
+  revenue_30d?: number;
 }
 
 interface UserRole {
@@ -98,6 +101,8 @@ export default function UserDashboard() {
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [showModifyDialog, setShowModifyDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const [showStatsDialog, setShowStatsDialog] = useState(false);
   const [reservationToCancel, setReservationToCancel] = useState<string | null>(null);
 
   useEffect(() => {
@@ -201,7 +206,36 @@ export default function UserDashboard() {
           .order('created_at', { ascending: false });
 
         if (vehiclesError) throw vehiclesError;
-        setMyVehicles(vehiclesData || []);
+
+        // Fetch mini-summary for each vehicle (last 30 days)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const vehiclesWithStats = await Promise.all(
+          (vehiclesData || []).map(async (vehicle) => {
+            const { count } = await supabase
+              .from('reservations')
+              .select('*', { count: 'exact', head: true })
+              .eq('vehicle_id', vehicle.id)
+              .gte('created_at', thirtyDaysAgo.toISOString());
+
+            const { data: revenueData } = await supabase
+              .from('reservations')
+              .select('total')
+              .eq('vehicle_id', vehicle.id)
+              .gte('created_at', thirtyDaysAgo.toISOString());
+
+            const revenue_30d = revenueData?.reduce((sum, r) => sum + Number(r.total), 0) || 0;
+
+            return {
+              ...vehicle,
+              reservations_30d: count || 0,
+              revenue_30d,
+            };
+          })
+        );
+
+        setMyVehicles(vehiclesWithStats);
       }
     } catch (error: any) {
       console.error('Error fetching user data:', error);
@@ -624,40 +658,45 @@ export default function UserDashboard() {
                             
                             <Separator />
                             
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                               <div>
-                                <p className="text-muted-foreground">Precio por día</p>
+                                <p className="text-muted-foreground">Ubicación</p>
+                                <p className="font-semibold">{vehicle.city || 'No especificada'}</p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground">Precio/día</p>
                                 <p className="font-semibold">Bs {vehicle.price_bs}</p>
                               </div>
                               <div>
-                                <p className="text-muted-foreground">Calificación</p>
-                                {vehicle.rating_avg > 0 ? (
-                                  <div className="flex items-center gap-1">
-                                    <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-                                    <span className="font-semibold">{Number(vehicle.rating_avg).toFixed(1)}</span>
-                                  </div>
-                                ) : (
-                                  <span className="text-sm text-muted-foreground">Sin valoraciones</span>
-                                )}
+                                <p className="text-muted-foreground">Reservas (30d)</p>
+                                <p className="font-semibold">{vehicle.reservations_30d || 0}</p>
                               </div>
-                              {vehicle.city && (
-                                <div>
-                                  <p className="text-muted-foreground">Ubicación</p>
-                                  <p className="font-semibold">{vehicle.city}</p>
-                                </div>
-                              )}
+                              <div>
+                                <p className="text-muted-foreground">Ingresos (30d)</p>
+                                <p className="font-semibold">Bs {(vehicle.revenue_30d || 0).toLocaleString()}</p>
+                              </div>
                             </div>
                             
                             <div className="flex gap-2 pt-2">
-                              <Button variant="outline" size="sm">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => navigate(`/owner/vehicles/${vehicle.id}/edit`)}
+                              >
                                 <Edit className="h-4 w-4 mr-2" />
                                 Editar
                               </Button>
-                              <Button variant="outline" size="sm">
-                                <Pause className="h-4 w-4 mr-2" />
-                                Pausar
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedVehicle(vehicle);
+                                  setShowStatsDialog(true);
+                                }}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ver estadísticas
                               </Button>
-                              <Button variant="outline" size="sm">Ver estadísticas</Button>
                             </div>
                           </div>
                         </div>
@@ -837,6 +876,16 @@ export default function UserDashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {selectedVehicle && (
+        <VehicleStatsDialog
+          open={showStatsDialog}
+          onOpenChange={setShowStatsDialog}
+          vehicleId={selectedVehicle.id}
+          vehicleTitle={`${selectedVehicle.brand} ${selectedVehicle.model} ${selectedVehicle.year}`}
+          pricePerDay={selectedVehicle.price_bs}
+        />
+      )}
     </div>
   );
 }
