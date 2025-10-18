@@ -24,7 +24,10 @@ import {
   Edit,
   Pause,
   Plus,
-  X
+  X,
+  CheckCircle,
+  AlertCircle,
+  Shield
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
@@ -76,6 +79,7 @@ export default function UserDashboard() {
   const [myVehicles, setMyVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('reservas');
+  const [kycStatus, setKycStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -107,6 +111,15 @@ export default function UserDashboard() {
 
       if (rolesError) throw rolesError;
       setUserRoles(rolesData?.map((r: UserRole) => r.role) || []);
+
+      // Fetch KYC status
+      const { data: kycData } = await supabase
+        .from('kyc_verifications')
+        .select('status')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      setKycStatus(kycData?.status || null);
 
       // Fetch upcoming reservations (as renter)
       const today = new Date().toISOString().split('T')[0];
@@ -584,6 +597,85 @@ export default function UserDashboard() {
                   <Edit className="h-4 w-4 mr-2" />
                   Editar perfil
                 </Button>
+              </CardContent>
+            </Card>
+
+            {/* KYC Status Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Verificación de identidad (KYC)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Estado</label>
+                  <div className="mt-2">
+                    {!kycStatus && (
+                      <Badge variant="outline" className="gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        Sin iniciar
+                      </Badge>
+                    )}
+                    {kycStatus === 'verified' && (
+                      <Badge variant="default" className="gap-1 bg-green-600">
+                        <CheckCircle className="h-3 w-3" />
+                        Verificado
+                      </Badge>
+                    )}
+                    {kycStatus === 'pending' && (
+                      <Badge variant="secondary" className="gap-1">
+                        <Clock className="h-3 w-3" />
+                        Pendiente de revisión
+                      </Badge>
+                    )}
+                    {kycStatus === 'rejected' && (
+                      <Badge variant="destructive" className="gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        Rechazado
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                
+                {(!kycStatus || kycStatus === 'rejected') && (
+                  <>
+                    <Separator />
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {!kycStatus 
+                          ? 'Completa tu verificación de identidad para publicar vehículos y acceder a todas las funcionalidades.'
+                          : 'Tu verificación fue rechazada. Por favor, intenta nuevamente con documentos válidos.'
+                        }
+                      </p>
+                      <Button asChild className="gap-2">
+                        <Link to="/kyc">
+                          <Shield className="h-4 w-4" />
+                          {!kycStatus ? 'Completar verificación KYC' : 'Reintentar verificación'}
+                        </Link>
+                      </Button>
+                    </div>
+                  </>
+                )}
+                
+                {kycStatus === 'pending' && (
+                  <>
+                    <Separator />
+                    <p className="text-sm text-muted-foreground">
+                      Tu verificación está siendo revisada por nuestro equipo. Te notificaremos cuando esté completa.
+                    </p>
+                  </>
+                )}
+                
+                {kycStatus === 'verified' && (
+                  <>
+                    <Separator />
+                    <p className="text-sm text-muted-foreground">
+                      Tu identidad ha sido verificada correctamente. Ahora puedes publicar vehículos y acceder a todas las funcionalidades.
+                    </p>
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

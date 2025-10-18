@@ -43,6 +43,14 @@ export default function VehicleWizard() {
     }
   }, [user, id]);
 
+  // Redirect to KYC if not verified (unless we're on step 1 showing the message)
+  useEffect(() => {
+    if (!loading && kycStatus !== null && kycStatus !== 'verified' && currentStep !== 1) {
+      toast.error('Debes completar tu verificación KYC antes de publicar un vehículo');
+      navigate('/kyc');
+    }
+  }, [loading, kycStatus, currentStep, navigate]);
+
   const checkPrerequisites = async () => {
     if (!user) return;
 
