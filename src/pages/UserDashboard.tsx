@@ -521,7 +521,7 @@ export default function UserDashboard() {
                   <CardContent className="pt-6 text-center py-12">
                     <Car className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <p className="text-muted-foreground mb-4">No tienes vehículos publicados</p>
-                    <Button>
+                    <Button onClick={() => navigate('/owner/vehicles/new')}>
                       <Plus className="h-4 w-4 mr-2" />
                       Publicar mi primer vehículo
                     </Button>
