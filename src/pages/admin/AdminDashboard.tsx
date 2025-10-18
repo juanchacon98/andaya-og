@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Car, Calendar, TrendingUp, DollarSign, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, Car, Calendar, TrendingUp, DollarSign, AlertCircle, RefreshCw } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ExchangeRateDisplay } from "@/components/admin/ExchangeRateDisplay";
 import { formatBs } from "@/lib/currency";
+import { toast } from "sonner";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -48,13 +50,25 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
+      // Get first and last day of current month
+      const now = new Date();
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
+
       const [usersRes, vehiclesRes, reservationsRes, paymentsRes, kycRes, incidentsRes] = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        // FIX: Only count active users
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_active", true),
         supabase.from("vehicles").select("id", { count: "exact", head: true }),
+        // Active reservations (approved status)
         supabase.from("reservations").select("id", { count: "exact", head: true }).eq("status", "approved"),
-        supabase.from("payments").select("amount_total"),
+        // FIX: Only payments from current month
+        supabase.from("payments")
+          .select("amount_total")
+          .gte("created_at", firstDayOfMonth)
+          .lte("created_at", lastDayOfMonth),
         supabase.from("kyc_verifications").select("user_id", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("incidents").select("id", { count: "exact", head: true })
+        // FIX: Only open incidents
+        supabase.from("incidents").select("id", { count: "exact", head: true }).eq("status", "open")
       ]);
 
       const totalRevenue = paymentsRes.data?.reduce((sum, p) => sum + Number(p.amount_total), 0) || 0;
@@ -67,8 +81,13 @@ const AdminDashboard = () => {
         pendingVerifications: kycRes.count || 0,
         incidents: incidentsRes.count || 0
       });
+      
+      if (!loading) {
+        toast.success("Dashboard actualizado");
+      }
     } catch (error) {
       console.error("Error fetching stats:", error);
+      toast.error("Error al cargar las estadísticas");
     } finally {
       setLoading(false);
     }
@@ -138,11 +157,17 @@ const AdminDashboard = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Vista general de la plataforma AndaYa
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">
+              Vista general de la plataforma AndaYa
+            </p>
+          </div>
+          <Button onClick={fetchStats} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Actualizar
+          </Button>
         </div>
 
         {/* Main Stats */}
