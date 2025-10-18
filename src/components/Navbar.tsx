@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Car, Map, Menu, X, Shield } from "lucide-react";
+import { Map, Menu, X, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import logo from "@/assets/logo.png";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,7 +34,7 @@ const Navbar = () => {
     <nav className="fixed top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center space-x-2">
-          <Car className="h-6 w-6 text-primary" />
+          <img src={logo} alt="AndaYa Logo" className="h-10 w-10 object-contain" />
           <span className="text-xl font-bold">AndaYa</span>
         </Link>
         
