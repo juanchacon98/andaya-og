@@ -110,11 +110,21 @@ const AdminDashboard = () => {
       
       <main className="flex-1 pt-24 pb-12 bg-gradient-to-b from-background to-secondary/30">
         <div className="container px-4 mx-auto">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Panel de Administración</h1>
-            <p className="text-muted-foreground">
-              Gestiona tu plataforma AndaYa
-            </p>
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Panel de Administración</h1>
+              <p className="text-muted-foreground">
+                Gestiona tu plataforma AndaYa
+              </p>
+            </div>
+            <Button 
+              onClick={() => navigate("/admin/usuarios")}
+              size="lg"
+              className="hidden sm:flex"
+            >
+              <Users className="mr-2 h-5 w-5" />
+              Ver Usuarios
+            </Button>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

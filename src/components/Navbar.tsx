@@ -1,12 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Car, Map, Menu, X } from "lucide-react";
+import { Car, Map, Menu, X, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    checkAdminRole();
+  }, [user]);
+
+  const checkAdminRole = async () => {
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
+
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin_primary");
+
+    setIsAdmin(roles && roles.length > 0);
+  };
 
   return (
     <nav className="fixed top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -18,6 +39,14 @@ const Navbar = () => {
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-2 lg:gap-4">
+          {isAdmin && (
+            <Link to="/admin">
+              <Button variant="ghost" size="sm" className="text-sm lg:text-base text-primary">
+                <Shield className="h-4 w-4 mr-2" />
+                Admin
+              </Button>
+            </Link>
+          )}
           <Link to="/explorar">
             <Button variant="ghost" size="sm" className="text-sm lg:text-base">
               Explorar carros
@@ -63,6 +92,14 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden border-t border-border/40 bg-background/98 backdrop-blur-lg animate-fade-in">
           <div className="container px-4 py-4 space-y-2">
+            {isAdmin && (
+              <Link to="/admin" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-base text-primary" size="lg">
+                  <Shield className="h-5 w-5 mr-2" />
+                  Panel Admin
+                </Button>
+              </Link>
+            )}
             <Link to="/explorar" onClick={() => setIsOpen(false)}>
               <Button variant="ghost" className="w-full justify-start text-base" size="lg">
                 Explorar carros

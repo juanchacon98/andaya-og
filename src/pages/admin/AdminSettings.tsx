@@ -38,14 +38,21 @@ const AdminSettings = () => {
       <main className="flex-1 pt-24 pb-12 bg-gradient-to-b from-background to-secondary/30">
         <div className="container px-4 mx-auto max-w-4xl">
           <div className="mb-8">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate("/admin")}
-              className="mb-4"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver al Dashboard
-            </Button>
+            <div className="flex gap-2 mb-4">
+              <Button 
+                variant="ghost" 
+                onClick={() => navigate("/admin")}
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Dashboard
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate("/admin/usuarios")}
+              >
+                Ver Usuarios
+              </Button>
+            </div>
             <h1 className="text-4xl font-bold mb-2">Configuración UI/UX</h1>
             <p className="text-muted-foreground">
               Personaliza la apariencia de la plataforma
