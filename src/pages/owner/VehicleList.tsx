@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Edit, Zap, AlertCircle } from "lucide-react";
+import { Plus, Edit, Zap, AlertCircle, Calendar } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
 import { QuickEditVehicle } from "@/components/owner/QuickEditVehicle";
+import { VehicleReservationsDialog } from "@/components/owner/VehicleReservationsDialog";
 
 interface Vehicle {
   id: string;
@@ -34,6 +35,8 @@ export default function VehicleList() {
   const [kycStatus, setKycStatus] = useState<string | null>(null);
   const [quickEditVehicle, setQuickEditVehicle] = useState<Vehicle | null>(null);
   const [quickEditOpen, setQuickEditOpen] = useState(false);
+  const [reservationsVehicle, setReservationsVehicle] = useState<Vehicle | null>(null);
+  const [reservationsOpen, setReservationsOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -97,6 +100,11 @@ export default function VehicleList() {
     setQuickEditOpen(true);
   };
 
+  const handleViewReservations = (vehicle: Vehicle) => {
+    setReservationsVehicle(vehicle);
+    setReservationsOpen(true);
+  };
+
   const VehicleTable = ({ vehicles }: { vehicles: Vehicle[] }) => (
     <Table>
       <TableHeader>
@@ -131,6 +139,14 @@ export default function VehicleList() {
               <TableCell>{getStatusBadge(vehicle.status)}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleViewReservations(vehicle)}
+                    title="Ver reservas"
+                  >
+                    <Calendar className="h-4 w-4" />
+                  </Button>
                   <Button 
                     variant="outline" 
                     size="sm"
@@ -278,6 +294,15 @@ export default function VehicleList() {
           open={quickEditOpen}
           onOpenChange={setQuickEditOpen}
           onSuccess={fetchData}
+        />
+      )}
+
+      {reservationsVehicle && (
+        <VehicleReservationsDialog
+          open={reservationsOpen}
+          onOpenChange={setReservationsOpen}
+          vehicleId={reservationsVehicle.id}
+          vehicleTitle={`${reservationsVehicle.brand} ${reservationsVehicle.model} ${reservationsVehicle.year}`}
         />
       )}
 
