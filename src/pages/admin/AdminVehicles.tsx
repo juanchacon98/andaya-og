@@ -34,7 +34,7 @@ interface Vehicle {
   year: number;
   type: string;
   status: string;
-  price_per_day: number;
+  price_bs: number;
   city: string;
   owner_id: string;
   created_at: string;
@@ -262,7 +262,7 @@ const AdminVehicles = () => {
                           {getStatusLabel(vehicle.status)}
                         </Badge>
                       </TableCell>
-                      <TableCell>${vehicle.price_per_day.toLocaleString()}</TableCell>
+                      <TableCell>Bs {vehicle.price_bs?.toLocaleString() || 0}</TableCell>
                       <TableCell>{vehicle.city || "N/A"}</TableCell>
                       <TableCell>
                         {new Date(vehicle.created_at).toLocaleDateString()}

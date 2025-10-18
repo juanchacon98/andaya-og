@@ -29,7 +29,7 @@ interface Vehicle {
   year: number;
   type: string;
   status: string;
-  price_per_day: number;
+  price_bs: number;
   city: string;
   plate?: string;
   description?: string;
@@ -60,7 +60,7 @@ export function VehicleEditDialog({ vehicle, open, onOpenChange, onSuccess }: Ve
           model: formData.model,
           year: formData.year,
           type: formData.type as "sedan" | "suv" | "van" | "pickup" | "coupe" | "hatchback" | "moto" | "otro",
-          price_per_day: formData.price_per_day,
+          price_bs: formData.price_bs,
           city: formData.city,
           plate: formData.plate,
           description: formData.description,
@@ -176,8 +176,8 @@ export function VehicleEditDialog({ vehicle, open, onOpenChange, onSuccess }: Ve
                 type="number"
                 min="0"
                 step="0.01"
-                value={formData.price_per_day || ""}
-                onChange={(e) => setFormData({ ...formData, price_per_day: parseFloat(e.target.value) })}
+                value={formData.price_bs || ""}
+                onChange={(e) => setFormData({ ...formData, price_bs: parseFloat(e.target.value) })}
                 required
               />
             </div>
