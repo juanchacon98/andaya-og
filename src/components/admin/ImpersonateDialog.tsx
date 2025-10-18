@@ -43,16 +43,10 @@ export function ImpersonateDialog({ open, onOpenChange, userId, userName, userEm
       if (error) throw error;
 
       if (data?.magic_link) {
-        // Open magic link in new tab
-        window.open(data.magic_link, '_blank');
+        toast.success(`Iniciando sesión como ${userEmail}...`);
         
-        toast.success(`Sesión de impersonación creada para ${userEmail}`, {
-          description: `Expira en ${duration} minutos`
-        });
-        
-        onOpenChange(false);
-        setReason('');
-        setDuration('15');
+        // Redirect to magic link in same window to impersonate
+        window.location.href = data.magic_link;
       }
     } catch (error: any) {
       console.error('Error impersonating user:', error);
