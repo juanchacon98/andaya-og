@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,34 +7,83 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Star, MapPin, Calendar, Users, Fuel, Settings, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import carSedan from "@/assets/car-sedan.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const CarDetail = () => {
   const { id } = useParams();
+  const [car, setCar] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - would come from API based on id
-  const car = {
-    id,
-    image: carSedan,
-    brand: "Honda",
-    model: "Civic",
-    year: 2023,
-    pricePerDay: 45,
-    location: "Bogotá, Colombia",
-    rating: 4.8,
-    type: "Sedán",
-    description: "Vehículo en excelente estado, ideal para viajes en ciudad o carretera. Mantenimiento al día y listo para tu próxima aventura.",
-    features: {
-      transmission: "Automática",
-      passengers: 5,
-      fuel: "Gasolina",
-    },
-    owner: {
-      name: "Carlos M.",
-      rating: 4.9,
-      verifiedSince: "2023",
-    },
+  useEffect(() => {
+    if (id) {
+      fetchCarDetails();
+    }
+  }, [id]);
+
+  const fetchCarDetails = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("vehicles")
+        .select(`
+          *,
+          vehicle_photos (url, sort_order),
+          profiles!vehicles_owner_id_fkey (full_name, id)
+        `)
+        .eq("id", id)
+        .eq("status", "active")
+        .single();
+
+      if (error) throw error;
+
+      if (!data) {
+        toast.error("Vehículo no encontrado");
+        return;
+      }
+
+      setCar(data);
+    } catch (error) {
+      console.error("Error loading vehicle:", error);
+      toast.error("Error al cargar el vehículo");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="container py-8 flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+            <p className="mt-2 text-sm text-muted-foreground">Cargando...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!car) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="container py-8">
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold mb-4">Vehículo no encontrado</h2>
+            <p className="text-muted-foreground mb-6">El vehículo que buscas no está disponible.</p>
+            <Link to="/explorar">
+              <Button>Explorar vehículos</Button>
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  const mainPhoto = car.vehicle_photos?.sort((a: any, b: any) => a.sort_order - b.sort_order)[0]?.url || "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=800";
 
   return (
     <div className="min-h-screen">
@@ -51,7 +101,7 @@ const CarDetail = () => {
             {/* Image gallery */}
             <div className="mb-6 aspect-video w-full overflow-hidden rounded-lg">
               <img
-                src={car.image}
+                src={mainPhoto}
                 alt={`${car.brand} ${car.model}`}
                 className="h-full w-full object-cover"
               />
@@ -67,11 +117,11 @@ const CarDetail = () => {
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1">
                       <Star className="h-5 w-5 fill-accent text-accent" />
-                      <span className="font-semibold">{car.rating}</span>
+                      <span className="font-semibold">{car.rating_avg > 0 ? car.rating_avg.toFixed(1) : "Sin valoraciones"}</span>
                     </div>
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <MapPin className="h-4 w-4" />
-                      <span>{car.location}</span>
+                      <span>{car.city || "Venezuela"}</span>
                     </div>
                   </div>
                 </div>
@@ -80,7 +130,7 @@ const CarDetail = () => {
                 </Badge>
               </div>
               
-              <p className="text-muted-foreground">{car.description}</p>
+              <p className="text-muted-foreground">{car.description || car.title}</p>
             </div>
             
             {/* Specifications */}
@@ -92,21 +142,21 @@ const CarDetail = () => {
                     <Settings className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <div className="text-sm text-muted-foreground">Transmisión</div>
-                      <div className="font-medium">{car.features.transmission}</div>
+                      <div className="font-medium">{car.transmission || "Manual"}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Users className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <div className="text-sm text-muted-foreground">Pasajeros</div>
-                      <div className="font-medium">{car.features.passengers}</div>
+                      <div className="font-medium">5</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Fuel className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <div className="text-sm text-muted-foreground">Combustible</div>
-                      <div className="font-medium">{car.features.fuel}</div>
+                      <div className="font-medium">{car.fuel_type || "Gasolina"}</div>
                     </div>
                   </div>
                 </div>
@@ -120,17 +170,13 @@ const CarDetail = () => {
                 <div className="flex items-center gap-4">
                   <Avatar className="h-12 w-12">
                     <AvatarFallback className="bg-primary text-primary-foreground">
-                      {car.owner.name.split(" ").map(n => n[0]).join("")}
+                      {car.profiles?.full_name?.split(" ").map((n: string) => n[0]).join("") || "?"}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-semibold">{car.owner.name}</div>
+                    <div className="font-semibold">{car.profiles?.full_name || "Propietario"}</div>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-accent text-accent" />
-                        <span>{car.owner.rating}</span>
-                      </div>
-                      <span>Verificado desde {car.owner.verifiedSince}</span>
+                      <span>Propietario verificado</span>
                     </div>
                   </div>
                 </div>
@@ -144,7 +190,7 @@ const CarDetail = () => {
               <CardContent className="p-6">
                 <div className="mb-6">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold">${car.pricePerDay}</span>
+                    <span className="text-3xl font-bold">Bs {car.price_bs?.toLocaleString() || 0}</span>
                     <span className="text-muted-foreground">/día</span>
                   </div>
                 </div>
