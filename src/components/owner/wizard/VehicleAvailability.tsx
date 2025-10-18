@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { MapLocationPicker } from "./MapLocationPicker";
 
 interface VehicleAvailabilityProps {
   data: any;
@@ -112,28 +113,19 @@ export function VehicleAvailability({ data, onChange }: VehicleAvailabilityProps
 
       {(data.delivery_type === 'pickup' || data.delivery_type === 'both') && (
         <div>
-          <Label htmlFor="lat">Ubicación de recogida</Label>
-          <div className="grid grid-cols-2 gap-4 mt-2">
-            <Input
-              id="lat"
-              type="number"
-              step="0.000001"
-              value={data.lat || ''}
-              onChange={(e) => onChange('lat', parseFloat(e.target.value))}
-              placeholder="Latitud"
-            />
-            <Input
-              id="lng"
-              type="number"
-              step="0.000001"
-              value={data.lng || ''}
-              onChange={(e) => onChange('lng', parseFloat(e.target.value))}
-              placeholder="Longitud"
-            />
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Coordenadas GPS del punto de recogida (opcional)
+          <Label>Ubicación de recogida</Label>
+          <p className="text-xs text-muted-foreground mb-3">
+            Haz clic en el mapa para seleccionar la ubicación donde los arrendatarios recogerán el vehículo
           </p>
+          <MapLocationPicker
+            lat={data.lat}
+            lng={data.lng}
+            city={data.city || ''}
+            onLocationChange={(lat, lng) => {
+              onChange('lat', lat);
+              onChange('lng', lng);
+            }}
+          />
         </div>
       )}
     </div>

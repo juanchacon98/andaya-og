@@ -188,6 +188,8 @@ export default function VehicleWizard() {
         status: 'pending_review',
       };
 
+      console.log('Submitting vehicle data:', dataToSubmit);
+
       let vehicleId = id;
 
       if (id) {
@@ -195,14 +197,20 @@ export default function VehicleWizard() {
           .from('vehicles')
           .update(dataToSubmit)
           .eq('id', id);
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
       } else {
         const { data, error } = await supabase
           .from('vehicles')
           .insert(dataToSubmit)
           .select()
           .single();
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
         vehicleId = data.id;
       }
 
@@ -225,14 +233,17 @@ export default function VehicleWizard() {
           .from('vehicle_photos')
           .insert(photoRecords);
         
-        if (photosError) throw photosError;
+        if (photosError) {
+          console.error('Photos error:', photosError);
+          throw photosError;
+        }
       }
 
       toast.success('Vehículo enviado a revisión');
       navigate('/owner/vehicles');
     } catch (error: any) {
       console.error('Error submitting vehicle:', error);
-      toast.error('Error al enviar el vehículo');
+      toast.error('Error al enviar el vehículo: ' + (error.message || 'Error desconocido'));
     }
   };
 
