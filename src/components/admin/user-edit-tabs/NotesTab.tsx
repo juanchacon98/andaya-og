@@ -18,11 +18,32 @@ export function NotesTab({ userId }: NotesTabProps) {
   const [newNote, setNewNote] = useState("");
 
   useEffect(() => {
-    // Por ahora solo mostrar placeholder
-    // En producción, crear tabla admin_notes
-    setLoading(false);
-    setNotes([]);
+    fetchNotes();
   }, [userId]);
+
+  const fetchNotes = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('admin_notes')
+        .select(`
+          *,
+          author:author_id (
+            raw_user_meta_data
+          )
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setNotes(data || []);
+    } catch (error: any) {
+      console.error("Error fetching notes:", error);
+      toast.error("Error al cargar notas");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddNote = async () => {
     if (!newNote.trim()) {
@@ -33,15 +54,47 @@ export function NotesTab({ userId }: NotesTabProps) {
     try {
       setSaving(true);
       
-      // TODO: Implementar cuando se cree la tabla admin_notes
-      toast.info("Funcionalidad de notas en desarrollo");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("No autenticado");
+        return;
+      }
+
+      const { error } = await supabase
+        .from('admin_notes')
+        .insert({
+          user_id: userId,
+          author_id: user.id,
+          content: newNote.trim()
+        });
+
+      if (error) throw error;
       
+      toast.success("Nota agregada exitosamente");
       setNewNote("");
+      fetchNotes();
     } catch (error: any) {
       console.error("Error adding note:", error);
       toast.error("Error al agregar nota");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    try {
+      const { error } = await supabase
+        .from('admin_notes')
+        .delete()
+        .eq('id', noteId);
+
+      if (error) throw error;
+      
+      toast.success("Nota eliminada");
+      fetchNotes();
+    } catch (error: any) {
+      console.error("Error deleting note:", error);
+      toast.error("Error al eliminar nota");
     }
   };
 
@@ -103,7 +156,7 @@ export function NotesTab({ userId }: NotesTabProps) {
                   <div className="flex-1">
                     <p className="text-sm whitespace-pre-wrap">{note.content}</p>
                     <p className="text-xs text-muted-foreground mt-2">
-                      {new Date(note.created_at).toLocaleString('es-VE')} • Por: {note.author_email}
+                      {new Date(note.created_at).toLocaleString('es-VE')} • Por: {note.author?.raw_user_meta_data?.full_name || 'Administrador'}
                     </p>
                   </div>
                   <AlertDialog>
@@ -121,7 +174,10 @@ export function NotesTab({ userId }: NotesTabProps) {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction className="bg-destructive hover:bg-destructive/90">
+                        <AlertDialogAction 
+                          className="bg-destructive hover:bg-destructive/90"
+                          onClick={() => handleDeleteNote(note.id)}
+                        >
                           Eliminar
                         </AlertDialogAction>
                       </AlertDialogFooter>
