@@ -4,12 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Car } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Car, Users, Building2, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { z } from "zod";
+import { RegistrationSuccess } from "@/components/RegistrationSuccess";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const registerSchema = z.object({
   email: z.string()
@@ -32,8 +39,26 @@ const registerSchema = z.object({
     .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/, { 
       message: "Solo se permiten letras y espacios" 
     }),
+
+  phone: z.string()
+    .trim()
+    .min(10, { message: "Teléfono debe tener al menos 10 dígitos" })
+    .max(15, { message: "Teléfono muy largo" })
+    .regex(/^[0-9+\s()-]+$/, { message: "Formato de teléfono inválido" }),
   
-  confirmPassword: z.string()
+  confirmPassword: z.string(),
+
+  termsAccepted: z.boolean().refine((val) => val === true, {
+    message: "Debes aceptar los términos y condiciones",
+  }),
+
+  dataProcessingAccepted: z.boolean().refine((val) => val === true, {
+    message: "Debes aceptar el tratamiento de datos",
+  }),
+
+  verificationPolicyAccepted: z.boolean().refine((val) => val === true, {
+    message: "Debes aceptar la política de verificación",
+  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Las contraseñas no coinciden",
   path: ["confirmPassword"],
@@ -44,8 +69,13 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [userType, setUserType] = useState<"renter" | "owner">("renter");
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [dataProcessingAccepted, setDataProcessingAccepted] = useState(false);
+  const [verificationPolicyAccepted, setVerificationPolicyAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [registrationComplete, setRegistrationComplete] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -64,7 +94,11 @@ const Register = () => {
         email,
         password,
         fullName,
-        confirmPassword
+        phone,
+        confirmPassword,
+        termsAccepted,
+        dataProcessingAccepted,
+        verificationPolicyAccepted,
       });
 
       setIsLoading(true);
@@ -76,6 +110,8 @@ const Register = () => {
         options: {
           data: {
             full_name: validated.fullName,
+            phone: validated.phone,
+            role: userType,
           },
           emailRedirectTo: `${window.location.origin}/`,
         },
@@ -98,7 +134,7 @@ const Register = () => {
         description: "Por favor verifica tu correo electrónico para continuar.",
       });
 
-      navigate("/login");
+      setRegistrationComplete(true);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast({
@@ -118,6 +154,10 @@ const Register = () => {
     }
   };
 
+  if (registrationComplete) {
+    return <RegistrationSuccess role={userType} userName={fullName} />;
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary/30 p-4">
       <Card className="w-full max-w-md">
@@ -132,7 +172,7 @@ const Register = () => {
         </CardHeader>
         
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="fullName">Nombre completo</Label>
               <Input
@@ -153,6 +193,18 @@ const Register = () => {
                 placeholder="tu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Teléfono</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+57 300 123 4567"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 required
               />
             </div>
@@ -182,21 +234,113 @@ const Register = () => {
             </div>
             
             <div className="space-y-3">
-              <Label>Tipo de usuario</Label>
-              <RadioGroup value={userType} onValueChange={(value) => setUserType(value as "renter" | "owner")}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="renter" id="renter" />
-                  <Label htmlFor="renter" className="font-normal">
-                    Usuario que alquila 🚙
-                  </Label>
+              <Label className="text-base">Selecciona tu rol</Label>
+              <TooltipProvider>
+                <div className="grid grid-cols-2 gap-3">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Card 
+                        className={`cursor-pointer transition-all hover:shadow-md ${
+                          userType === "renter" 
+                            ? "border-primary bg-primary/5 ring-2 ring-primary" 
+                            : "border-border hover:border-primary/50"
+                        }`}
+                        onClick={() => setUserType("renter")}
+                      >
+                        <CardContent className="p-4 text-center space-y-2">
+                          <Users className="h-8 w-8 mx-auto text-primary" />
+                          <div>
+                            <p className="font-semibold text-sm">Arrendatario</p>
+                            <p className="text-xs text-muted-foreground">Quiero alquilar</p>
+                          </div>
+                          <Info className="h-4 w-4 mx-auto text-muted-foreground" />
+                        </CardContent>
+                      </Card>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">Usuarios que buscan alquilar vehículos para sus necesidades de transporte.</p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Card 
+                        className={`cursor-pointer transition-all hover:shadow-md ${
+                          userType === "owner" 
+                            ? "border-primary bg-primary/5 ring-2 ring-primary" 
+                            : "border-border hover:border-primary/50"
+                        }`}
+                        onClick={() => setUserType("owner")}
+                      >
+                        <CardContent className="p-4 text-center space-y-2">
+                          <Building2 className="h-8 w-8 mx-auto text-primary" />
+                          <div>
+                            <p className="font-semibold text-sm">Arrendador</p>
+                            <p className="text-xs text-muted-foreground">Quiero publicar</p>
+                          </div>
+                          <Info className="h-4 w-4 mx-auto text-muted-foreground" />
+                        </CardContent>
+                      </Card>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">Propietarios que desean compartir sus vehículos y generar ingresos adicionales.</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="owner" id="owner" />
-                  <Label htmlFor="owner" className="font-normal">
-                    Dueño de vehículo 🚗
-                  </Label>
-                </div>
-              </RadioGroup>
+              </TooltipProvider>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <div className="flex items-start space-x-2">
+                <Checkbox 
+                  id="terms" 
+                  checked={termsAccepted}
+                  onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                />
+                <label
+                  htmlFor="terms"
+                  className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Acepto los{" "}
+                  <a href="/terminos" className="text-primary hover:underline" target="_blank">
+                    términos y condiciones
+                  </a>
+                </label>
+              </div>
+
+              <div className="flex items-start space-x-2">
+                <Checkbox 
+                  id="dataProcessing" 
+                  checked={dataProcessingAccepted}
+                  onCheckedChange={(checked) => setDataProcessingAccepted(checked as boolean)}
+                />
+                <label
+                  htmlFor="dataProcessing"
+                  className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Acepto el{" "}
+                  <a href="/tratamiento-datos" className="text-primary hover:underline" target="_blank">
+                    tratamiento de mis datos personales
+                  </a>
+                </label>
+              </div>
+
+              <div className="flex items-start space-x-2">
+                <Checkbox 
+                  id="verification" 
+                  checked={verificationPolicyAccepted}
+                  onCheckedChange={(checked) => setVerificationPolicyAccepted(checked as boolean)}
+                />
+                <label
+                  htmlFor="verification"
+                  className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Acepto la{" "}
+                  <a href="/politica-verificacion" className="text-primary hover:underline" target="_blank">
+                    política de verificación de identidad
+                  </a>
+                </label>
+              </div>
             </div>
           </CardContent>
           
