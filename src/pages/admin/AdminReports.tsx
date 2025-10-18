@@ -11,6 +11,8 @@ import {
   TrendingUp, 
   AlertCircle 
 } from "lucide-react";
+import { ExchangeRateDisplay } from "@/components/admin/ExchangeRateDisplay";
+import { formatBs } from "@/lib/currency";
 
 const AdminReports = () => {
   const navigate = useNavigate();
@@ -128,8 +130,8 @@ const AdminReports = () => {
     },
     {
       title: "Ingresos del Mes",
-      value: `$${(stats.monthlyRevenue / 1000000).toFixed(1)}M`,
-      subtitle: `$${(stats.totalRevenue / 1000000).toFixed(1)}M total`,
+      value: formatBs(stats.monthlyRevenue),
+      subtitle: `${formatBs(stats.totalRevenue)} total`,
       icon: DollarSign,
       color: "text-yellow-600 bg-yellow-50"
     },
@@ -142,7 +144,7 @@ const AdminReports = () => {
     },
     {
       title: "Valor Promedio",
-      value: `$${(stats.averageBookingValue / 1000).toFixed(0)}K`,
+      value: formatBs(stats.averageBookingValue),
       subtitle: "Por reserva",
       icon: AlertCircle,
       color: "text-pink-600 bg-pink-50"
@@ -185,6 +187,11 @@ const AdminReports = () => {
                   <p className="text-sm text-muted-foreground font-medium">{card.title}</p>
                   <p className="text-3xl font-bold text-foreground">{card.value}</p>
                   <p className="text-xs text-muted-foreground">{card.subtitle}</p>
+                  {(card.title === "Ingresos del Mes" || card.title === "Valor Promedio") && (
+                    <ExchangeRateDisplay 
+                      amountBs={card.title === "Ingresos del Mes" ? stats.monthlyRevenue : stats.averageBookingValue} 
+                    />
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -210,8 +217,13 @@ const AdminReports = () => {
                 <span className="text-2xl font-bold">{stats.totalReservations}</span>
               </div>
               <div className="flex justify-between items-center p-4 bg-secondary rounded-lg">
-                <span className="text-sm font-medium">Ingresos totales</span>
-                <span className="text-2xl font-bold">${(stats.totalRevenue / 1000000).toFixed(2)}M</span>
+                <div className="flex-1">
+                  <span className="text-sm font-medium">Ingresos totales</span>
+                  <div className="mt-1">
+                    <span className="text-2xl font-bold">{formatBs(stats.totalRevenue)}</span>
+                    <ExchangeRateDisplay amountBs={stats.totalRevenue} className="mt-1" />
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>

@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Car, Calendar, TrendingUp, DollarSign, AlertCircle } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { ExchangeRateDisplay } from "@/components/admin/ExchangeRateDisplay";
+import { formatBs } from "@/lib/currency";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -96,7 +98,7 @@ const AdminDashboard = () => {
     },
     {
       title: "Ingresos del Mes",
-      value: `$${(stats.totalRevenue / 1000000).toFixed(1)}M`,
+      value: formatBs(stats.totalRevenue),
       icon: DollarSign,
       color: "text-yellow-600 bg-yellow-50",
       link: "/admin/pagos"
@@ -160,6 +162,9 @@ const AdminDashboard = () => {
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground font-medium">{stat.title}</p>
                   <p className="text-3xl font-bold text-foreground">{stat.value}</p>
+                  {stat.title === "Ingresos del Mes" && stats.totalRevenue > 0 && (
+                    <ExchangeRateDisplay amountBs={stats.totalRevenue} />
+                  )}
                 </div>
               </CardContent>
             </Card>

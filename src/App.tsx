@@ -22,6 +22,7 @@ import AdminPayments from "./pages/admin/AdminPayments";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminBackups from "./pages/admin/AdminBackups";
 import AdminAuditLogs from "./pages/admin/AdminAuditLogs";
+import AdminExchangeRates from "./pages/admin/AdminExchangeRates";
 import UserDashboard from "./pages/UserDashboard";
 import KYC from "./pages/KYC";
 
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/admin/reservas" element={<ProtectedRoute><AdminReservations /></ProtectedRoute>} />
             <Route path="/admin/pagos" element={<ProtectedRoute><AdminPayments /></ProtectedRoute>} />
             <Route path="/admin/reportes" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
+            <Route path="/admin/tasas" element={<ProtectedRoute><AdminExchangeRates /></ProtectedRoute>} />
             <Route path="/admin/backups" element={<ProtectedRoute><AdminBackups /></ProtectedRoute>} />
             <Route path="/admin/auditoria" element={<ProtectedRoute><AdminAuditLogs /></ProtectedRoute>} />
             <Route path="/admin/configuracion" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />

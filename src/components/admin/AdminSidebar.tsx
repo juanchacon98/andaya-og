@@ -8,7 +8,8 @@ import {
   Settings,
   ChevronLeft,
   Database,
-  Shield
+  Shield,
+  DollarSign
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
@@ -31,6 +32,7 @@ const menuItems = [
   { title: "Usuarios", url: "/admin/usuarios", icon: Users },
   { title: "Pagos", url: "/admin/pagos", icon: CreditCard },
   { title: "Reportes", url: "/admin/reportes", icon: BarChart3 },
+  { title: "Tasas FX", url: "/admin/tasas", icon: DollarSign },
   { title: "Backups", url: "/admin/backups", icon: Database },
   { title: "Auditoría", url: "/admin/auditoria", icon: Shield },
   { title: "Configuración", url: "/admin/configuracion", icon: Settings },

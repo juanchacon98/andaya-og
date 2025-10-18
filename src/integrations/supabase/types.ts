@@ -101,6 +101,111 @@ export type Database = {
         }
         Relationships: []
       }
+      exchange_rates: {
+        Row: {
+          buy: number | null
+          code: string
+          created_at: string
+          fetched_at: string
+          id: string
+          provider: string
+          sell: number | null
+          source: Json | null
+          value: number
+        }
+        Insert: {
+          buy?: number | null
+          code: string
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          provider: string
+          sell?: number | null
+          source?: Json | null
+          value: number
+        }
+        Update: {
+          buy?: number | null
+          code?: string
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          provider?: string
+          sell?: number | null
+          source?: Json | null
+          value?: number
+        }
+        Relationships: []
+      }
+      fx_settings: {
+        Row: {
+          default_currency: string
+          default_provider: string
+          eur_usd_fallback_rate: number | null
+          id: string
+          refresh_minutes: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          default_currency?: string
+          default_provider?: string
+          eur_usd_fallback_rate?: number | null
+          id?: string
+          refresh_minutes?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          default_currency?: string
+          default_provider?: string
+          eur_usd_fallback_rate?: number | null
+          id?: string
+          refresh_minutes?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      homepage_content: {
+        Row: {
+          content: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          published_at: string | null
+          section: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published_at?: string | null
+          section: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published_at?: string | null
+          section?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
       incidents: {
         Row: {
           admin_notes: string | null
@@ -274,6 +379,8 @@ export type Database = {
           id: string
           is_active: boolean | null
           phone: string | null
+          preferred_currency: string | null
+          preferred_provider: string | null
           role: Database["public"]["Enums"]["app_role"] | null
           updated_at: string | null
         }
@@ -283,6 +390,8 @@ export type Database = {
           id: string
           is_active?: boolean | null
           phone?: string | null
+          preferred_currency?: string | null
+          preferred_provider?: string | null
           role?: Database["public"]["Enums"]["app_role"] | null
           updated_at?: string | null
         }
@@ -292,6 +401,8 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           phone?: string | null
+          preferred_currency?: string | null
+          preferred_provider?: string | null
           role?: Database["public"]["Enums"]["app_role"] | null
           updated_at?: string | null
         }
