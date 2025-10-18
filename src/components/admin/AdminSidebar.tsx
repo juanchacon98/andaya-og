@@ -40,15 +40,15 @@ export function AdminSidebar() {
   const { open, toggleSidebar } = useSidebar();
 
   return (
-    <Sidebar className="border-r border-slate-800 bg-[#0F172A]" collapsible="icon">
-      <div className="flex items-center justify-between p-4 border-b border-slate-800">
+    <Sidebar className="border-r border-sidebar-border bg-sidebar" collapsible="icon">
+      <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         {open && (
-          <h2 className="text-lg font-semibold text-white">AndaYa Admin</h2>
+          <h2 className="text-lg font-semibold text-sidebar-foreground">AndaYa Admin</h2>
         )}
         <button
           onClick={toggleSidebar}
           className={cn(
-            "rounded-lg p-2 hover:bg-slate-800/50 transition-colors text-white focus:outline-none focus:ring-2 focus:ring-slate-600",
+            "rounded-lg p-2 hover:bg-sidebar-accent transition-colors text-sidebar-foreground focus:outline-none focus:ring-2 focus:ring-sidebar-ring",
             !open && "mx-auto"
           )}
           aria-label={open ? "Colapsar menú" : "Expandir menú"}
@@ -57,9 +57,9 @@ export function AdminSidebar() {
         </button>
       </div>
 
-      <SidebarContent className="bg-[#0F172A]">
+      <SidebarContent className="bg-sidebar">
         <SidebarGroup>
-          <SidebarGroupLabel className={cn("text-slate-400 text-xs uppercase tracking-wider", !open && "hidden")}>
+          <SidebarGroupLabel className={cn("text-muted-foreground text-xs uppercase tracking-wider", !open && "hidden")}>
             Menú Principal
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -73,10 +73,10 @@ export function AdminSidebar() {
                       className={({ isActive }) =>
                         cn(
                           "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200",
-                          "focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-2 focus:ring-offset-[#0F172A]",
+                          "focus:outline-none focus:ring-2 focus:ring-sidebar-ring focus:ring-offset-2 focus:ring-offset-sidebar",
                           isActive
-                            ? "bg-[#1F2937] text-white font-medium shadow-sm"
-                            : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent/50"
                         )
                       }
                     >
