@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -23,9 +23,19 @@ export function ModifyReservationDialog({
   reservation,
   onSuccess 
 }: ModifyReservationDialogProps) {
-  const [startDate, setStartDate] = useState<Date>(new Date(reservation?.start_date));
-  const [endDate, setEndDate] = useState<Date>(new Date(reservation?.end_date));
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Initialize dates when reservation changes
+  useEffect(() => {
+    if (reservation?.start_date) {
+      setStartDate(new Date(reservation.start_date));
+    }
+    if (reservation?.end_date) {
+      setEndDate(new Date(reservation.end_date));
+    }
+  }, [reservation]);
 
   const calculateTotal = () => {
     if (!startDate || !endDate || !reservation) return { days: 0, subtotal: 0, serviceFee: 0, total: 0 };
@@ -75,6 +85,8 @@ export function ModifyReservationDialog({
   };
 
   const { days, subtotal, serviceFee, total } = calculateTotal();
+
+  if (!reservation) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
