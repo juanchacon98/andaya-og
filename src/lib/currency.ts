@@ -1,12 +1,12 @@
 export function formatBs(value: number | null | undefined): string {
   if (value === null || value === undefined) return 'Bs 0,00';
   
-  return new Intl.NumberFormat('es-VE', {
-    style: 'currency',
-    currency: 'VES',
+  const formatted = new Intl.NumberFormat('es-VE', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(value).replace('VES', 'Bs');
+  }).format(value);
+  
+  return `Bs ${formatted}`;
 }
 
 export function formatUsd(value: number | null | undefined): string {
