@@ -52,7 +52,15 @@ export function VehicleRejectDialog({
 
       if (error) throw error;
 
-      // TODO: Enviar notificación al propietario con el motivo
+      // Notify vehicle owner
+      try {
+        await supabase.functions.invoke('notify-vehicle-rejection', {
+          body: { vehicleId, reason }
+        });
+      } catch (notifyError: any) {
+        console.error('Error sending notification:', notifyError);
+        // Continue anyway - rejection was successful
+      }
 
       toast.success("Vehículo rechazado. Se notificará al propietario.");
       onSuccess();

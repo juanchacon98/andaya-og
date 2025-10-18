@@ -36,7 +36,7 @@ const Footer = () => {
             <h3 className="mb-4 font-semibold">Para dueños</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/publicar" className="text-muted-foreground hover:text-foreground">
+                <Link to="/owner/vehicles/new" className="text-muted-foreground hover:text-foreground">
                   Publicar mi carro
                 </Link>
               </li>
@@ -67,13 +67,13 @@ const Footer = () => {
           <div>
             <h3 className="mb-4 font-semibold">Síguenos</h3>
             <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground hover:text-foreground">
+              <a href="https://facebook.com/andaya" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground" aria-label="Facebook">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground">
+              <a href="https://instagram.com/andaya" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground" aria-label="Instagram">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground">
+              <a href="https://twitter.com/andaya" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground" aria-label="Twitter">
                 <Twitter className="h-5 w-5" />
               </a>
             </div>
