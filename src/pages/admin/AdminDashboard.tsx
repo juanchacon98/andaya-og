@@ -23,20 +23,38 @@ const AdminDashboard = () => {
   }, []);
 
   const checkAdminAccess = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    console.log("Admin Dashboard - Current user:", user?.id, user?.email);
+    
+    if (userError) {
+      console.error("Error getting user:", userError);
+      navigate("/login");
+      return;
+    }
+    
     if (!user) {
+      console.log("No user found, redirecting to login");
       navigate("/login");
       return;
     }
 
-    const { data: roles } = await supabase
+    const { data: roles, error: rolesError } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin_primary");
+      .eq("user_id", user.id);
 
-    if (!roles || roles.length === 0) {
+    console.log("User roles found:", roles);
+    console.log("Roles error:", rolesError);
+
+    const hasAdminRole = roles?.some(r => 
+      r.role === "admin_primary" || r.role === "admin_security"
+    );
+
+    if (!hasAdminRole) {
+      console.log("User does not have admin role, redirecting to home");
       navigate("/");
+    } else {
+      console.log("Admin access granted");
     }
   };
 
