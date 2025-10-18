@@ -50,7 +50,7 @@ const Home = () => {
         year: vehicle.year,
         pricePerDay: vehicle.price_per_day,
         location: `${vehicle.city || "Venezuela"}`,
-        rating: vehicle.rating_avg || 5.0,
+        rating: vehicle.rating_avg || 0,
         type: vehicle.type as "sedan" | "suv" | "compact",
       }));
 

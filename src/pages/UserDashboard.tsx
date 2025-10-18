@@ -559,10 +559,14 @@ export default function UserDashboard() {
                               </div>
                               <div>
                                 <p className="text-muted-foreground">Calificación</p>
-                                <div className="flex items-center gap-1">
-                                  <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-                                  <span className="font-semibold">{Number(vehicle.rating_avg).toFixed(1)}</span>
-                                </div>
+                                {vehicle.rating_avg > 0 ? (
+                                  <div className="flex items-center gap-1">
+                                    <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                                    <span className="font-semibold">{Number(vehicle.rating_avg).toFixed(1)}</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-sm text-muted-foreground">Sin valoraciones</span>
+                                )}
                               </div>
                               {vehicle.city && (
                                 <div>
