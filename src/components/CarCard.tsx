@@ -35,7 +35,7 @@ const CarCard = ({ id, image, brand, model, year, pricePerDay, location, rating 
             </div>
             <div className="flex items-center gap-1 bg-secondary px-2 py-1 rounded-lg">
               <Star className="h-4 w-4 fill-primary text-primary" />
-              <span className="font-semibold text-sm">{rating}</span>
+              <span className="font-semibold text-sm">{rating > 0 ? rating : "N/A"}</span>
             </div>
           </div>
           
@@ -46,7 +46,7 @@ const CarCard = ({ id, image, brand, model, year, pricePerDay, location, rating 
           
           <div className="flex items-baseline gap-1 pt-3 border-t border-border">
             <span className="text-2xl font-bold text-foreground">
-              ${pricePerDay.toLocaleString()}
+              ${pricePerDay?.toLocaleString() || 0}
             </span>
             <span className="text-sm text-muted-foreground">/ día</span>
           </div>

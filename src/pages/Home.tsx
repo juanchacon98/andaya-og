@@ -48,7 +48,7 @@ const Home = () => {
         brand: vehicle.brand,
         model: vehicle.model,
         year: vehicle.year,
-        pricePerDay: vehicle.price_per_day,
+        pricePerDay: vehicle.price_bs || 0,
         location: `${vehicle.city || "Venezuela"}`,
         rating: vehicle.rating_avg || 0,
         type: vehicle.type as "sedan" | "suv" | "compact",
