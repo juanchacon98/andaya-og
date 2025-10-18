@@ -763,10 +763,12 @@ export type Database = {
           model: string
           owner_id: string
           paused_at: string | null
+          pickup_hours: string | null
           plate: string | null
           price_bs: number
           rating_avg: number | null
           rejected_reason: string | null
+          return_hours: string | null
           rules: Json | null
           status: Database["public"]["Enums"]["vehicle_status"] | null
           title: string
@@ -806,10 +808,12 @@ export type Database = {
           model: string
           owner_id: string
           paused_at?: string | null
+          pickup_hours?: string | null
           plate?: string | null
           price_bs: number
           rating_avg?: number | null
           rejected_reason?: string | null
+          return_hours?: string | null
           rules?: Json | null
           status?: Database["public"]["Enums"]["vehicle_status"] | null
           title: string
@@ -849,10 +853,12 @@ export type Database = {
           model?: string
           owner_id?: string
           paused_at?: string | null
+          pickup_hours?: string | null
           plate?: string | null
           price_bs?: number
           rating_avg?: number | null
           rejected_reason?: string | null
+          return_hours?: string | null
           rules?: Json | null
           status?: Database["public"]["Enums"]["vehicle_status"] | null
           title?: string
