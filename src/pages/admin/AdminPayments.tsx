@@ -107,10 +107,10 @@ const AdminPayments = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "completed": return "bg-green-500";
-      case "pending": return "bg-yellow-500";
-      case "failed": return "bg-red-500";
-      default: return "bg-gray-500";
+      case "completed": return "success";
+      case "pending": return "warning";
+      case "failed": return "destructive";
+      default: return "secondary";
     }
   };
 
@@ -209,7 +209,7 @@ const AdminPayments = () => {
                       <TableCell>${payment.upfront?.toLocaleString() || 0}</TableCell>
                       <TableCell>{payment.installments || "N/A"}</TableCell>
                       <TableCell>
-                        <Badge className={getStatusColor(payment.status)}>
+                        <Badge variant={getStatusColor(payment.status) as any}>
                           {getStatusLabel(payment.status)}
                         </Badge>
                       </TableCell>

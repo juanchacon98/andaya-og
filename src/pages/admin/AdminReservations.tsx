@@ -114,12 +114,12 @@ const AdminReservations = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "approved": return "bg-green-500";
-      case "pending": return "bg-yellow-500";
-      case "rejected": return "bg-red-500";
-      case "finished": return "bg-blue-500";
-      case "cancelled": return "bg-gray-500";
-      default: return "bg-gray-500";
+      case "approved": return "success";
+      case "pending": return "warning";
+      case "rejected": return "destructive";
+      case "finished": return "default";
+      case "cancelled": return "secondary";
+      default: return "outline";
     }
   };
 
@@ -222,7 +222,7 @@ const AdminReservations = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getStatusColor(reservation.status)}>
+                        <Badge variant={getStatusColor(reservation.status) as any}>
                           {getStatusLabel(reservation.status)}
                         </Badge>
                       </TableCell>

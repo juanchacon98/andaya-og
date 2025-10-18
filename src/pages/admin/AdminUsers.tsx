@@ -124,7 +124,7 @@ const AdminUsers = () => {
     switch (role) {
       case "admin_primary": return "destructive";
       case "admin_security": return "destructive";
-      case "owner": return "default";
+      case "owner": return "success";
       case "renter": return "secondary";
       default: return "outline";
     }
@@ -133,8 +133,8 @@ const AdminUsers = () => {
   const getKycBadgeVariant = (status: string | null) => {
     if (!status) return "outline";
     switch (status) {
-      case "approved": return "default";
-      case "pending": return "secondary";
+      case "approved": return "success";
+      case "pending": return "warning";
       case "rejected": return "destructive";
       default: return "outline";
     }

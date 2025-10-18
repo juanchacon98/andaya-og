@@ -36,25 +36,26 @@ export function AdminSidebar() {
   const { open, toggleSidebar } = useSidebar();
 
   return (
-    <Sidebar className="border-r border-border bg-background" collapsible="icon">
-      <div className="flex items-center justify-between p-4 border-b border-border">
+    <Sidebar className="border-r border-slate-800 bg-[#0F172A]" collapsible="icon">
+      <div className="flex items-center justify-between p-4 border-b border-slate-800">
         {open && (
-          <h2 className="text-lg font-semibold text-foreground">AndaYa Admin</h2>
+          <h2 className="text-lg font-semibold text-white">AndaYa Admin</h2>
         )}
         <button
           onClick={toggleSidebar}
           className={cn(
-            "rounded-lg p-2 hover:bg-secondary transition-colors",
+            "rounded-lg p-2 hover:bg-slate-800/50 transition-colors text-white focus:outline-none focus:ring-2 focus:ring-slate-600",
             !open && "mx-auto"
           )}
+          aria-label={open ? "Colapsar menú" : "Expandir menú"}
         >
           <ChevronLeft className={cn("h-5 w-5 transition-transform", !open && "rotate-180")} />
         </button>
       </div>
 
-      <SidebarContent>
+      <SidebarContent className="bg-[#0F172A]">
         <SidebarGroup>
-          <SidebarGroupLabel className={cn(!open && "hidden")}>
+          <SidebarGroupLabel className={cn("text-slate-400 text-xs uppercase tracking-wider", !open && "hidden")}>
             Menú Principal
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -67,10 +68,11 @@ export function AdminSidebar() {
                       end={item.url === "/admin"}
                       className={({ isActive }) =>
                         cn(
-                          "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+                          "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200",
+                          "focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-2 focus:ring-offset-[#0F172A]",
                           isActive
-                            ? "bg-primary text-primary-foreground font-medium"
-                            : "hover:bg-secondary text-foreground"
+                            ? "bg-[#1F2937] text-white font-medium shadow-sm"
+                            : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
                         )
                       }
                     >

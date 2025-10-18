@@ -131,11 +131,11 @@ const AdminVehicles = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active": return "bg-green-500";
-      case "pending_review": return "bg-yellow-500";
-      case "inactive": return "bg-gray-500";
-      case "rejected": return "bg-red-500";
-      default: return "bg-gray-500";
+      case "active": return "success";
+      case "pending_review": return "warning";
+      case "inactive": return "secondary";
+      case "rejected": return "destructive";
+      default: return "outline";
     }
   };
 
@@ -230,7 +230,7 @@ const AdminVehicles = () => {
                       </TableCell>
                       <TableCell>{vehicle.profiles?.full_name || "N/A"}</TableCell>
                       <TableCell>
-                        <Badge className={getStatusColor(vehicle.status)}>
+                        <Badge variant={getStatusColor(vehicle.status) as any}>
                           {getStatusLabel(vehicle.status)}
                         </Badge>
                       </TableCell>

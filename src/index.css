@@ -27,11 +27,11 @@ All colors MUST be HSL.
     --primary: 270 60% 45%;           /* brand-purple */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 97%;            /* brand-gray-light */
-    --secondary-foreground: 220 15% 20%;
+    --secondary: 0 0% 96%;            /* brand-gray-light - ligeramente más oscuro */
+    --secondary-foreground: 220 15% 20%;  /* Texto oscuro sobre fondo claro */
 
-    --muted: 0 0% 97%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 220 10% 38%;  /* Más oscuro para mejor contraste (4.5:1 min) */
 
     --accent: 270 60% 45%;            /* brand-purple */
     --accent-foreground: 0 0% 100%;
