@@ -312,17 +312,54 @@ export default function UserDashboard() {
           </CardContent>
         </Card>
 
+        {/* KYC Alert for Owners without verification */}
+        {isOwner && (!kycStatus || kycStatus !== 'verified') && (
+          <Card className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2 rounded-lg bg-amber-500 text-white">
+                  <Shield className="h-6 w-6" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-1">
+                    {!kycStatus ? 'Verificación KYC requerida' : 
+                     kycStatus === 'pending' ? 'KYC en revisión' :
+                     'KYC rechazado - Acción requerida'}
+                  </h3>
+                  <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                    {!kycStatus ? 
+                      'Para publicar vehículos en la plataforma, necesitas completar tu verificación de identidad.' :
+                     kycStatus === 'pending' ?
+                      'Tu verificación está siendo revisada. Te notificaremos cuando esté lista.' :
+                      'Tu verificación fue rechazada. Por favor, revisa los comentarios y vuelve a intentar.'}
+                  </p>
+                  {(!kycStatus || kycStatus === 'rejected') && (
+                    <Button asChild size="sm" variant="default" className="bg-amber-600 hover:bg-amber-700">
+                      <Link to="/kyc">
+                        <Shield className="h-4 w-4 mr-2" />
+                        {!kycStatus ? 'Completar verificación ahora' : 'Reintentar verificación'}
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Navigation tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:w-auto">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             <TabsTrigger value="reservas" className="gap-2">
               <Calendar className="h-4 w-4" />
-              Mis reservas
+              <span className="hidden sm:inline">Mis reservas</span>
+              <span className="sm:hidden">Reservas</span>
             </TabsTrigger>
             {isOwner && (
               <TabsTrigger value="vehiculos" className="gap-2">
                 <Car className="h-4 w-4" />
-                Mis vehículos
+                <span className="hidden sm:inline">Mis vehículos</span>
+                <span className="sm:hidden">Vehículos</span>
               </TabsTrigger>
             )}
             <TabsTrigger value="favoritos" className="gap-2">
