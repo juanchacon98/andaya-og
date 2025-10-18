@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Edit, Pause, Play, Trash2, AlertCircle } from "lucide-react";
+import { Plus, Edit, Zap, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
+import { QuickEditVehicle } from "@/components/owner/QuickEditVehicle";
 
 interface Vehicle {
   id: string;
@@ -22,6 +23,7 @@ interface Vehicle {
   price_bs: number;
   status: string;
   city: string | null;
+  kilometraje: number | null;
   created_at: string;
 }
 
@@ -30,6 +32,8 @@ export default function VehicleList() {
   const [loading, setLoading] = useState(true);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [kycStatus, setKycStatus] = useState<string | null>(null);
+  const [quickEditVehicle, setQuickEditVehicle] = useState<Vehicle | null>(null);
+  const [quickEditOpen, setQuickEditOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -88,6 +92,11 @@ export default function VehicleList() {
     return vehicles.filter(v => v.status === status);
   };
 
+  const handleQuickEdit = (vehicle: Vehicle) => {
+    setQuickEditVehicle(vehicle);
+    setQuickEditOpen(true);
+  };
+
   const VehicleTable = ({ vehicles }: { vehicles: Vehicle[] }) => (
     <Table>
       <TableHeader>
@@ -122,8 +131,16 @@ export default function VehicleList() {
               <TableCell>{getStatusBadge(vehicle.status)}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleQuickEdit(vehicle)}
+                    title="Edición rápida"
+                  >
+                    <Zap className="h-4 w-4" />
+                  </Button>
                   <Link to={`/owner/vehicles/${vehicle.id}/edit`}>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" title="Edición completa">
                       <Edit className="h-4 w-4" />
                     </Button>
                   </Link>
@@ -254,6 +271,15 @@ export default function VehicleList() {
           )}
         </div>
       </main>
+
+      {quickEditVehicle && (
+        <QuickEditVehicle
+          vehicle={quickEditVehicle}
+          open={quickEditOpen}
+          onOpenChange={setQuickEditOpen}
+          onSuccess={fetchData}
+        />
+      )}
 
       <Footer />
     </div>
