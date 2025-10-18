@@ -6,10 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Star, MapPin, Calendar as CalendarIcon, Users, Fuel, Settings, ArrowLeft, Phone, MessageCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { DateRangePicker } from "@/components/DateRangePicker";
+import { Star, MapPin, Users, Fuel, Settings, ArrowLeft, MessageCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,10 +23,12 @@ const CarDetail = () => {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [isBooking, setIsBooking] = useState(false);
+  const [unavailableDates, setUnavailableDates] = useState<string[]>([]);
 
   useEffect(() => {
     if (id) {
       fetchCarDetails();
+      fetchUnavailableDates();
     }
   }, [id]);
 
@@ -58,6 +58,36 @@ const CarDetail = () => {
       toast.error("Error al cargar el vehículo");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUnavailableDates = async () => {
+    try {
+      // Obtener reservas aprobadas/activas para este vehículo
+      const { data: reservations, error } = await supabase
+        .from("reservations")
+        .select("start_date, end_date")
+        .eq("vehicle_id", id)
+        .in("status", ["approved", "finished"]);
+
+      if (error) throw error;
+
+      // Convertir rangos de reservas a array de fechas individuales
+      const blockedDates: string[] = [];
+      reservations?.forEach((reservation) => {
+        const start = new Date(reservation.start_date);
+        const end = new Date(reservation.end_date);
+        const current = new Date(start);
+        
+        while (current <= end) {
+          blockedDates.push(format(current, "yyyy-MM-dd"));
+          current.setDate(current.getDate() + 1);
+        }
+      });
+
+      setUnavailableDates(blockedDates);
+    } catch (error) {
+      console.error("Error loading availability:", error);
     }
   };
 
@@ -286,62 +316,16 @@ const CarDetail = () => {
                   </div>
                 </div>
                 
-                <div className="mb-4 space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Fecha de inicio</label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !startDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {startDate ? format(startDate, "PPP", { locale: es }) : "Selecciona una fecha"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={startDate}
-                          onSelect={setStartDate}
-                          disabled={(date) => date < new Date()}
-                          initialFocus
-                          className={cn("p-3 pointer-events-auto")}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Fecha de devolución</label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !endDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {endDate ? format(endDate, "PPP", { locale: es }) : "Selecciona una fecha"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={endDate}
-                          onSelect={setEndDate}
-                          disabled={(date) => date < (startDate || new Date())}
-                          initialFocus
-                          className={cn("p-3 pointer-events-auto")}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                <div className="mb-4">
+                  <DateRangePicker
+                    value={{ startDate, endDate }}
+                    minDate={new Date()}
+                    unavailableDates={unavailableDates}
+                    onChange={({ startDate: start, endDate: end }) => {
+                      setStartDate(start);
+                      setEndDate(end);
+                    }}
+                  />
                 </div>
 
                 {startDate && endDate && days > 0 && (
