@@ -10,6 +10,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { ReservationDetailsDialog } from '@/components/ReservationDetailsDialog';
+import { ModifyReservationDialog } from '@/components/ModifyReservationDialog';
 import { 
   User, 
   Car, 
@@ -28,7 +40,8 @@ import {
   X,
   CheckCircle,
   AlertCircle,
-  Shield
+  Shield,
+  Eye
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -81,6 +94,11 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('reservas');
   const [kycStatus, setKycStatus] = useState<string | null>(null);
+  const [selectedReservation, setSelectedReservation] = useState<any>(null);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showModifyDialog, setShowModifyDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [reservationToCancel, setReservationToCancel] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -212,6 +230,43 @@ export default function UserDashboard() {
     };
     const statusInfo = statusMap[status] || { label: status, variant: 'outline' };
     return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
+  };
+
+  const handleViewDetails = (reservation: Reservation) => {
+    setSelectedReservation(reservation);
+    setShowDetailsDialog(true);
+  };
+
+  const handleModify = (reservation: Reservation) => {
+    setSelectedReservation(reservation);
+    setShowModifyDialog(true);
+  };
+
+  const handleCancelClick = (reservationId: string) => {
+    setReservationToCancel(reservationId);
+    setShowCancelDialog(true);
+  };
+
+  const handleCancelConfirm = async () => {
+    if (!reservationToCancel) return;
+
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .update({ status: 'cancelled' })
+        .eq('id', reservationToCancel);
+
+      if (error) throw error;
+
+      toast.success('Reserva cancelada exitosamente');
+      fetchUserData();
+    } catch (error: any) {
+      console.error('Error canceling reservation:', error);
+      toast.error('Error al cancelar la reserva: ' + error.message);
+    } finally {
+      setShowCancelDialog(false);
+      setReservationToCancel(null);
+    }
   };
 
   if (loading) {
@@ -433,13 +488,30 @@ export default function UserDashboard() {
                             </div>
                             
                             <div className="flex gap-2 pt-2">
-                              <Button variant="outline" size="sm">
-                                <Edit className="h-4 w-4 mr-2" />
-                                Modificar
-                              </Button>
-                              <Button variant="outline" size="sm">Ver detalles</Button>
                               {reservation.status === 'pending' && (
-                                <Button variant="destructive" size="sm">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleModify(reservation)}
+                                >
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Modificar
+                                </Button>
+                              )}
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleViewDetails(reservation)}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ver detalles
+                              </Button>
+                              {reservation.status === 'pending' && (
+                                <Button 
+                                  variant="destructive" 
+                                  size="sm"
+                                  onClick={() => handleCancelClick(reservation.id)}
+                                >
                                   <X className="h-4 w-4 mr-2" />
                                   Cancelar
                                 </Button>
@@ -730,8 +802,41 @@ export default function UserDashboard() {
           </TabsContent>
         </Tabs>
       </main>
-
+      
       <Footer />
+
+      {/* Dialogs */}
+      <ReservationDetailsDialog
+        open={showDetailsDialog}
+        onOpenChange={setShowDetailsDialog}
+        reservation={selectedReservation}
+        isOwner={false}
+      />
+
+      <ModifyReservationDialog
+        open={showModifyDialog}
+        onOpenChange={setShowModifyDialog}
+        reservation={selectedReservation}
+        onSuccess={fetchUserData}
+      />
+
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Cancelar reserva?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción cancelará tu reserva. Dependiendo de la política de cancelación del vehículo, 
+              podrías estar sujeto a cargos por cancelación.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No, mantener reserva</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCancelConfirm} className="bg-destructive hover:bg-destructive/90">
+              Sí, cancelar reserva
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
