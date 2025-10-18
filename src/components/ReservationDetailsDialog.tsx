@@ -96,7 +96,7 @@ export function ReservationDetailsDialog({
                   Inicio
                 </p>
                 <p className="font-medium">
-                  {format(new Date(reservation.start_date), "PPP", { locale: es })}
+                  {(() => { const d = reservation?.start_date ? new Date(reservation.start_date) : null; return d && !isNaN(d.getTime()) ? format(d, "PPP", { locale: es }) : "No disponible"; })()}
                 </p>
               </div>
               <div>
@@ -105,7 +105,7 @@ export function ReservationDetailsDialog({
                   Devolución
                 </p>
                 <p className="font-medium">
-                  {format(new Date(reservation.end_date), "PPP", { locale: es })}
+                  {(() => { const d = reservation?.end_date ? new Date(reservation.end_date) : null; return d && !isNaN(d.getTime()) ? format(d, "PPP", { locale: es }) : "No disponible"; })()}
                 </p>
               </div>
             </div>
@@ -156,7 +156,7 @@ export function ReservationDetailsDialog({
               ID de reserva: {reservation.id}
             </p>
             <p className="text-xs text-muted-foreground">
-              Creada el: {format(new Date(reservation.created_at), "PPP 'a las' p", { locale: es })}
+              {(() => { const d = reservation?.created_at ? new Date(reservation.created_at) : null; return `Creada el: ${d && !isNaN(d.getTime()) ? format(d, "PPP 'a las' p", { locale: es }) : "No disponible"}`; })()}
             </p>
           </div>
         </div>
