@@ -25,7 +25,7 @@ export interface UseExchangeRateResult {
 }
 
 export function useExchangeRate({ 
-  provider = 'bcv', 
+  provider = 'yadio', 
   code = 'USD' 
 }: ExchangeRateParams = {}): UseExchangeRateResult {
   const { data, isLoading, error } = useQuery({

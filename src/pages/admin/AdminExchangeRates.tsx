@@ -26,7 +26,7 @@ const AdminExchangeRates = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [settings, setSettings] = useState<FxSettings>({
-    default_provider: 'bcv',
+    default_provider: 'yadio',
     default_currency: 'USD',
     refresh_minutes: 30,
     eur_usd_fallback_rate: 1.10
