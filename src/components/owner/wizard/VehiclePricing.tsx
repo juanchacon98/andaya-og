@@ -40,7 +40,7 @@ export function VehiclePricing({ data, onChange }: VehiclePricingProps) {
         </div>
 
         <div>
-          <Label htmlFor="deposit_bs">Depósito de seguridad (Bs)</Label>
+          <Label htmlFor="deposit_bs">Depósito de seguridad (Bs) (opcional)</Label>
           <Input
             id="deposit_bs"
             type="number"
@@ -52,40 +52,6 @@ export function VehiclePricing({ data, onChange }: VehiclePricingProps) {
           <p className="text-xs text-muted-foreground mt-1">
             Monto reembolsable en caso de daños
           </p>
-        </div>
-
-        <div>
-          <Label htmlFor="cleaning_fee_bs">Tarifa de limpieza (Bs)</Label>
-          <Input
-            id="cleaning_fee_bs"
-            type="number"
-            step="0.01"
-            value={data.cleaning_fee_bs || ''}
-            onChange={(e) => onChange('cleaning_fee_bs', parseFloat(e.target.value))}
-            placeholder="50.00"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="km_included">Kilómetros incluidos por día</Label>
-          <Input
-            id="km_included"
-            type="number"
-            value={data.km_included || 200}
-            onChange={(e) => onChange('km_included', parseInt(e.target.value))}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="extra_km_fee_bs">Costo por km adicional (Bs)</Label>
-          <Input
-            id="extra_km_fee_bs"
-            type="number"
-            step="0.01"
-            value={data.extra_km_fee_bs || ''}
-            onChange={(e) => onChange('extra_km_fee_bs', parseFloat(e.target.value))}
-            placeholder="2.00"
-          />
         </div>
 
         <div>
@@ -125,20 +91,18 @@ export function VehiclePricing({ data, onChange }: VehiclePricingProps) {
       </div>
 
       <div className="bg-muted p-4 rounded-lg">
-        <h4 className="font-medium mb-2">Resumen de precios</h4>
+        <h4 className="font-medium mb-2">Resumen</h4>
         <div className="space-y-1 text-sm">
           <div className="flex justify-between">
             <span>Precio por día:</span>
             <span className="font-medium">Bs {data.price_bs || 0}</span>
           </div>
-          <div className="flex justify-between">
-            <span>Depósito de seguridad:</span>
-            <span className="font-medium">Bs {data.deposit_bs || 0}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Tarifa de limpieza:</span>
-            <span className="font-medium">Bs {data.cleaning_fee_bs || 0}</span>
-          </div>
+          {data.deposit_bs > 0 && (
+            <div className="flex justify-between">
+              <span>Depósito de seguridad:</span>
+              <span className="font-medium">Bs {data.deposit_bs}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
