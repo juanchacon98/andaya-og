@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -13,38 +14,37 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Car, UserCheck } from "lucide-react";
+import { Search, Car, UserCheck, RefreshCw, Edit } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 
-interface Profile {
+interface UserData {
   id: string;
+  email: string;
+  created_at: string;
+  last_sign_in_at: string | null;
   full_name: string | null;
   phone: string | null;
-  created_at: string;
-}
-
-interface UserWithRole extends Profile {
   roles: string[];
-  vehicles_count: number;
-  reservations_count: number;
   kyc_status: string | null;
+  email_confirmed: boolean;
 }
 
 const AdminUsers = () => {
   const navigate = useNavigate();
-  const [users, setUsers] = useState<UserWithRole[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<UserWithRole[]>([]);
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<UserData[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     checkAdminAccess();
-    fetchUsers();
   }, []);
 
   useEffect(() => {
     const filtered = users.filter(user =>
       user.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+      user.email?.toLowerCase().includes(search.toLowerCase()) ||
       user.id.toLowerCase().includes(search.toLowerCase()) ||
       user.phone?.includes(search)
     );
@@ -70,80 +70,84 @@ const AdminUsers = () => {
 
     if (!hasAdminRole) {
       navigate("/");
+      return;
     }
+
+    fetchAllUsers();
   };
 
-  const fetchUsers = async () => {
+  const fetchAllUsers = async () => {
     try {
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!profiles) {
-        setLoading(false);
+      setLoading(true);
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("No hay sesión activa");
         return;
       }
 
-      const usersWithData = await Promise.all(
-        profiles.map(async (profile) => {
-          const [rolesRes, vehiclesRes, reservationsRes, kycRes] = await Promise.all([
-            supabase
-              .from("user_roles")
-              .select("role")
-              .eq("user_id", profile.id),
-            supabase
-              .from("vehicles")
-              .select("id", { count: "exact", head: true })
-              .eq("owner_id", profile.id),
-            supabase
-              .from("reservations")
-              .select("id", { count: "exact", head: true })
-              .eq("renter_id", profile.id),
-            supabase
-              .from("kyc_verifications")
-              .select("status")
-              .eq("user_id", profile.id)
-              .single()
-          ]);
+      const response = await supabase.functions.invoke('admin-list-users', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
 
-          return {
-            ...profile,
-            roles: rolesRes.data?.map(r => r.role) || [],
-            vehicles_count: vehiclesRes.count || 0,
-            reservations_count: reservationsRes.count || 0,
-            kyc_status: kycRes.data?.status || null
-          };
-        })
-      );
+      if (response.error) {
+        throw response.error;
+      }
 
-      setUsers(usersWithData);
-      setFilteredUsers(usersWithData);
-    } catch (error) {
+      if (response.data?.users) {
+        setUsers(response.data.users);
+        setFilteredUsers(response.data.users);
+        toast.success(`${response.data.users.length} usuarios cargados correctamente`);
+      }
+    } catch (error: any) {
       console.error("Error fetching users:", error);
+      toast.error("Error al cargar usuarios: " + (error.message || "Error desconocido"));
     } finally {
       setLoading(false);
     }
   };
 
+  const getRoleLabel = (role: string) => {
+    const labels: Record<string, string> = {
+      admin_primary: "Admin Principal",
+      admin_security: "Admin Seguridad",
+      owner: "Propietario",
+      renter: "Arrendatario"
+    };
+    return labels[role] || role;
+  };
+
   const getRoleColor = (role: string) => {
     switch (role) {
-      case "admin_primary": return "bg-red-500";
-      case "admin_security": return "bg-orange-500";
-      case "owner": return "bg-blue-500";
-      case "renter": return "bg-green-500";
-      default: return "bg-gray-500";
+      case "admin_primary": return "destructive";
+      case "admin_security": return "destructive";
+      case "owner": return "default";
+      case "renter": return "secondary";
+      default: return "outline";
     }
   };
 
-  const getKycColor = (status: string | null) => {
-    if (!status) return "bg-gray-500";
+  const getKycBadgeVariant = (status: string | null) => {
+    if (!status) return "outline";
     switch (status) {
-      case "approved": return "bg-green-500";
-      case "pending": return "bg-yellow-500";
-      case "rejected": return "bg-red-500";
-      default: return "bg-gray-500";
+      case "approved": return "default";
+      case "pending": return "secondary";
+      case "rejected": return "destructive";
+      default: return "outline";
     }
+  };
+
+  const getKycLabel = (status: string | null) => {
+    if (!status) return "N/A";
+    const labels: Record<string, string> = {
+      approved: "Aprobado",
+      pending: "Pendiente",
+      rejected: "Rechazado"
+    };
+    return labels[status] || status;
   };
 
   const owners = filteredUsers.filter(u => u.roles.includes("owner"));
@@ -155,7 +159,7 @@ const AdminUsers = () => {
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-            <p className="mt-2 text-sm text-muted-foreground">Cargando usuarios...</p>
+            <p className="mt-2 text-sm text-muted-foreground">Cargando todos los usuarios...</p>
           </div>
         </div>
       </AdminLayout>
@@ -165,11 +169,17 @@ const AdminUsers = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Gestión de Usuarios</h1>
-          <p className="text-muted-foreground mt-1">
-            Administra todos los usuarios de la plataforma
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Gestión de Usuarios</h1>
+            <p className="text-muted-foreground mt-1">
+              Administra todos los usuarios registrados en Supabase
+            </p>
+          </div>
+          <Button onClick={fetchAllUsers} variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Actualizar
+          </Button>
         </div>
 
         <Card className="border-border">
@@ -177,7 +187,7 @@ const AdminUsers = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar por nombre, ID o teléfono..."
+                placeholder="Buscar por nombre, email, ID o teléfono..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
@@ -209,47 +219,72 @@ const AdminUsers = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead>Email</TableHead>
                         <TableHead>Nombre</TableHead>
                         <TableHead>Teléfono</TableHead>
                         <TableHead>Roles</TableHead>
                         <TableHead>KYC</TableHead>
-                        <TableHead>Vehículos</TableHead>
-                        <TableHead>Reservas</TableHead>
-                        <TableHead>Registro</TableHead>
+                        <TableHead>Email Confirmado</TableHead>
+                        <TableHead>Último acceso</TableHead>
+                        <TableHead>Acciones</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredUsers.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell className="font-medium">
-                            {user.full_name || "Sin nombre"}
-                          </TableCell>
-                          <TableCell>{user.phone || "N/A"}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-1 flex-wrap">
-                              {user.roles.length > 0 ? (
-                                user.roles.map((role) => (
-                                  <Badge key={role} className={getRoleColor(role)}>
-                                    {role}
-                                  </Badge>
-                                ))
-                              ) : (
-                                <Badge variant="outline">Sin rol</Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={getKycColor(user.kyc_status)}>
-                              {user.kyc_status || "N/A"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{user.vehicles_count}</TableCell>
-                          <TableCell>{user.reservations_count}</TableCell>
-                          <TableCell>
-                            {new Date(user.created_at).toLocaleDateString()}
+                      {filteredUsers.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center text-muted-foreground">
+                            No se encontraron usuarios
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ) : (
+                        filteredUsers.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell className="font-medium">
+                              {user.email}
+                            </TableCell>
+                            <TableCell>
+                              {user.full_name || <span className="text-muted-foreground italic">Sin perfil</span>}
+                            </TableCell>
+                            <TableCell>{user.phone || "N/A"}</TableCell>
+                            <TableCell>
+                              <div className="flex gap-1 flex-wrap">
+                                {user.roles.length > 0 ? (
+                                  user.roles.map((role) => (
+                                    <Badge key={role} variant={getRoleColor(role)}>
+                                      {getRoleLabel(role)}
+                                    </Badge>
+                                  ))
+                                ) : (
+                                  <Badge variant="outline">Sin rol</Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={getKycBadgeVariant(user.kyc_status)}>
+                                {getKycLabel(user.kyc_status)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {user.email_confirmed ? (
+                                <Badge variant="default">Sí</Badge>
+                              ) : (
+                                <Badge variant="outline">No</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {user.last_sign_in_at 
+                                ? new Date(user.last_sign_in_at).toLocaleString('es-VE')
+                                : "Nunca"
+                              }
+                            </TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </div>
@@ -267,31 +302,41 @@ const AdminUsers = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead>Email</TableHead>
                         <TableHead>Nombre</TableHead>
                         <TableHead>Teléfono</TableHead>
                         <TableHead>KYC</TableHead>
-                        <TableHead>Vehículos</TableHead>
                         <TableHead>Registro</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {owners.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell className="font-medium">
-                            {user.full_name || "Sin nombre"}
-                          </TableCell>
-                          <TableCell>{user.phone || "N/A"}</TableCell>
-                          <TableCell>
-                            <Badge className={getKycColor(user.kyc_status)}>
-                              {user.kyc_status || "N/A"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{user.vehicles_count}</TableCell>
-                          <TableCell>
-                            {new Date(user.created_at).toLocaleDateString()}
+                      {owners.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center text-muted-foreground">
+                            No hay propietarios registrados
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ) : (
+                        owners.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell className="font-medium">
+                              {user.email}
+                            </TableCell>
+                            <TableCell>
+                              {user.full_name || <span className="text-muted-foreground italic">Sin perfil</span>}
+                            </TableCell>
+                            <TableCell>{user.phone || "N/A"}</TableCell>
+                            <TableCell>
+                              <Badge variant={getKycBadgeVariant(user.kyc_status)}>
+                                {getKycLabel(user.kyc_status)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {new Date(user.created_at).toLocaleDateString('es-VE')}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </div>
@@ -309,31 +354,41 @@ const AdminUsers = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead>Email</TableHead>
                         <TableHead>Nombre</TableHead>
                         <TableHead>Teléfono</TableHead>
                         <TableHead>KYC</TableHead>
-                        <TableHead>Reservas</TableHead>
                         <TableHead>Registro</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {renters.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell className="font-medium">
-                            {user.full_name || "Sin nombre"}
-                          </TableCell>
-                          <TableCell>{user.phone || "N/A"}</TableCell>
-                          <TableCell>
-                            <Badge className={getKycColor(user.kyc_status)}>
-                              {user.kyc_status || "N/A"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{user.reservations_count}</TableCell>
-                          <TableCell>
-                            {new Date(user.created_at).toLocaleDateString()}
+                      {renters.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center text-muted-foreground">
+                            No hay arrendatarios registrados
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ) : (
+                        renters.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell className="font-medium">
+                              {user.email}
+                            </TableCell>
+                            <TableCell>
+                              {user.full_name || <span className="text-muted-foreground italic">Sin perfil</span>}
+                            </TableCell>
+                            <TableCell>{user.phone || "N/A"}</TableCell>
+                            <TableCell>
+                              <Badge variant={getKycBadgeVariant(user.kyc_status)}>
+                                {getKycLabel(user.kyc_status)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {new Date(user.created_at).toLocaleDateString('es-VE')}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </div>
