@@ -4,7 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { ImpersonationBanner } from "./components/ImpersonationBanner";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -34,14 +35,21 @@ import Terminos from "./pages/Terminos";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
+function AppContent() {
+  const { impersonationData } = useAuth();
+  
+  return (
+    <>
+      {impersonationData && (
+        <ImpersonationBanner 
+          userName={impersonationData.userName} 
+          expiresAt={impersonationData.expiresAt} 
+        />
+      )}
+      <div className={impersonationData ? "pt-14" : ""}>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <Routes>
+        <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Register />} />
@@ -69,7 +77,18 @@ const App = () => (
             <Route path="/terminos" element={<Terminos />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
-          </Routes>
+        </Routes>
+      </div>
+    </>
+  );
+}
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <TooltipProvider>
+        <BrowserRouter>
+          <AppContent />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

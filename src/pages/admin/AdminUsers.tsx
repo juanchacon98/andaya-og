@@ -284,16 +284,34 @@ const AdminUsers = () => {
                               }
                             </TableCell>
                             <TableCell>
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedUserId(user.id);
-                                  setEditDialogOpen(true);
-                                }}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
+                              <div className="flex gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    setImpersonateUser({
+                                      id: user.id,
+                                      name: user.full_name,
+                                      email: user.email
+                                    });
+                                    setImpersonateDialogOpen(true);
+                                  }}
+                                  title="Impersonar usuario"
+                                >
+                                  <UserCog className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedUserId(user.id);
+                                    setEditDialogOpen(true);
+                                  }}
+                                  title="Editar usuario"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))
@@ -416,6 +434,16 @@ const AdminUsers = () => {
           userId={selectedUserId}
           onUpdate={fetchAllUsers}
         />
+        
+        {impersonateUser && (
+          <ImpersonateDialog
+            open={impersonateDialogOpen}
+            onOpenChange={setImpersonateDialogOpen}
+            userId={impersonateUser.id}
+            userName={impersonateUser.name}
+            userEmail={impersonateUser.email}
+          />
+        )}
       </div>
     </AdminLayout>
   );
