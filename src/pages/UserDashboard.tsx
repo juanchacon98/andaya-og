@@ -294,7 +294,7 @@ export default function UserDashboard() {
                 <Button 
                   variant="outline" 
                   size="icon"
-                  onClick={() => navigate('/perfil')}
+                  onClick={() => toast.info("Funcionalidad de mensajes próximamente")}
                   title="Mensajes"
                 >
                   <MessageSquare className="h-5 w-5" />
@@ -302,7 +302,7 @@ export default function UserDashboard() {
                 <Button 
                   variant="outline" 
                   size="icon"
-                  onClick={() => navigate('/perfil')}
+                  onClick={() => setActiveTab('perfil')}
                   title="Configuración"
                 >
                   <Settings className="h-5 w-5" />
