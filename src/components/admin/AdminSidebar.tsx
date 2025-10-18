@@ -6,7 +6,8 @@ import {
   CreditCard, 
   BarChart3, 
   Settings,
-  ChevronLeft
+  ChevronLeft,
+  Database
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
@@ -29,6 +30,7 @@ const menuItems = [
   { title: "Usuarios", url: "/admin/usuarios", icon: Users },
   { title: "Pagos", url: "/admin/pagos", icon: CreditCard },
   { title: "Reportes", url: "/admin/reportes", icon: BarChart3 },
+  { title: "Backups", url: "/admin/backups", icon: Database },
   { title: "Configuración", url: "/admin/configuracion", icon: Settings },
 ];
 
