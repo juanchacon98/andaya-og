@@ -24,7 +24,7 @@ interface VehicleMapProps {
     title: string;
     lat: number;
     lng: number;
-    price_per_day: number;
+    price_bs: number;
   }>;
 }
 
@@ -111,7 +111,7 @@ const VehicleMap = ({
 
           const price = document.createElement('p');
           price.style.color = 'hsl(var(--primary))';
-          price.textContent = `$${vehicle.price_per_day.toLocaleString()}/día`;
+          price.textContent = `Bs ${vehicle.price_bs.toLocaleString()}/día`;
 
           popupDiv.appendChild(title);
           popupDiv.appendChild(price);

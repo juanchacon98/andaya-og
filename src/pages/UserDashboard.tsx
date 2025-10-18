@@ -57,7 +57,7 @@ interface Vehicle {
   brand: string;
   model: string;
   year: number;
-  price_per_day: number;
+  price_bs: number;
   status: string;
   rating_avg: number;
   city: string | null;
@@ -497,7 +497,7 @@ export default function UserDashboard() {
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                               <div>
                                 <p className="text-muted-foreground">Precio por día</p>
-                                <p className="font-semibold">${vehicle.price_per_day}</p>
+                                <p className="font-semibold">Bs {vehicle.price_bs}</p>
                               </div>
                               <div>
                                 <p className="text-muted-foreground">Calificación</p>

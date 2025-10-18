@@ -11,7 +11,7 @@ interface Vehicle {
   title: string;
   lat: number;
   lng: number;
-  price_per_day: number;
+  price_bs: number;
   brand: string;
   model: string;
   year: number;
@@ -30,7 +30,7 @@ const MapExplore = () => {
     try {
       const { data, error } = await supabase
         .from("vehicles")
-        .select("id, title, lat, lng, price_per_day, brand, model, year, city")
+        .select("id, title, lat, lng, price_bs, brand, model, year, city")
         .eq("status", "active")
         .not("lat", "is", null)
         .not("lng", "is", null);

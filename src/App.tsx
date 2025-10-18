@@ -25,6 +25,9 @@ import AdminAuditLogs from "./pages/admin/AdminAuditLogs";
 import AdminExchangeRates from "./pages/admin/AdminExchangeRates";
 import UserDashboard from "./pages/UserDashboard";
 import KYC from "./pages/KYC";
+import OwnerDashboard from "./pages/owner/OwnerDashboard";
+import VehicleList from "./pages/owner/VehicleList";
+import VehicleWizard from "./pages/owner/VehicleWizard";
 import PoliticaVerificacion from "./pages/PoliticaVerificacion";
 import TratamientoDatos from "./pages/TratamientoDatos";
 import Terminos from "./pages/Terminos";
@@ -57,6 +60,10 @@ const App = () => (
             <Route path="/admin/configuracion" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
             <Route path="/perfil" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
             <Route path="/kyc" element={<ProtectedRoute><KYC /></ProtectedRoute>} />
+            <Route path="/owner" element={<ProtectedRoute><OwnerDashboard /></ProtectedRoute>} />
+            <Route path="/owner/vehicles" element={<ProtectedRoute><VehicleList /></ProtectedRoute>} />
+            <Route path="/owner/vehicles/new" element={<ProtectedRoute><VehicleWizard /></ProtectedRoute>} />
+            <Route path="/owner/vehicles/:id/edit" element={<ProtectedRoute><VehicleWizard /></ProtectedRoute>} />
             <Route path="/politica-verificacion" element={<PoliticaVerificacion />} />
             <Route path="/tratamiento-datos" element={<TratamientoDatos />} />
             <Route path="/terminos" element={<Terminos />} />

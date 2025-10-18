@@ -206,6 +206,42 @@ export type Database = {
         }
         Relationships: []
       }
+      impersonation_sessions: {
+        Row: {
+          admin_id: string
+          created_at: string | null
+          expires_at: string
+          id: string
+          ip_address: string | null
+          issued_at: string | null
+          reason: string
+          revoked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          issued_at?: string | null
+          reason: string
+          revoked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          issued_at?: string | null
+          reason?: string
+          revoked_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       incidents: {
         Row: {
           admin_notes: string | null
@@ -558,6 +594,85 @@ export type Database = {
           },
         ]
       }
+      vehicle_availability_rules: {
+        Row: {
+          blocked_dates: string[] | null
+          created_at: string | null
+          id: string
+          pickup_hours: string | null
+          return_hours: string | null
+          updated_at: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          blocked_dates?: string[] | null
+          created_at?: string | null
+          id?: string
+          pickup_hours?: string | null
+          return_hours?: string | null
+          updated_at?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          blocked_dates?: string[] | null
+          created_at?: string | null
+          id?: string
+          pickup_hours?: string | null
+          return_hours?: string | null
+          updated_at?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_availability_rules_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: true
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_documents: {
+        Row: {
+          confidence: number | null
+          created_at: string | null
+          doc_type: string
+          id: string
+          ocr_json: Json | null
+          updated_at: string | null
+          url: string
+          vehicle_id: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string | null
+          doc_type: string
+          id?: string
+          ocr_json?: Json | null
+          updated_at?: string | null
+          url: string
+          vehicle_id: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string | null
+          doc_type?: string
+          id?: string
+          ocr_json?: Json | null
+          updated_at?: string | null
+          url?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_documents_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_photos: {
         Row: {
           created_at: string | null
@@ -592,60 +707,132 @@ export type Database = {
       }
       vehicles: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           brand: string
+          cancellation_policy: string | null
           city: string | null
+          cleaning_fee_bs: number | null
+          color: string | null
           created_at: string | null
+          currency: string | null
+          delivery_cost_bs: number | null
+          delivery_points: string[] | null
+          delivery_type: string | null
+          delivery_zones: string[] | null
+          deposit_bs: number | null
           description: string | null
+          extra_km_fee_bs: number | null
+          fuel_type: string | null
           id: string
+          insurance_company: string | null
+          insurance_expiry: string | null
+          insurance_number: string | null
+          kilometraje: number | null
+          km_included: number | null
           lat: number | null
           lng: number | null
+          min_rental_days: number | null
           model: string
           owner_id: string
+          paused_at: string | null
           plate: string | null
-          price_per_day: number
+          price_bs: number
           rating_avg: number | null
+          rejected_reason: string | null
+          rules: Json | null
           status: Database["public"]["Enums"]["vehicle_status"] | null
           title: string
+          transmission: string | null
           type: Database["public"]["Enums"]["vehicle_type"]
           updated_at: string | null
+          vin: string | null
           year: number
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           brand: string
+          cancellation_policy?: string | null
           city?: string | null
+          cleaning_fee_bs?: number | null
+          color?: string | null
           created_at?: string | null
+          currency?: string | null
+          delivery_cost_bs?: number | null
+          delivery_points?: string[] | null
+          delivery_type?: string | null
+          delivery_zones?: string[] | null
+          deposit_bs?: number | null
           description?: string | null
+          extra_km_fee_bs?: number | null
+          fuel_type?: string | null
           id?: string
+          insurance_company?: string | null
+          insurance_expiry?: string | null
+          insurance_number?: string | null
+          kilometraje?: number | null
+          km_included?: number | null
           lat?: number | null
           lng?: number | null
+          min_rental_days?: number | null
           model: string
           owner_id: string
+          paused_at?: string | null
           plate?: string | null
-          price_per_day: number
+          price_bs: number
           rating_avg?: number | null
+          rejected_reason?: string | null
+          rules?: Json | null
           status?: Database["public"]["Enums"]["vehicle_status"] | null
           title: string
+          transmission?: string | null
           type: Database["public"]["Enums"]["vehicle_type"]
           updated_at?: string | null
+          vin?: string | null
           year: number
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           brand?: string
+          cancellation_policy?: string | null
           city?: string | null
+          cleaning_fee_bs?: number | null
+          color?: string | null
           created_at?: string | null
+          currency?: string | null
+          delivery_cost_bs?: number | null
+          delivery_points?: string[] | null
+          delivery_type?: string | null
+          delivery_zones?: string[] | null
+          deposit_bs?: number | null
           description?: string | null
+          extra_km_fee_bs?: number | null
+          fuel_type?: string | null
           id?: string
+          insurance_company?: string | null
+          insurance_expiry?: string | null
+          insurance_number?: string | null
+          kilometraje?: number | null
+          km_included?: number | null
           lat?: number | null
           lng?: number | null
+          min_rental_days?: number | null
           model?: string
           owner_id?: string
+          paused_at?: string | null
           plate?: string | null
-          price_per_day?: number
+          price_bs?: number
           rating_avg?: number | null
+          rejected_reason?: string | null
+          rules?: Json | null
           status?: Database["public"]["Enums"]["vehicle_status"] | null
           title?: string
+          transmission?: string | null
           type?: Database["public"]["Enums"]["vehicle_type"]
           updated_at?: string | null
+          vin?: string | null
           year?: number
         }
         Relationships: []

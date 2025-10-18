@@ -14,10 +14,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Car, UserCheck, RefreshCw, Edit } from "lucide-react";
+import { Search, Car, UserCheck, RefreshCw, Edit, UserCog } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { UserEditDialog } from "@/components/admin/UserEditDialog";
+import { ImpersonateDialog } from "@/components/admin/ImpersonateDialog";
 
 interface UserData {
   id: string;
@@ -39,6 +40,8 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [impersonateDialogOpen, setImpersonateDialogOpen] = useState(false);
+  const [impersonateUser, setImpersonateUser] = useState<{id: string, name: string | null, email: string} | null>(null);
 
   useEffect(() => {
     checkAdminAccess();
