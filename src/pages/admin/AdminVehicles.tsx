@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Eye, CheckCircle, XCircle, Edit, Pause } from "lucide-react";
+import { Search, Filter, Eye, CheckCircle, XCircle, Edit, Pause, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { VehicleEditDialog } from "@/components/admin/VehicleEditDialog";
 import { VehicleRejectDialog } from "@/components/admin/VehicleRejectDialog";
@@ -154,6 +154,27 @@ const AdminVehicles = () => {
     } catch (error) {
       console.error("Error updating vehicle:", error);
       toast.error("Error al actualizar vehículo");
+    }
+  };
+
+  const deleteVehicle = async (id: string, vehicleName: string) => {
+    if (!confirm(`¿Estás seguro de que deseas eliminar el vehículo "${vehicleName}"? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("vehicles")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast.success("Vehículo eliminado correctamente");
+      fetchVehicles();
+    } catch (error) {
+      console.error("Error deleting vehicle:", error);
+      toast.error("Error al eliminar el vehículo");
     }
   };
 
@@ -339,6 +360,17 @@ const AdminVehicles = () => {
                               <CheckCircle className="h-4 w-4" />
                             </Button>
                           )}
+                          
+                          {/* Botón de eliminar - disponible para todos los estados */}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => deleteVehicle(vehicle.id, `${vehicle.brand} ${vehicle.model}`)}
+                            title="Eliminar"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>

@@ -99,14 +99,20 @@ const AdminUsers = () => {
         }
       });
 
+      console.log("Response from admin-list-users:", response);
+
       if (response.error) {
         throw response.error;
       }
 
       if (response.data?.users) {
+        console.log("Total users received:", response.data.users.length);
+        console.log("Users data:", response.data.users);
         setUsers(response.data.users);
         setFilteredUsers(response.data.users);
         toast.success(`${response.data.users.length} usuarios cargados correctamente`);
+      } else {
+        console.log("No users data in response:", response.data);
       }
     } catch (error: any) {
       console.error("Error fetching users:", error);
