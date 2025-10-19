@@ -67,7 +67,7 @@ const Explore = () => {
     <div className="min-h-screen">
       <Navbar />
       
-      <div className="container py-8">
+      <div className="container py-8" style={{ paddingTop: 'calc(var(--app-header-h) + 2rem)' }}>
         <h1 className="mb-8 text-4xl font-bold">Explora vehículos disponibles</h1>
         
         {/* Filters */}

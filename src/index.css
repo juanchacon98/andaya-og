@@ -8,6 +8,9 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Layout Variables */
+    --app-header-h: 64px;
+    
     /* AndaYa Brand Colors - Turo-inspired */
     --brand-purple: 270 60% 45%;      /* #6A1BB5 - Turo purple accent */
     --brand-purple-light: 270 60% 55%; /* Lighter purple for hover */
@@ -125,5 +128,10 @@ All colors MUST be HSL.
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold;
+  }
+  
+  /* Scroll margin to account for fixed header */
+  h1, h2, h3, h4, h5, h6, [id] {
+    scroll-margin-top: calc(var(--app-header-h) + 12px);
   }
 }

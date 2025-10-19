@@ -14,15 +14,21 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CarCard from "@/components/CarCard";
 import { LocationAutocomplete } from "@/components/LocationAutocomplete";
-import { SearchDateRangePicker } from "@/components/SearchDateRangePicker";
+import { MonthRangePicker } from "@/components/MonthRangePicker";
 import { Location } from "@/types/location";
 import heroImage from "@/assets/hero-turo-style.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 
-interface DateRange {
-  startDate: Date | null;
-  endDate: Date | null;
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+interface MonthRange {
+  startMonth: { month: number; year: number } | null;
+  endMonth: { month: number; year: number } | null;
 }
 
 const Home = () => {
@@ -33,9 +39,9 @@ const Home = () => {
   
   // Search form state
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
-  const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: null,
-    endDate: null,
+  const [monthRange, setMonthRange] = useState<MonthRange>({
+    startMonth: null,
+    endMonth: null,
   });
 
   useEffect(() => {
@@ -86,18 +92,29 @@ const Home = () => {
       return;
     }
     
-    if (!dateRange.startDate || !dateRange.endDate) {
-      toast.error("Selecciona fecha de inicio y fin");
+    if (!monthRange.startMonth || !monthRange.endMonth) {
+      toast.error("Selecciona mes de inicio y fin");
       return;
     }
+    
+    // Calcular primer día del mes de inicio a las 00:00:00
+    const startYear = monthRange.startMonth.year;
+    const startMonth = monthRange.startMonth.month;
+    const firstDayISO = dayjs.tz(`${startYear}-${String(startMonth + 1).padStart(2, '0')}-01 00:00:00`, 'America/Caracas').toISOString();
+    
+    // Calcular último día del mes de fin a las 23:59:59
+    const endYear = monthRange.endMonth.year;
+    const endMonth = monthRange.endMonth.month;
+    const lastDay = dayjs.tz(`${endYear}-${String(endMonth + 1).padStart(2, '0')}-01`, 'America/Caracas').endOf('month').format('YYYY-MM-DD');
+    const lastDayISO = dayjs.tz(`${lastDay} 23:59:59`, 'America/Caracas').toISOString();
     
     const params = new URLSearchParams({
       q: selectedLocation.id,
       label: selectedLocation.label,
       lat: selectedLocation.lat.toString(),
       lng: selectedLocation.lng.toString(),
-      from: dateRange.startDate.toISOString(),
-      to: dateRange.endDate.toISOString(),
+      from: firstDayISO,
+      to: lastDayISO,
     });
     
     navigate(`/explorar?${params.toString()}`);
@@ -150,14 +167,14 @@ const Home = () => {
                   />
                 </div>
                 
-                {/* Date Range */}
+                {/* Month Range */}
                 <div className="md:col-span-1">
                   <label className="block text-sm font-medium text-muted-foreground mb-2">
-                    Fechas
+                    Meses
                   </label>
-                  <SearchDateRangePicker
-                    value={dateRange}
-                    onChange={setDateRange}
+                  <MonthRangePicker
+                    value={monthRange}
+                    onChange={setMonthRange}
                     className="w-full border-border"
                   />
                 </div>
@@ -168,7 +185,7 @@ const Home = () => {
                     type="submit"
                     className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
                     size="lg"
-                    disabled={!selectedLocation || !dateRange.startDate || !dateRange.endDate}
+                    disabled={!selectedLocation || !monthRange.startMonth || !monthRange.endMonth}
                   >
                     <Search className="h-5 w-5 mr-2" />
                     Buscar
