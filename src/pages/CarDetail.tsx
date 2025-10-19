@@ -25,13 +25,18 @@ const CarDetail = () => {
   const [isBooking, setIsBooking] = useState(false);
   const [unavailableDates, setUnavailableDates] = useState<string[]>([]);
   const [pendingDates, setPendingDates] = useState<string[]>([]);
+  const [myReservation, setMyReservation] = useState<any>(null);
 
   useEffect(() => {
     if (id) {
       fetchCarDetails();
       fetchUnavailableDates();
+      if (user) {
+        fetchMyReservation();
+        subscribeToReservationUpdates();
+      }
     }
-  }, [id]);
+  }, [id, user]);
 
   const fetchCarDetails = async () => {
     try {
@@ -101,6 +106,56 @@ const CarDetail = () => {
     } catch (error) {
       console.error("Error loading availability:", error);
     }
+  };
+
+  const fetchMyReservation = async () => {
+    if (!user || !id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("reservations")
+        .select(`
+          *,
+          owner:profiles!reservations_owner_id_fkey (phone)
+        `)
+        .eq("vehicle_id", id)
+        .eq("renter_id", user.id)
+        .in("status", ["pending", "approved"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      setMyReservation(data);
+    } catch (error) {
+      console.error("Error fetching my reservation:", error);
+    }
+  };
+
+  const subscribeToReservationUpdates = () => {
+    if (!user || !id) return;
+
+    const channel = supabase
+      .channel(`vehicle-${id}-reservations`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reservations',
+          filter: `vehicle_id=eq.${id}`,
+        },
+        (payload) => {
+          console.log('Reservation update:', payload);
+          fetchMyReservation();
+          fetchUnavailableDates();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   };
 
   if (loading) {
@@ -201,19 +256,35 @@ const CarDetail = () => {
   };
 
   const handleContactOwner = () => {
-    if (!car.profiles?.phone) {
+    const phone = myReservation?.owner?.phone || car.profiles?.phone;
+    
+    if (!phone) {
       toast.error("No se encontró información de contacto del propietario");
       return;
     }
 
-    // Format phone number for WhatsApp (remove spaces and special characters)
-    const phoneNumber = car.profiles.phone.replace(/\D/g, '');
+    // Usar utilidad de normalización
+    const normalizeVePhone = (input: string | null | undefined): string | null => {
+      if (!input) return null;
+      let cleaned = input.replace(/[^\d+]/g, '');
+      if (cleaned.startsWith('+58')) cleaned = cleaned.substring(3);
+      else if (cleaned.startsWith('58')) cleaned = cleaned.substring(2);
+      if (cleaned.startsWith('0')) cleaned = cleaned.substring(1);
+      if (cleaned.length !== 10 || !cleaned.startsWith('4')) return null;
+      return `+58${cleaned}`;
+    };
+
+    const normalized = normalizeVePhone(phone);
+    if (!normalized) {
+      toast.error("El número del propietario no es válido");
+      return;
+    }
+
     const message = encodeURIComponent(
-      `Hola, estoy interesado en tu ${car.brand} ${car.model} ${car.year} publicado en AndaYa.`
+      `Hola, te contacto sobre tu ${car.brand} ${car.model} ${car.year} publicado en AndaYa.`
     );
     
-    // Open WhatsApp
-    window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+    window.open(`https://wa.me/${normalized}?text=${message}`, '_blank');
   };
 
   const { days, subtotal, serviceFee, total } = calculateTotal();
@@ -248,10 +319,6 @@ const CarDetail = () => {
                     {car.brand} {car.model} {car.year}
                   </h1>
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-5 w-5 fill-accent text-accent" />
-                      <span className="font-semibold">{car.rating_avg > 0 ? car.rating_avg.toFixed(1) : "Sin valoraciones"}</span>
-                    </div>
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <MapPin className="h-4 w-4" />
                       <span>{car.city || "Venezuela"}</span>
@@ -358,23 +425,51 @@ const CarDetail = () => {
                   </div>
                 )}
                 
-                <Button 
-                  className="mb-4 w-full" 
-                  size="lg"
-                  onClick={handleBookNow}
-                  disabled={isBooking || !startDate || !endDate}
-                >
-                  {isBooking ? "Procesando..." : "Reservar ahora"}
-                </Button>
+                {!myReservation && (
+                  <Button 
+                    className="mb-4 w-full" 
+                    size="lg"
+                    onClick={handleBookNow}
+                    disabled={isBooking || !startDate || !endDate}
+                  >
+                    {isBooking ? "Procesando..." : "Reservar ahora"}
+                  </Button>
+                )}
+
+                {myReservation && myReservation.status === 'pending' && (
+                  <div className="mb-4 w-full p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg text-center">
+                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-2">
+                      Solicitud enviada
+                    </p>
+                    <p className="text-xs text-amber-700 dark:text-amber-300">
+                      Esperando aprobación del dueño...
+                    </p>
+                  </div>
+                )}
+
+                {myReservation && myReservation.status === 'approved' && (
+                  <div className="mb-4 space-y-2">
+                    <div className="w-full p-3 bg-green-50 dark:bg-green-950/20 rounded-lg text-center">
+                      <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                        ¡Reserva aprobada!
+                      </p>
+                    </div>
+                    <Button className="w-full" size="lg">
+                      Proceder al pago
+                    </Button>
+                  </div>
+                )}
                 
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={handleContactOwner}
-                >
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  Contactar al dueño
-                </Button>
+                {myReservation && ['approved'].includes(myReservation.status) && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full mb-4"
+                    onClick={handleContactOwner}
+                  >
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Contactar al dueño
+                  </Button>
+                )}
                 
                 <div className="mt-6 rounded-md bg-secondary/50 p-4 text-center text-sm">
                   <p className="text-muted-foreground">

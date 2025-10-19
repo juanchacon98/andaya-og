@@ -350,32 +350,14 @@ export default function UserDashboard() {
                   </div>
                   
                   {isOwner && (
-                    <div className="flex items-center gap-2">
-                      <Car className="h-5 w-5 text-primary" />
-                      <div>
-                        <p className="text-2xl font-bold">{myVehicles.length}</p>
-                        <p className="text-xs text-muted-foreground">Carros publicados</p>
-                      </div>
-                    </div>
-                  )}
-                  
                   <div className="flex items-center gap-2">
-                    <Star className="h-5 w-5 text-yellow-500" />
+                    <Car className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-2xl font-bold">4.8</p>
-                      <p className="text-xs text-muted-foreground">Como conductor</p>
+                      <p className="text-2xl font-bold">{myVehicles.length}</p>
+                      <p className="text-xs text-muted-foreground">Carros publicados</p>
                     </div>
                   </div>
-                  
-                  {isOwner && (
-                    <div className="flex items-center gap-2">
-                      <Star className="h-5 w-5 text-yellow-500" />
-                      <div>
-                        <p className="text-2xl font-bold">4.9</p>
-                        <p className="text-xs text-muted-foreground">Como dueño</p>
-                      </div>
-                    </div>
-                  )}
+                )}
                 </div>
               </div>
               

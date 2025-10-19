@@ -30,6 +30,7 @@ import OwnerDashboard from "./pages/owner/OwnerDashboard";
 import VehicleList from "./pages/owner/VehicleList";
 import VehicleWizard from "./pages/owner/VehicleWizard";
 import ReservationSuccess from "./pages/ReservationSuccess";
+import MisReservas from "./pages/MisReservas";
 import PoliticaVerificacion from "./pages/PoliticaVerificacion";
 import TratamientoDatos from "./pages/TratamientoDatos";
 import Terminos from "./pages/Terminos";
@@ -74,6 +75,7 @@ function AppContent() {
             <Route path="/owner/vehicles" element={<ProtectedRoute><VehicleList /></ProtectedRoute>} />
             <Route path="/owner/vehicles/new" element={<ProtectedRoute><VehicleWizard /></ProtectedRoute>} />
             <Route path="/owner/vehicles/:id/edit" element={<ProtectedRoute><VehicleWizard /></ProtectedRoute>} />
+            <Route path="/mis-reservas" element={<ProtectedRoute><MisReservas /></ProtectedRoute>} />
             <Route path="/politica-verificacion" element={<PoliticaVerificacion />} />
             <Route path="/tratamiento-datos" element={<TratamientoDatos />} />
             <Route path="/terminos" element={<Terminos />} />
