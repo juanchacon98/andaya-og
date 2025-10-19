@@ -156,6 +156,7 @@ export default function UserDashboard() {
           status,
           total,
           vehicle_id,
+          owner_id,
           vehicles (
             id,
             title,
@@ -170,7 +171,29 @@ export default function UserDashboard() {
         .order('created_at', { ascending: false });
 
       if (upcomingError) throw upcomingError;
-      setUpcomingReservations(upcomingData || []);
+      
+      // Fetch owner details for upcoming reservations
+      const upcomingWithOwners = await Promise.all(
+        (upcomingData || []).map(async (res: any) => {
+          const { data: ownerData } = await supabase
+            .from('profiles')
+            .select('id, full_name, phone, kyc_status')
+            .eq('id', res.owner_id)
+            .single();
+          
+          return {
+            ...res,
+            owner: ownerData || { 
+              id: res.owner_id, 
+              full_name: 'Desconocido', 
+              phone: '',
+              kyc_status: 'unverified' 
+            }
+          };
+        })
+      );
+      
+      setUpcomingReservations(upcomingWithOwners);
 
       // Fetch past reservations
       const { data: pastData, error: pastError } = await supabase
@@ -182,6 +205,7 @@ export default function UserDashboard() {
           status,
           total,
           vehicle_id,
+          owner_id,
           vehicles (
             id,
             title,
@@ -196,7 +220,29 @@ export default function UserDashboard() {
         .limit(10);
 
       if (pastError) throw pastError;
-      setPastReservations(pastData || []);
+      
+      // Fetch owner details for past reservations
+      const pastWithOwners = await Promise.all(
+        (pastData || []).map(async (res: any) => {
+          const { data: ownerData } = await supabase
+            .from('profiles')
+            .select('id, full_name, phone, kyc_status')
+            .eq('id', res.owner_id)
+            .single();
+          
+          return {
+            ...res,
+            owner: ownerData || { 
+              id: res.owner_id, 
+              full_name: 'Desconocido', 
+              phone: '',
+              kyc_status: 'unverified' 
+            }
+          };
+        })
+      );
+      
+      setPastReservations(pastWithOwners);
 
       // Fetch my vehicles if owner
       if (rolesData?.some((r: UserRole) => r.role === 'owner')) {

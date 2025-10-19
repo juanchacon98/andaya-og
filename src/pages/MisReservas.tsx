@@ -40,10 +40,11 @@ interface Reservation {
     city: string | null;
     vehicle_photos: Array<{ url: string; sort_order: number }>;
   };
-  profiles: {
+  owner: {
     id: string;
     full_name: string;
     phone: string;
+    kyc_status?: string;
   };
 }
 
@@ -98,13 +99,18 @@ export default function MisReservas() {
         (data || []).map(async (res: any) => {
           const { data: ownerData } = await supabase
             .from('profiles')
-            .select('id, full_name, phone')
+            .select('id, full_name, phone, kyc_status')
             .eq('id', res.owner_id)
             .single();
           
           return {
             ...res,
-            profiles: ownerData || { id: res.owner_id, full_name: 'Desconocido', phone: '' }
+            owner: ownerData || { 
+              id: res.owner_id, 
+              full_name: 'Desconocido', 
+              phone: '',
+              kyc_status: 'unverified' 
+            }
           };
         })
       );
@@ -168,8 +174,8 @@ export default function MisReservas() {
 
   const handleContactOwner = (reservation: Reservation) => {
     const whatsappLink = createWhatsAppLink(
-      reservation.profiles.phone,
-      `Hola ${reservation.profiles.full_name}, te contacto sobre la reserva de tu ${reservation.vehicles.brand} ${reservation.vehicles.model} del ${format(new Date(reservation.start_date), 'dd/MM/yyyy', { locale: es })}.`
+      reservation.owner.phone,
+      `Hola ${reservation.owner.full_name}, te contacto sobre la reserva de tu ${reservation.vehicles.brand} ${reservation.vehicles.model} del ${format(new Date(reservation.start_date), 'dd/MM/yyyy', { locale: es })}.`
     );
 
     if (!whatsappLink) {
