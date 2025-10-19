@@ -39,6 +39,7 @@ import TratamientoDatos from "./pages/TratamientoDatos";
 import Terminos from "./pages/Terminos";
 import Transparencia from "./pages/Transparencia";
 import AuthCallback from "./pages/AuthCallback";
+import SignupSuccess from "./pages/SignupSuccess";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ function AppContent() {
             <Route path="/registro" element={<Register />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/auth/verify-success" element={<AuthVerifySuccess />} />
+            <Route path="/success" element={<SignupSuccess />} />
             <Route path="/explorar" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
             <Route path="/mapa" element={<ProtectedRoute><MapExplore /></ProtectedRoute>} />
             <Route path="/carro/:id" element={<ProtectedRoute><CarDetail /></ProtectedRoute>} />
