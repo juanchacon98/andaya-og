@@ -42,28 +42,21 @@ select
   coalesce(kyc_status, 'pending') as kyc_status,
   created_at,
   updated_at
-from public.profiles;
-
--- Habilitar RLS en la vista
-alter view public.v_profiles_basic set (security_barrier = true);
-
--- Grant de lectura a authenticated
-grant select on public.v_profiles_basic to authenticated;
-
--- Política de lectura en la vista
-drop policy if exists "profiles_basic_self_read" on public.v_profiles_basic;
-create policy "profiles_basic_self_read"
-on public.v_profiles_basic
-for select
-to authenticated
-using (
+from public.profiles
+where 
+  -- RLS en la vista: solo el propio usuario o admins pueden ver
   id = auth.uid()
   or exists (
     select 1 from public.user_roles ur 
     where ur.user_id = auth.uid() 
     and ur.role in ('admin_primary','admin_security')
-  )
-);
+  );
+
+-- Habilitar security barrier
+alter view public.v_profiles_basic set (security_barrier = true);
+
+-- Grant de lectura a authenticated
+grant select on public.v_profiles_basic to authenticated;
 
 -- ====== RPC PRINCIPAL (firma canónica) ======
 -- public.simulate_payment(p_method text, p_reservation_id uuid)
