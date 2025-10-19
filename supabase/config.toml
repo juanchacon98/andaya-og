@@ -41,3 +41,12 @@ verify_jwt = true
 
 [functions.reservation-approved]
 verify_jwt = true
+
+[functions.pricing-quote]
+verify_jwt = false
+
+[functions.request-extension]
+verify_jwt = true
+
+[functions.close-reservation]
+verify_jwt = true
