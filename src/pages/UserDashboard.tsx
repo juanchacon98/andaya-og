@@ -469,36 +469,36 @@ export default function UserDashboard() {
 
         {/* Navigation tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-0">
-          <div className="sticky top-16 sm:top-20 z-20 bg-white/95 dark:bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/80 dark:supports-[backdrop-filter]:bg-background/80 border-b border-slate-200 dark:border-border shadow-sm py-2">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 p-1.5 bg-slate-100/80 dark:bg-muted/80 transition-all duration-200">
-              <TabsTrigger value="reservas" className="gap-2 py-2.5 text-sm sm:text-base data-[state=active]:bg-white dark:data-[state=active]:bg-background">
+          <div className="sticky top-16 sm:top-20 z-30 bg-slate-50/95 dark:bg-muted/95 backdrop-blur-md border-b border-slate-200 dark:border-border shadow-sm py-3">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 p-1.5 bg-white/90 dark:bg-background/90 rounded-lg transition-all duration-200">
+              <TabsTrigger value="reservas" className="gap-2 py-2.5 text-sm sm:text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <Calendar className="h-4 w-4 flex-shrink-0" />
                 <span className="hidden sm:inline">Mis reservas</span>
                 <span className="sm:hidden">Reservas</span>
               </TabsTrigger>
               {isOwner && (
-                <TabsTrigger value="vehiculos" className="gap-2 py-2.5 text-sm sm:text-base data-[state=active]:bg-white dark:data-[state=active]:bg-background">
+                <TabsTrigger value="vehiculos" className="gap-2 py-2.5 text-sm sm:text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Car className="h-4 w-4 flex-shrink-0" />
                   <span className="hidden sm:inline">Mis vehículos</span>
                   <span className="sm:hidden">Vehículos</span>
                 </TabsTrigger>
               )}
-              <TabsTrigger value="favoritos" className="gap-2 py-2.5 text-sm sm:text-base data-[state=active]:bg-white dark:data-[state=active]:bg-background">
+              <TabsTrigger value="favoritos" className="gap-2 py-2.5 text-sm sm:text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <Heart className="h-4 w-4 flex-shrink-0" />
                 <span className="hidden sm:inline">Favoritos</span>
                 <span className="sm:hidden">Favs</span>
               </TabsTrigger>
-              <TabsTrigger value="perfil" className="gap-2 py-2.5 text-sm sm:text-base data-[state=active]:bg-white dark:data-[state=active]:bg-background">
-                <User className="h-4 w-4" />
+              <TabsTrigger value="perfil" className="gap-2 py-2.5 text-sm sm:text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <User className="h-4 w-4 flex-shrink-0" />
                 Perfil
               </TabsTrigger>
             </TabsList>
           </div>
 
           {/* Reservations tab */}
-          <TabsContent value="reservas" className="space-y-4 sm:space-y-6 pt-4 sm:pt-6">
+          <TabsContent value="reservas" className="space-y-4 sm:space-y-6 pt-5 sm:pt-6">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 scroll-mt-24">Reservas próximas</h2>
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 scroll-mt-32">Reservas próximas</h2>
               {upcomingReservations.length === 0 ? (
                 <Card>
                   <CardContent className="pt-6 text-center py-12">
@@ -681,7 +681,7 @@ export default function UserDashboard() {
 
           {/* Vehicles tab (only for owners) */}
           {isOwner && (
-            <TabsContent value="vehiculos" className="space-y-4 sm:space-y-6 pt-4 sm:pt-6">
+            <TabsContent value="vehiculos" className="space-y-4 sm:space-y-6 pt-5 sm:pt-6">
               <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
                 <h2 className="text-xl sm:text-2xl font-bold">Mis vehículos</h2>
                 <Button className="min-h-[44px] text-xs sm:text-sm">
@@ -782,7 +782,7 @@ export default function UserDashboard() {
           )}
 
           {/* Favorites tab */}
-          <TabsContent value="favoritos" className="pt-4 sm:pt-6">
+          <TabsContent value="favoritos" className="pt-5 sm:pt-6">
             <Card className="rounded-xl shadow-sm overflow-hidden">
               <CardContent className="pt-6 text-center py-12">
                 <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -795,7 +795,7 @@ export default function UserDashboard() {
           </TabsContent>
 
           {/* Profile tab */}
-          <TabsContent value="perfil" className="space-y-4 sm:space-y-6 pt-4 sm:pt-6">
+          <TabsContent value="perfil" className="space-y-4 sm:space-y-6 pt-5 sm:pt-6">
             <Card className="rounded-xl shadow-sm overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-lg sm:text-xl">Información personal</CardTitle>
