@@ -23,6 +23,8 @@ import {
 import { ReservationDetailsDialog } from '@/components/ReservationDetailsDialog';
 import { ModifyReservationDialog } from '@/components/ModifyReservationDialog';
 import { VehicleStatsDialog } from '@/components/owner/VehicleStatsDialog';
+import { YummyIntegrationBanner } from '@/components/mock/YummyIntegrationBanner';
+import { TuGrueroSimulator } from '@/components/mock/TuGrueroSimulator';
 import { 
   User, 
   Car, 

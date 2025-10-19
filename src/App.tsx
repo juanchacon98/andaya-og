@@ -34,6 +34,7 @@ import MisReservas from "./pages/MisReservas";
 import PoliticaVerificacion from "./pages/PoliticaVerificacion";
 import TratamientoDatos from "./pages/TratamientoDatos";
 import Terminos from "./pages/Terminos";
+import Transparencia from "./pages/Transparencia";
 import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
@@ -81,6 +82,7 @@ function AppContent() {
             <Route path="/politica-verificacion" element={<PoliticaVerificacion />} />
             <Route path="/tratamiento-datos" element={<TratamientoDatos />} />
             <Route path="/terminos" element={<Terminos />} />
+            <Route path="/transparencia" element={<Transparencia />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
         </Routes>

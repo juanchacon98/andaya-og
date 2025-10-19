@@ -61,6 +61,11 @@ const Footer = () => {
                   Términos del Servicio
                 </Link>
               </li>
+              <li>
+                <Link to="/transparencia" className="text-muted-foreground hover:text-foreground">
+                  Transparencia
+                </Link>
+              </li>
             </ul>
           </div>
           
