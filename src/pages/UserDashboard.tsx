@@ -367,61 +367,65 @@ export default function UserDashboard() {
   const activeReservations = upcomingReservations.filter(r => r.status === 'approved').length;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background" style={{ scrollPaddingTop: 'calc(env(safe-area-inset-top) + 4rem)' }}>
       <Navbar />
       
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-3 sm:py-6 mt-12 sm:mt-14" style={{ marginTop: 'calc(env(safe-area-inset-top) + 3rem)' }}>
         {/* Header with user summary */}
-        <Card className="mb-8">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-              <Avatar className="h-24 w-24">
-                <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
+        <Card className="mb-4 sm:mb-6 rounded-xl shadow-sm overflow-hidden">
+          <CardContent className="pt-4 sm:pt-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+              <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
+                <AvatarFallback className="text-xl sm:text-2xl bg-primary text-primary-foreground">
                   {profile?.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold mb-2">{profile?.full_name || 'Usuario'}</h1>
-                <p className="text-muted-foreground mb-4">{user?.email}</p>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2 break-words" style={{ fontSize: '1.25rem', lineHeight: '1.75rem', color: 'hsl(var(--foreground))' }}>
+                  {profile?.full_name || 'Usuario'}
+                </h1>
+                <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4 break-all">{user?.email}</p>
                 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-2xl font-bold">{activeReservations}</p>
+                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xl sm:text-2xl font-bold">{activeReservations}</p>
                       <p className="text-xs text-muted-foreground">Reservas activas</p>
                     </div>
                   </div>
                   
                   {isOwner && (
-                  <div className="flex items-center gap-2">
-                    <Car className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-2xl font-bold">{myVehicles.length}</p>
-                      <p className="text-xs text-muted-foreground">Carros publicados</p>
+                    <div className="flex items-center gap-2">
+                      <Car className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xl sm:text-2xl font-bold">{myVehicles.length}</p>
+                        <p className="text-xs text-muted-foreground">Carros publicados</p>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
                 </div>
               </div>
               
-              <div className="flex gap-2">
+              <div className="flex gap-3 self-start sm:self-center">
                 <Button 
                   variant="outline" 
                   size="icon"
+                  className="h-10 w-10 sm:h-11 sm:w-11"
                   onClick={() => toast.info("Funcionalidad de mensajes próximamente")}
                   title="Mensajes"
                 >
-                  <MessageSquare className="h-5 w-5" />
+                  <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
                 <Button 
                   variant="outline" 
                   size="icon"
+                  className="h-10 w-10 sm:h-11 sm:w-11"
                   onClick={() => setActiveTab('perfil')}
                   title="Configuración"
                 >
-                  <Settings className="h-5 w-5" />
+                  <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </div>
             </div>
@@ -430,19 +434,19 @@ export default function UserDashboard() {
 
         {/* KYC Alert for Owners without verification */}
         {isOwner && (!kycStatus || kycStatus !== 'verified') && (
-          <Card className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-4">
-                <div className="p-2 rounded-lg bg-amber-500 text-white">
-                  <Shield className="h-6 w-6" />
+          <Card className="border-amber-500 bg-amber-50 dark:bg-amber-950/20 rounded-xl shadow-sm overflow-hidden mb-4 sm:mb-6">
+            <CardContent className="pt-4 sm:pt-6">
+              <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                <div className="p-2 rounded-lg bg-amber-500 text-white flex-shrink-0">
+                  <Shield className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-1">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-1 text-sm sm:text-base break-words">
                     {!kycStatus ? 'Verificación KYC requerida' : 
                      kycStatus === 'pending' ? 'KYC en revisión' :
                      'KYC rechazado - Acción requerida'}
                   </h3>
-                  <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                  <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-300 mb-3">
                     {!kycStatus ? 
                       'Para publicar vehículos en la plataforma, necesitas completar tu verificación de identidad.' :
                      kycStatus === 'pending' ?
@@ -450,7 +454,7 @@ export default function UserDashboard() {
                       'Tu verificación fue rechazada. Por favor, revisa los comentarios y vuelve a intentar.'}
                   </p>
                   {(!kycStatus || kycStatus === 'rejected') && (
-                    <Button asChild size="sm" variant="default" className="bg-amber-600 hover:bg-amber-700">
+                    <Button asChild size="sm" variant="default" className="bg-amber-600 hover:bg-amber-700 w-full sm:w-auto min-h-[44px]">
                       <Link to="/kyc">
                         <Shield className="h-4 w-4 mr-2" />
                         {!kycStatus ? 'Completar verificación ahora' : 'Reintentar verificación'}
@@ -464,34 +468,37 @@ export default function UserDashboard() {
         )}
 
         {/* Navigation tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            <TabsTrigger value="reservas" className="gap-2">
-              <Calendar className="h-4 w-4" />
-              <span className="hidden sm:inline">Mis reservas</span>
-              <span className="sm:hidden">Reservas</span>
-            </TabsTrigger>
-            {isOwner && (
-              <TabsTrigger value="vehiculos" className="gap-2">
-                <Car className="h-4 w-4" />
-                <span className="hidden sm:inline">Mis vehículos</span>
-                <span className="sm:hidden">Vehículos</span>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+          <div className="sticky bg-background z-40 shadow-sm" style={{ top: 'calc(env(safe-area-inset-top) + 3rem)' }}>
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 p-1 transition-all duration-200">
+              <TabsTrigger value="reservas" className="gap-1.5 sm:gap-2 py-2 text-sm sm:text-base">
+                <Calendar className="h-4 w-4" />
+                <span className="hidden sm:inline">Mis reservas</span>
+                <span className="sm:hidden">Reservas</span>
               </TabsTrigger>
-            )}
-            <TabsTrigger value="favoritos" className="gap-2">
-              <Heart className="h-4 w-4" />
-              Favoritos
-            </TabsTrigger>
-            <TabsTrigger value="perfil" className="gap-2">
-              <User className="h-4 w-4" />
-              Perfil
-            </TabsTrigger>
-          </TabsList>
+              {isOwner && (
+                <TabsTrigger value="vehiculos" className="gap-1.5 sm:gap-2 py-2 text-sm sm:text-base">
+                  <Car className="h-4 w-4" />
+                  <span className="hidden sm:inline">Mis vehículos</span>
+                  <span className="sm:hidden">Vehículos</span>
+                </TabsTrigger>
+              )}
+              <TabsTrigger value="favoritos" className="gap-1.5 sm:gap-2 py-2 text-sm sm:text-base">
+                <Heart className="h-4 w-4" />
+                <span className="hidden sm:inline">Favoritos</span>
+                <span className="sm:hidden text-xs">Favs</span>
+              </TabsTrigger>
+              <TabsTrigger value="perfil" className="gap-1.5 sm:gap-2 py-2 text-sm sm:text-base">
+                <User className="h-4 w-4" />
+                Perfil
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Reservations tab */}
-          <TabsContent value="reservas" className="space-y-6">
+          <TabsContent value="reservas" className="space-y-4 sm:space-y-6 mt-3">
             <div>
-              <h2 className="text-2xl font-bold mb-4">Reservas próximas</h2>
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Reservas próximas</h2>
               {upcomingReservations.length === 0 ? (
                 <Card>
                   <CardContent className="pt-6 text-center py-12">
@@ -503,77 +510,84 @@ export default function UserDashboard() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-4">
+                <div className="grid gap-3 sm:gap-4">
                   {upcomingReservations.map((reservation) => (
-                    <Card key={reservation.id}>
-                      <CardContent className="pt-6">
-                        <div className="flex flex-col md:flex-row gap-4">
+                    <Card key={reservation.id} className="rounded-xl shadow-sm overflow-hidden">
+                      <CardContent className="pt-4 sm:pt-6 max-w-full">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                           <div className="flex-shrink-0">
-                            <div className="w-full md:w-48 h-32 bg-muted rounded-lg flex items-center justify-center">
-                              <Car className="h-12 w-12 text-muted-foreground" />
+                            <div className="w-full sm:w-40 md:w-48 h-28 sm:h-32 bg-muted rounded-lg flex items-center justify-center">
+                              <Car className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
                             </div>
                           </div>
                           
-                          <div className="flex-1 space-y-3">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <h3 className="text-xl font-semibold">{reservation.vehicles.title}</h3>
-                                <p className="text-sm text-muted-foreground">
+                          <div className="flex-1 space-y-2 sm:space-y-3 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <h3 className="text-base sm:text-lg md:text-xl font-semibold break-words" style={{ fontSize: '1.1rem', lineHeight: '1.5rem' }}>
+                                  {reservation.vehicles.title}
+                                </h3>
+                                <p className="text-xs sm:text-sm text-muted-foreground break-words">
                                   {reservation.vehicles.brand} {reservation.vehicles.model}
                                 </p>
                               </div>
-                              {getStatusBadge(reservation.status)}
+                              <div className="flex-shrink-0">
+                                {getStatusBadge(reservation.status)}
+                              </div>
                             </div>
                             
                             <Separator />
                             
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
                               <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4 text-muted-foreground" />
-                                <span>Desde: {new Date(reservation.start_date).toLocaleDateString('es-VE')}</span>
+                                <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                <span className="break-words">Desde: {new Date(reservation.start_date).toLocaleDateString('es-VE')}</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4 text-muted-foreground" />
-                                <span>Hasta: {new Date(reservation.end_date).toLocaleDateString('es-VE')}</span>
+                                <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                <span className="break-words">Hasta: {new Date(reservation.end_date).toLocaleDateString('es-VE')}</span>
                               </div>
                               {reservation.vehicles.city && (
                                 <div className="flex items-center gap-2">
-                                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                                  <span>{reservation.vehicles.city}</span>
+                                  <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                  <span className="break-words">{reservation.vehicles.city}</span>
                                 </div>
                               )}
                               <div className="flex items-center gap-2">
-                                <CreditCard className="h-4 w-4 text-muted-foreground" />
+                                <CreditCard className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                                 <span className="font-semibold">${reservation.total}</span>
                               </div>
                             </div>
                             
-                            <div className="flex gap-2 pt-2">
+                            <div className="flex flex-wrap gap-2 pt-2">
                               {reservation.status === 'pending' && (
                                 <Button 
                                   variant="outline" 
                                   size="sm"
+                                  className="min-h-[44px] text-xs sm:text-sm"
                                   onClick={() => handleModify(reservation)}
                                 >
-                                  <Edit className="h-4 w-4 mr-2" />
+                                  <Edit className="h-4 w-4 mr-1.5" />
                                   Modificar
                                 </Button>
                               )}
                               <Button 
                                 variant="outline" 
                                 size="sm"
+                                className="min-h-[44px] text-xs sm:text-sm"
                                 onClick={() => handleViewDetails(reservation)}
                               >
-                                <Eye className="h-4 w-4 mr-2" />
+                                <Eye className="h-4 w-4 mr-1.5" />
                                 Ver detalles
                               </Button>
                               {reservation.status === 'pending' && (
                                 <Button 
                                   variant="destructive" 
                                   size="sm"
+                                  className="min-h-[44px] text-xs sm:text-sm"
                                   onClick={() => handleCancelClick(reservation.id)}
                                 >
-                                  <X className="h-4 w-4 mr-2" />
+                                  <X className="h-4 w-4 mr-1.5" />
                                   Cancelar
                                 </Button>
                               )}
@@ -587,10 +601,10 @@ export default function UserDashboard() {
               )}
             </div>
 
-            <Separator className="my-8" />
+            <Separator className="my-6 sm:my-8" />
 
             <div>
-              <h2 className="text-2xl font-bold mb-4">Historial de viajes</h2>
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Historial de viajes</h2>
               {pastReservations.length === 0 ? (
                 <Card>
                   <CardContent className="pt-6 text-center py-12">
@@ -599,34 +613,36 @@ export default function UserDashboard() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-4">
+                <div className="grid gap-3 sm:gap-4">
                   {pastReservations.map((reservation) => (
-                    <Card key={reservation.id}>
-                      <CardContent className="pt-6">
-                        <div className="flex flex-col md:flex-row gap-4">
+                    <Card key={reservation.id} className="rounded-xl shadow-sm overflow-hidden">
+                      <CardContent className="pt-4 sm:pt-6 max-w-full">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                           <div className="flex-shrink-0">
-                            <div className="w-full md:w-32 h-24 bg-muted rounded-lg flex items-center justify-center">
-                              <Car className="h-8 w-8 text-muted-foreground" />
+                            <div className="w-full sm:w-28 md:w-32 h-20 sm:h-24 bg-muted rounded-lg flex items-center justify-center">
+                              <Car className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
                             </div>
                           </div>
                           
-                          <div className="flex-1">
-                            <div className="flex items-start justify-between mb-2">
-                              <div>
-                                <h3 className="font-semibold">{reservation.vehicles.title}</h3>
-                                <p className="text-sm text-muted-foreground">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <div className="min-w-0 flex-1">
+                                <h3 className="font-semibold text-sm sm:text-base break-words">{reservation.vehicles.title}</h3>
+                                <p className="text-xs sm:text-sm text-muted-foreground break-words">
                                   {new Date(reservation.start_date).toLocaleDateString('es-VE')} - {new Date(reservation.end_date).toLocaleDateString('es-VE')}
                                 </p>
                               </div>
-                              {getStatusBadge(reservation.status)}
+                              <div className="flex-shrink-0">
+                                {getStatusBadge(reservation.status)}
+                              </div>
                             </div>
                             
-                            <div className="flex gap-2 mt-3">
-                              <Button variant="outline" size="sm">
-                                <Star className="h-4 w-4 mr-2" />
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              <Button variant="outline" size="sm" className="min-h-[44px] text-xs sm:text-sm">
+                                <Star className="h-4 w-4 mr-1.5" />
                                 Calificar
                               </Button>
-                              <Button variant="outline" size="sm">Ver recibo</Button>
+                              <Button variant="outline" size="sm" className="min-h-[44px] text-xs sm:text-sm">Ver recibo</Button>
                             </div>
                           </div>
                         </div>
@@ -640,88 +656,93 @@ export default function UserDashboard() {
 
           {/* Vehicles tab (only for owners) */}
           {isOwner && (
-            <TabsContent value="vehiculos" className="space-y-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold">Mis vehículos</h2>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Agregar nuevo vehículo
+            <TabsContent value="vehiculos" className="space-y-4 sm:space-y-6 mt-3">
+              <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+                <h2 className="text-xl sm:text-2xl font-bold">Mis vehículos</h2>
+                <Button className="min-h-[44px] text-xs sm:text-sm">
+                  <Plus className="h-4 w-4 mr-1.5" />
+                  <span className="hidden sm:inline">Agregar nuevo</span>
+                  <span className="sm:hidden">Nuevo</span>
                 </Button>
               </div>
 
               {myVehicles.length === 0 ? (
-                <Card>
+                <Card className="rounded-xl shadow-sm overflow-hidden">
                   <CardContent className="pt-6 text-center py-12">
                     <Car className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <p className="text-muted-foreground mb-4">No tienes vehículos publicados</p>
-                    <Button onClick={() => navigate('/owner/vehicles/new')}>
+                    <Button onClick={() => navigate('/owner/vehicles/new')} className="min-h-[44px]">
                       <Plus className="h-4 w-4 mr-2" />
                       Publicar mi primer vehículo
                     </Button>
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-4">
+                <div className="grid gap-3 sm:gap-4">
                   {myVehicles.map((vehicle) => (
-                    <Card key={vehicle.id}>
-                      <CardContent className="pt-6">
-                        <div className="flex flex-col md:flex-row gap-4">
+                    <Card key={vehicle.id} className="rounded-xl shadow-sm overflow-hidden">
+                      <CardContent className="pt-4 sm:pt-6 max-w-full">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                           <div className="flex-shrink-0">
-                            <div className="w-full md:w-48 h-32 bg-muted rounded-lg flex items-center justify-center">
-                              <Car className="h-12 w-12 text-muted-foreground" />
+                            <div className="w-full sm:w-40 md:w-48 h-28 sm:h-32 bg-muted rounded-lg flex items-center justify-center">
+                              <Car className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
                             </div>
                           </div>
                           
-                          <div className="flex-1 space-y-3">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <h3 className="text-xl font-semibold">{vehicle.title}</h3>
-                                <p className="text-sm text-muted-foreground">
+                          <div className="flex-1 space-y-2 sm:space-y-3 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <h3 className="text-base sm:text-lg md:text-xl font-semibold break-words">{vehicle.title}</h3>
+                                <p className="text-xs sm:text-sm text-muted-foreground break-words">
                                   {vehicle.brand} {vehicle.model} {vehicle.year}
                                 </p>
                               </div>
-                              {getVehicleStatusBadge(vehicle.status)}
+                              <div className="flex-shrink-0">
+                                {getVehicleStatusBadge(vehicle.status)}
+                              </div>
                             </div>
                             
                             <Separator />
                             
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                              <div>
+                            <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
+                              <div className="min-w-0">
                                 <p className="text-muted-foreground">Ubicación</p>
-                                <p className="font-semibold">{vehicle.city || 'No especificada'}</p>
+                                <p className="font-semibold break-words">{vehicle.city || 'No especificada'}</p>
                               </div>
-                              <div>
+                              <div className="min-w-0">
                                 <p className="text-muted-foreground">Precio/día</p>
                                 <p className="font-semibold">Bs {vehicle.price_bs}</p>
                               </div>
-                              <div>
+                              <div className="min-w-0">
                                 <p className="text-muted-foreground">Reservas (30d)</p>
                                 <p className="font-semibold">{vehicle.reservations_30d || 0}</p>
                               </div>
-                              <div>
+                              <div className="min-w-0">
                                 <p className="text-muted-foreground">Ingresos (30d)</p>
                                 <p className="font-semibold">Bs {(vehicle.revenue_30d || 0).toLocaleString()}</p>
                               </div>
                             </div>
                             
-                            <div className="flex gap-2 pt-2">
+                            <div className="flex flex-wrap gap-2 pt-2">
                               <Button 
                                 variant="outline" 
                                 size="sm"
+                                className="min-h-[44px] text-xs sm:text-sm"
                                 onClick={() => navigate(`/owner/vehicles/${vehicle.id}/edit`)}
                               >
-                                <Edit className="h-4 w-4 mr-2" />
+                                <Edit className="h-4 w-4 mr-1.5" />
                                 Editar
                               </Button>
                               <Button 
                                 variant="outline" 
                                 size="sm"
+                                className="min-h-[44px] text-xs sm:text-sm"
                                 onClick={() => {
                                   setSelectedVehicle(vehicle);
                                   setShowStatsDialog(true);
                                 }}
                               >
-                                <Eye className="h-4 w-4 mr-2" />
+                                <Eye className="h-4 w-4 mr-1.5" />
                                 Ver estadísticas
                               </Button>
                             </div>
@@ -736,12 +757,12 @@ export default function UserDashboard() {
           )}
 
           {/* Favorites tab */}
-          <TabsContent value="favoritos">
-            <Card>
+          <TabsContent value="favoritos" className="mt-3">
+            <Card className="rounded-xl shadow-sm overflow-hidden">
               <CardContent className="pt-6 text-center py-12">
                 <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No tienes favoritos guardados</p>
-                <Button asChild className="mt-4">
+                <p className="text-muted-foreground mb-4">No tienes favoritos guardados</p>
+                <Button asChild className="min-h-[44px]">
                   <Link to="/explorar">Explorar vehículos</Link>
                 </Button>
               </CardContent>
@@ -749,30 +770,30 @@ export default function UserDashboard() {
           </TabsContent>
 
           {/* Profile tab */}
-          <TabsContent value="perfil" className="space-y-6">
-            <Card>
+          <TabsContent value="perfil" className="space-y-4 sm:space-y-6 mt-3">
+            <Card className="rounded-xl shadow-sm overflow-hidden">
               <CardHeader>
-                <CardTitle>Información personal</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">Información personal</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4">
                 <div>
                   <label className="text-sm font-medium">Nombre completo</label>
-                  <p className="text-muted-foreground">{profile?.full_name || 'No especificado'}</p>
+                  <p className="text-sm sm:text-base text-muted-foreground break-words">{profile?.full_name || 'No especificado'}</p>
                 </div>
                 <Separator />
                 <div>
                   <label className="text-sm font-medium">Correo electrónico</label>
-                  <p className="text-muted-foreground">{user?.email}</p>
+                  <p className="text-sm sm:text-base text-muted-foreground break-all">{user?.email}</p>
                 </div>
                 <Separator />
                 <div>
                   <label className="text-sm font-medium">Teléfono</label>
-                  <p className="text-muted-foreground">{profile?.phone || 'No especificado'}</p>
+                  <p className="text-sm sm:text-base text-muted-foreground break-words">{profile?.phone || 'No especificado'}</p>
                 </div>
                 <Separator />
                 <div>
                   <label className="text-sm font-medium">Roles</label>
-                  <div className="flex gap-2 mt-2">
+                  <div className="flex flex-wrap gap-2 mt-2">
                     {userRoles.map((role) => (
                       <Badge key={role} variant="secondary">
                         {role === 'renter' ? 'Arrendatario' : role === 'owner' ? 'Propietario' : role}
@@ -780,7 +801,7 @@ export default function UserDashboard() {
                     ))}
                   </div>
                 </div>
-                <Button className="mt-4">
+                <Button className="mt-4 w-full sm:w-auto min-h-[44px]">
                   <Edit className="h-4 w-4 mr-2" />
                   Editar perfil
                 </Button>
@@ -788,38 +809,38 @@ export default function UserDashboard() {
             </Card>
 
             {/* KYC Status Card */}
-            <Card>
+            <Card className="rounded-xl shadow-sm overflow-hidden">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Verificación de identidad (KYC)
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                  <Shield className="h-5 w-5 flex-shrink-0" />
+                  <span className="break-words">Verificación de identidad (KYC)</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4">
                 <div>
                   <label className="text-sm font-medium">Estado</label>
                   <div className="mt-2">
                     {!kycStatus && (
-                      <Badge variant="outline" className="gap-1">
-                        <AlertCircle className="h-3 w-3" />
+                      <Badge variant="outline" className="gap-1 text-xs sm:text-sm">
+                        <AlertCircle className="h-3 w-3 flex-shrink-0" />
                         Sin iniciar
                       </Badge>
                     )}
                     {kycStatus === 'verified' && (
-                      <Badge variant="default" className="gap-1 bg-green-600">
-                        <CheckCircle className="h-3 w-3" />
+                      <Badge variant="default" className="gap-1 bg-green-600 text-xs sm:text-sm">
+                        <CheckCircle className="h-3 w-3 flex-shrink-0" />
                         Verificado
                       </Badge>
                     )}
                     {kycStatus === 'pending' && (
-                      <Badge variant="secondary" className="gap-1">
-                        <Clock className="h-3 w-3" />
+                      <Badge variant="secondary" className="gap-1 text-xs sm:text-sm">
+                        <Clock className="h-3 w-3 flex-shrink-0" />
                         Pendiente de revisión
                       </Badge>
                     )}
                     {kycStatus === 'rejected' && (
-                      <Badge variant="destructive" className="gap-1">
-                        <AlertCircle className="h-3 w-3" />
+                      <Badge variant="destructive" className="gap-1 text-xs sm:text-sm">
+                        <AlertCircle className="h-3 w-3 flex-shrink-0" />
                         Rechazado
                       </Badge>
                     )}
@@ -836,7 +857,7 @@ export default function UserDashboard() {
                           : 'Tu verificación fue rechazada. Por favor, intenta nuevamente con documentos válidos.'
                         }
                       </p>
-                      <Button asChild className="gap-2">
+                      <Button asChild className="gap-2 w-full sm:w-auto min-h-[44px]">
                         <Link to="/kyc">
                           <Shield className="h-4 w-4" />
                           {!kycStatus ? 'Completar verificación KYC' : 'Reintentar verificación'}
