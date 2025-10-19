@@ -157,77 +157,29 @@ export function ReservationDetailsDialog({
   const handlePaymentComplete = async (method: "cashea" | "mercantil") => {
     setProcessingPayment(true);
     try {
-      // Try primary edge function first
-      const { data, error } = await supabase.functions.invoke('simulate-payment', {
-        body: {
-          reservation_id: reservation.id,
-          method,
-        },
+      // Use RPC with SECURITY DEFINER to bypass RLS issues
+      const { data, error } = await supabase.rpc('simulate_payment' as any, {
+        p_reservation_id: reservation.id,
+        p_method: method,
       });
 
       if (error) {
-        console.warn('Primary edge function failed, trying fallback...', error);
-        
-        // Fallback: use alternative edge function
-        const { data: fallbackData, error: fallbackError } = await supabase.functions.invoke('mark-payment-simulated', {
-          body: {
-            reservation_id: reservation.id,
-            method,
-            amount_bs: reservation.final_total_bs || reservation.total_price_bs || reservation.total,
-          },
-        });
-
-        if (fallbackError) {
-          console.error('Fallback also failed, using direct database update:', fallbackError);
-          
-          // Last resort: direct database update with RLS
-          const totalAmount = reservation.final_total_bs || reservation.total_price_bs || reservation.total || 0;
-          
-          const { data: payment, error: paymentInsertError } = await supabase
-            .from('payments')
-            .insert({
-              reservation_id: reservation.id,
-              amount_total: totalAmount,
-              upfront: method === 'cashea' ? Math.round(totalAmount * 0.25) : totalAmount,
-              installments: method === 'cashea' ? 3 : 0,
-              method: method === 'cashea' ? 'cashea_sim' : 'full',
-              status: 'paid',
-              currency: 'Bs',
-              provider_ref: `CLIENT-${method.toUpperCase()}-${Date.now()}`,
-            })
-            .select()
-            .single();
-
-          if (paymentInsertError) throw paymentInsertError;
-
-          const { error: reservationUpdateError } = await supabase
-            .from('reservations')
-            .update({ 
-              payment_status: 'simulated'
-            } as any)
-            .eq('id', reservation.id);
-
-          if (reservationUpdateError) throw reservationUpdateError;
-
-          toast.success('Pago procesado exitosamente', {
-            description: 'Pago simulado registrado automáticamente',
-          });
-        } else {
-          toast.success('Pago procesado exitosamente', {
-            description: 'Recibirás un correo con los detalles del pago',
-          });
-        }
-      } else {
-        toast.success('Pago procesado exitosamente', {
-          description: 'Recibirás un correo con los detalles del pago',
-        });
+        console.error('RPC simulate_payment failed:', error);
+        throw error;
       }
+
+      const paymentData = data as any;
+      const amountBs = paymentData?.amount_bs || 0;
+
+      toast.success('Pago simulado registrado exitosamente', {
+        description: `Monto: Bs ${amountBs.toLocaleString('es-VE', { minimumFractionDigits: 2 })}`,
+      });
 
       // Refresh reservation data
       await fetchFullReservationData();
     } catch (error: any) {
       console.error('Payment error:', error);
-      toast.error('Error al procesar el pago', {
+      toast.error('Error al procesar el pago simulado', {
         description: error.message || 'Intenta nuevamente',
       });
     } finally {
