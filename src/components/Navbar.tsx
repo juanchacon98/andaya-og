@@ -33,8 +33,8 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-      <div className="container flex h-12 sm:h-14 items-center justify-between px-4 sm:px-6 lg:px-8">
+    <nav className="fixed top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-2 sm:pt-0">
+      <div className="container flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center space-x-1.5 sm:space-x-2">
           <img src="/favicon.png" alt="AndaYa Logo" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
           <span className="text-lg sm:text-xl font-bold">AndaYa</span>

@@ -367,10 +367,10 @@ export default function UserDashboard() {
   const activeReservations = upcomingReservations.filter(r => r.status === 'approved').length;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background" style={{ scrollPaddingTop: 'calc(env(safe-area-inset-top) + 4rem)' }}>
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       
-      <main className="flex-1 container mx-auto px-4 py-3 sm:py-6 mt-12 sm:mt-14" style={{ marginTop: 'calc(env(safe-area-inset-top) + 3rem)' }}>
+      <main className="flex-1 container mx-auto px-4 py-3 sm:py-6 mt-16 sm:mt-20">
         {/* Header with user summary */}
         <Card className="mb-4 sm:mb-6 rounded-xl shadow-sm overflow-hidden">
           <CardContent className="pt-4 sm:pt-6">
@@ -469,7 +469,7 @@ export default function UserDashboard() {
 
         {/* Navigation tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          <div className="sticky bg-background z-40 shadow-sm" style={{ top: 'calc(env(safe-area-inset-top) + 3rem)' }}>
+          <div className="sticky bg-background z-40 shadow-sm top-16 sm:top-20">
             <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 p-1 transition-all duration-200">
               <TabsTrigger value="reservas" className="gap-1.5 sm:gap-2 py-2 text-sm sm:text-base">
                 <Calendar className="h-4 w-4" />
