@@ -1,12 +1,9 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { 
   Search, 
-  MapPin,
-  Calendar,
   Star,
   Plane,
   CalendarDays,
@@ -16,13 +13,30 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CarCard from "@/components/CarCard";
+import { LocationAutocomplete } from "@/components/LocationAutocomplete";
+import { SearchDateRangePicker } from "@/components/SearchDateRangePicker";
+import { Location } from "@/types/location";
 import heroImage from "@/assets/hero-turo-style.jpg";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface DateRange {
+  startDate: Date | null;
+  endDate: Date | null;
+}
 
 const Home = () => {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [recommendedCars, setRecommendedCars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Search form state
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [dateRange, setDateRange] = useState<DateRange>({
+    startDate: null,
+    endDate: null,
+  });
 
   useEffect(() => {
     fetchRecommendedVehicles();
@@ -64,6 +78,31 @@ const Home = () => {
     }
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedLocation) {
+      toast.error("Selecciona una ubicación de la lista");
+      return;
+    }
+    
+    if (!dateRange.startDate || !dateRange.endDate) {
+      toast.error("Selecciona fecha de inicio y fin");
+      return;
+    }
+    
+    const params = new URLSearchParams({
+      q: selectedLocation.id,
+      label: selectedLocation.label,
+      lat: selectedLocation.lat.toString(),
+      lng: selectedLocation.lng.toString(),
+      from: dateRange.startDate.toISOString(),
+      to: dateRange.endDate.toISOString(),
+    });
+    
+    navigate(`/explorar?${params.toString()}`);
+  };
+
   const categories = [
     { name: "Todos", icon: null },
     { name: "Aeropuertos", icon: Plane },
@@ -96,61 +135,47 @@ const Home = () => {
             </p>
             
             {/* Search Bar */}
-            <div className="bg-white rounded-2xl shadow-xl p-6 max-w-4xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <form onSubmit={handleSearch} className="bg-white rounded-2xl shadow-xl p-6 max-w-4xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Location */}
                 <div className="md:col-span-1">
                   <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Dónde
                   </label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input 
-                      placeholder="Ciudad, aeropuerto..." 
-                      className="pl-10 h-12 border-border"
-                    />
-                  </div>
+                  <LocationAutocomplete
+                    value={selectedLocation}
+                    onChange={setSelectedLocation}
+                    placeholder="Ciudad, aeropuerto..."
+                    className="h-12 border-border"
+                  />
                 </div>
                 
-                {/* Start Date */}
+                {/* Date Range */}
                 <div className="md:col-span-1">
                   <label className="block text-sm font-medium text-muted-foreground mb-2">
-                    Desde
+                    Fechas
                   </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input 
-                      type="datetime-local" 
-                      className="pl-10 h-12 border-border"
-                    />
-                  </div>
-                </div>
-                
-                {/* End Date */}
-                <div className="md:col-span-1">
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">
-                    Hasta
-                  </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input 
-                      type="datetime-local" 
-                      className="pl-10 h-12 border-border"
-                    />
-                  </div>
+                  <SearchDateRangePicker
+                    value={dateRange}
+                    onChange={setDateRange}
+                    className="w-full border-border"
+                  />
                 </div>
                 
                 {/* Search Button */}
                 <div className="md:col-span-1 flex items-end">
                   <Button 
+                    type="submit"
                     className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
                     size="lg"
+                    disabled={!selectedLocation || !dateRange.startDate || !dateRange.endDate}
                   >
-                    <Search className="h-5 w-5" />
+                    <Search className="h-5 w-5 mr-2" />
+                    Buscar
                   </Button>
                 </div>
               </div>
-            </div>
+            </form>
             
             {/* Secondary Button */}
             <div>
