@@ -215,21 +215,12 @@ export function ReservationDetailsDialog({
             </div>
           ) : (
             <div className="space-y-2">
-              <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg">
-                <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-amber-900 dark:text-amber-200">
-                  El {otherPartyLabel.toLowerCase()} no tiene un número de WhatsApp válido registrado.
+              <div className="flex items-start gap-2 p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-lg">
+                <MessageCircle className="h-4 w-4 text-green-600 dark:text-green-500 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-green-900 dark:text-green-200">
+                  El arrendador se pondrá en contacto contigo. Ya le enviamos tus datos para coordinar la entrega del vehículo.
                 </p>
               </div>
-              <Button
-                onClick={() => {
-                  toast.info("Se ha notificado al propietario para actualizar su contacto");
-                }}
-                variant="outline"
-                className="w-full"
-              >
-                Solicitar contacto
-              </Button>
             </div>
           )}
         </div>
@@ -450,6 +441,83 @@ export function ReservationDetailsDialog({
               </Button>
             )}
           </div>
+
+          {/* Services Section - Only show when approved and paid */}
+          {!isOwner && isApproved && (reservation.payment_status === 'paid' || reservation.payment_status === 'simulated') && (
+            <div className="space-y-4 p-4 rounded-lg border bg-card">
+              <h3 className="font-semibold text-lg">Servicios disponibles para tu viaje 🚗</h3>
+              <p className="text-sm text-muted-foreground">
+                Accede a servicios de asistencia y protección durante tu alquiler
+              </p>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Tu Gruero Card */}
+                <div className="p-4 rounded-lg border bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                      <svg className="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-blue-900 dark:text-blue-100">Asistencia Tu Gruero</h4>
+                      <p className="text-xs text-blue-800 dark:text-blue-200 mt-1">
+                        Usa Tu Gruero si necesitas ayuda básica en carretera o remolcar el vehículo hasta un taller cercano.
+                      </p>
+                      <p className="text-xs text-blue-700 dark:text-blue-300 mt-2 font-medium">
+                        📞 Disponible las 24 h en todo el país
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => window.open('https://tugruero.com/', '_blank')}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    size="sm"
+                  >
+                    Contactar Tu Gruero
+                  </Button>
+                </div>
+
+                {/* RCV Insurance Card */}
+                <div className="p-4 rounded-lg border bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-900 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
+                      <svg className="h-6 w-6 text-yellow-600 dark:text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-yellow-900 dark:text-yellow-100">Seguro RCV activo</h4>
+                      <p className="text-xs text-yellow-800 dark:text-yellow-200 mt-1">
+                        Cubre daños ocasionados a terceros o al vehículo arrendado en caso de accidente.
+                      </p>
+                      <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2 font-medium">
+                        🛡️ Consulta tu cobertura o reporta un siniestro
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => toast.info('Contacto con aseguradora', {
+                      description: 'En producción, aquí se mostraría información de la aseguradora asociada'
+                    })}
+                    className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
+                    size="sm"
+                  >
+                    Ver cobertura RCV
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Show message when not paid yet */}
+          {!isOwner && isApproved && reservation.payment_status !== 'paid' && reservation.payment_status !== 'simulated' && (
+            <div className="p-4 rounded-lg bg-secondary/50 border">
+              <p className="text-sm text-muted-foreground text-center">
+                Los servicios estarán disponibles una vez que el pago sea confirmado.
+              </p>
+            </div>
+          )}
 
           {/* Información del otro usuario */}
           <div className="space-y-3">
