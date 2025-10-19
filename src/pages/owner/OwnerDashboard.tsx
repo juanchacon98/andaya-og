@@ -18,10 +18,34 @@ export default function OwnerDashboard() {
   const [vehicleCount, setVehicleCount] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [reservationCount, setReservationCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
   const { rate } = useExchangeRate({ provider: 'yadio', code: 'USD' });
 
   useEffect(() => {
     fetchDashboardData();
+
+    // Realtime subscription for pending reservations
+    if (user) {
+      const channel = supabase
+        .channel('owner-pending-count')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'reservations',
+            filter: `owner_id=eq.${user.id}`,
+          },
+          () => {
+            fetchPendingCount();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [user]);
 
   const fetchDashboardData = async () => {
@@ -65,11 +89,30 @@ export default function OwnerDashboard() {
       const total = payments?.reduce((sum, p) => sum + Number(p.amount_total), 0) || 0;
       setTotalEarnings(total);
 
+      // Fetch pending reservations count
+      await fetchPendingCount();
+
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       toast.error('Error al cargar datos del dashboard');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPendingCount = async () => {
+    if (!user) return;
+    
+    try {
+      const { count } = await supabase
+        .from('reservations')
+        .select('*', { count: 'exact', head: true })
+        .eq('owner_id', user.id)
+        .eq('status', 'pending' as any);
+      
+      setPendingCount(count || 0);
+    } catch (error) {
+      console.error('Error fetching pending count:', error);
     }
   };
 
@@ -144,6 +187,31 @@ export default function OwnerDashboard() {
             </Card>
           )}
 
+          {/* Pending Reservations Alert */}
+          {pendingCount > 0 && (
+            <Card className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+                  <AlertCircle className="h-5 w-5" />
+                  Reservas por aprobar
+                  <Badge variant="default" className="ml-auto bg-amber-600" aria-live="polite">
+                    {pendingCount}
+                  </Badge>
+                </CardTitle>
+                <CardDescription className="text-amber-700 dark:text-amber-300">
+                  Tienes {pendingCount} solicitud{pendingCount !== 1 ? 'es' : ''} de reserva pendiente{pendingCount !== 1 ? 's' : ''} de aprobación
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link to="/owner/reservas-pendientes">
+                  <Button variant="outline" className="w-full border-amber-600 text-amber-800 hover:bg-amber-100">
+                    Ver solicitudes pendientes
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Stats Cards */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
@@ -178,16 +246,23 @@ export default function OwnerDashboard() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Reservas</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{reservationCount}</div>
-                <p className="text-xs text-muted-foreground">Totales</p>
-              </CardContent>
-            </Card>
+            <Link to="/owner/reservas-pendientes" className="block">
+              <Card className={`transition-colors ${pendingCount > 0 ? 'border-amber-500 hover:bg-amber-50/50 dark:hover:bg-amber-950/10' : ''}`}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Por Aprobar</CardTitle>
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2">
+                    <div className="text-2xl font-bold">{pendingCount}</div>
+                    {pendingCount > 0 && (
+                      <Badge variant="default" className="bg-amber-600">Nuevas</Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Pendientes</p>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
 
           {/* Quick Actions */}
@@ -203,10 +278,13 @@ export default function OwnerDashboard() {
                   Ver mis vehículos
                 </Button>
               </Link>
-              <Link to="/perfil">
+              <Link to="/owner/reservas-pendientes">
                 <Button variant="outline" className="w-full justify-start gap-2">
                   <Calendar className="h-4 w-4" />
-                  Ver reservas
+                  Reservas por aprobar
+                  {pendingCount > 0 && (
+                    <Badge variant="default" className="ml-auto bg-amber-600">{pendingCount}</Badge>
+                  )}
                 </Button>
               </Link>
             </CardContent>

@@ -182,10 +182,14 @@ export function ReservationDetailsDialog({
     }
   };
 
-  // Check if payment button should be shown
-  const shouldShowPayButton = !isOwner && 
-    isApproved && 
-    (reservation.payment_status !== 'paid');
+  // Check if payment button should be shown (single source of truth)
+  const canPay = 
+    !isOwner &&
+    reservation.status === 'approved' &&
+    reservation.payment_status !== 'paid' &&
+    reservation.payment_status !== 'simulated';
+
+  const shouldShowPayButton = canPay;
 
   // Contact visibility logic
   const getContactSection = () => {
