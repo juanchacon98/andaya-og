@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Map, Menu, X, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useSecureSignOut } from "@/hooks/useSecureSignOut";
 
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const { signOut } = useSecureSignOut();
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {

@@ -116,7 +116,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      // Use local scope to avoid 403 errors
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch (error) {
+      console.error('Error signing out:', error);
+      // Even if it fails, clear local state
+      setUser(null);
+      setSession(null);
+      setImpersonationData(null);
+    }
   };
 
   return (

@@ -38,21 +38,31 @@ export function ImpersonationBanner({ userName, expiresAt }: ImpersonationBanner
   }, [expiresAt]);
 
   const handleExit = async () => {
-    // Revoke impersonation session
-    if (user?.id) {
-      try {
-        await supabase
-          .from('impersonation_sessions')
-          .update({ revoked_at: new Date().toISOString() })
-          .eq('user_id', user.id)
-          .is('revoked_at', null);
-      } catch (error) {
+    if (!user?.id) return;
+    
+    try {
+      // Revoke the impersonation session
+      const { error } = await supabase
+        .from('impersonation_sessions')
+        .update({ revoked_at: new Date().toISOString() })
+        .eq('user_id', user.id)
+        .is('revoked_at', null);
+      
+      if (error) {
         console.error('Error revoking impersonation:', error);
       }
+      
+      // Clear impersonation data from storage
+      localStorage.removeItem('__impersonate');
+      sessionStorage.removeItem('__impersonate');
+      
+      // Use local scope for safe logout
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch (error) {
+      console.error('Error in handleExit:', error);
     }
     
-    // Clear session and redirect to admin
-    await supabase.auth.signOut();
+    // Force redirect to admin users page
     window.location.href = '/admin/usuarios';
   };
 
