@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { PaymentMethodSelector } from "@/components/PaymentMethodSelector";
+import { fetchProfileWithFallback } from "@/lib/profileHelpers";
 
 interface ReservationDetailsDialogProps {
   open: boolean;
@@ -83,18 +84,10 @@ export function ReservationDetailsDialog({
 
       if (error) throw error;
 
-      // Fetch owner and renter separately
+      // Fetch owner and renter separately (with fallback)
       const [ownerResult, renterResult] = await Promise.all([
-        supabase
-          .from('v_profiles_basic' as any)
-          .select('id, full_name, phone, kyc_status')
-          .eq('id', data.owner_id)
-          .maybeSingle(),
-        supabase
-          .from('v_profiles_basic' as any)
-          .select('id, full_name, phone, kyc_status')
-          .eq('id', data.renter_id)
-          .maybeSingle(),
+        fetchProfileWithFallback(data.owner_id),
+        fetchProfileWithFallback(data.renter_id),
       ]);
 
       setReservation({

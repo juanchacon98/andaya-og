@@ -25,6 +25,7 @@ import { ModifyReservationDialog } from '@/components/ModifyReservationDialog';
 import { VehicleStatsDialog } from '@/components/owner/VehicleStatsDialog';
 import { YummyIntegrationBanner } from '@/components/mock/YummyIntegrationBanner';
 import { TuGrueroSimulator } from '@/components/mock/TuGrueroSimulator';
+import { fetchProfileWithFallback } from '@/lib/profileHelpers';
 import { 
   User, 
   Car, 
@@ -119,15 +120,10 @@ export default function UserDashboard() {
     try {
       setLoading(true);
 
-      // Fetch profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('v_profiles_basic' as any)
-        .select('id, full_name, phone, kyc_status')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (profileError) throw profileError;
-      setProfile(profileData as any);
+      // Fetch profile (con fallback)
+      const profileResult = await fetchProfileWithFallback(user.id);
+      if (profileResult.error) throw profileResult.error;
+      setProfile(profileResult.data as any);
 
       // Fetch user roles
       const { data: rolesData, error: rolesError } = await supabase

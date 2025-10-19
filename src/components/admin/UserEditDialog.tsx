@@ -13,6 +13,7 @@ import { KYCTab } from "./user-edit-tabs/KYCTab";
 import { SecurityTab } from "./user-edit-tabs/SecurityTab";
 import { ActivityTab } from "./user-edit-tabs/ActivityTab";
 import { NotesTab } from "./user-edit-tabs/NotesTab";
+import { fetchProfileWithFallback } from "@/lib/profileHelpers";
 
 interface UserEditDialogProps {
   open: boolean;
@@ -51,12 +52,9 @@ export function UserEditDialog({ open, onOpenChange, userId, onUpdate }: UserEdi
     
     setLoading(true);
     try {
-      // Obtener datos del perfil
-      const { data: profile } = await supabase
-        .from("v_profiles_basic" as any)
-        .select("id, full_name, phone, kyc_status")
-        .eq("id", userId)
-        .maybeSingle();
+      // Obtener datos del perfil (con fallback)
+      const profileResult = await fetchProfileWithFallback(userId);
+      const profile = profileResult.data;
 
       // Obtener roles
       const { data: userRoles } = await supabase
