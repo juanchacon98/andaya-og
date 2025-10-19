@@ -145,7 +145,7 @@ export default function UserDashboard() {
       
       setKycStatus(kycData?.status || null);
 
-      // Fetch upcoming reservations (as renter)
+      // Fetch upcoming reservations (as renter) - ordered by most recent first
       const today = new Date().toISOString().split('T')[0];
       const { data: upcomingData, error: upcomingError } = await supabase
         .from('reservations')
@@ -166,7 +166,8 @@ export default function UserDashboard() {
         `)
         .eq('renter_id', user.id)
         .gte('start_date', today)
-        .order('start_date', { ascending: true });
+        .order('start_date', { ascending: false })
+        .order('created_at', { ascending: false });
 
       if (upcomingError) throw upcomingError;
       setUpcomingReservations(upcomingData || []);

@@ -63,6 +63,13 @@ export const DateRangePicker = ({
 
     // Si ya hay fecha de inicio, establecer fecha de fin
     if (startDate && !endDate) {
+      // Permitir seleccionar la misma fecha (alquiler de 1 día)
+      if (isSameDay(normalizedDate, startDate)) {
+        setEndDate(normalizedDate);
+        onChange({ startDate, endDate: normalizedDate });
+        return;
+      }
+      
       // Si la fecha clickeada es anterior a startDate, intercambiar
       if (isBefore(normalizedDate, startDate)) {
         setEndDate(startDate);
@@ -163,7 +170,8 @@ export const DateRangePicker = ({
   };
 
   const isRangeValid = (): boolean => {
-    return !!(startDate && endDate && isBefore(startDate, endDate));
+    // Permitir rangos del mismo día (alquiler de 1 día)
+    return !!(startDate && endDate && (isBefore(startDate, endDate) || isSameDay(startDate, endDate)));
   };
 
   const handleConfirm = () => {
