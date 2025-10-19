@@ -35,3 +35,9 @@ verify_jwt = false
 
 [functions.fx-latest]
 verify_jwt = false
+
+[functions.reservation-requested]
+verify_jwt = true
+
+[functions.reservation-approved]
+verify_jwt = true
