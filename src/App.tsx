@@ -34,6 +34,7 @@ import MisReservas from "./pages/MisReservas";
 import PoliticaVerificacion from "./pages/PoliticaVerificacion";
 import TratamientoDatos from "./pages/TratamientoDatos";
 import Terminos from "./pages/Terminos";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ function AppContent() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Register />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/explorar" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
             <Route path="/mapa" element={<ProtectedRoute><MapExplore /></ProtectedRoute>} />
             <Route path="/carro/:id" element={<ProtectedRoute><CarDetail /></ProtectedRoute>} />

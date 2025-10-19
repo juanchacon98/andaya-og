@@ -103,7 +103,9 @@ const Register = () => {
 
       setIsLoading(true);
 
-      // Sign up user
+      // Sign up user with proper redirect
+      const SITE_URL = import.meta.env.VITE_SITE_URL ?? window.location.origin;
+      
       const { data, error } = await supabase.auth.signUp({
         email: validated.email,
         password: validated.password,
@@ -113,7 +115,7 @@ const Register = () => {
             phone: validated.phone,
             role: userType,
           },
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${SITE_URL}/auth/callback`,
         },
       });
 
