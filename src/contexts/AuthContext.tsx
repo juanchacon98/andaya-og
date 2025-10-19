@@ -48,13 +48,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               if (impersonationSession) {
                 // Get user profile for display name
                 const { data: profile } = await supabase
-                  .from('profiles')
+                  .from('v_profiles_basic' as any)
                   .select('full_name')
                   .eq('id', session.user.id)
-                  .single();
+                  .maybeSingle();
                 
                 setImpersonationData({
-                  userName: profile?.full_name || session.user.email || 'Usuario',
+                  userName: (profile as any)?.full_name || session.user.email || 'Usuario',
                   expiresAt: impersonationSession.expires_at
                 });
               } else {
@@ -94,13 +94,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (impersonationSession) {
             // Get user profile for display name
             const { data: profile } = await supabase
-              .from('profiles')
+              .from('v_profiles_basic' as any)
               .select('full_name')
               .eq('id', session.user.id)
-              .single();
+              .maybeSingle();
             
             setImpersonationData({
-              userName: profile?.full_name || session.user.email || 'Usuario',
+              userName: (profile as any)?.full_name || session.user.email || 'Usuario',
               expiresAt: impersonationSession.expires_at
             });
           }

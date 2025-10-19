@@ -53,10 +53,10 @@ export function UserEditDialog({ open, onOpenChange, userId, onUpdate }: UserEdi
     try {
       // Obtener datos del perfil
       const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
+        .from("v_profiles_basic" as any)
+        .select("id, full_name, phone, kyc_status")
         .eq("id", userId)
-        .single();
+        .maybeSingle();
 
       // Obtener roles
       const { data: userRoles } = await supabase
@@ -85,13 +85,13 @@ export function UserEditDialog({ open, onOpenChange, userId, onUpdate }: UserEdi
         id: userId,
         email: authUser?.email || "",
         email_confirmed: authUser?.email_confirmed || false,
-        created_at: profile?.created_at || "",
+        created_at: (profile as any)?.created_at || "",
         last_sign_in_at: authUser?.last_sign_in_at || null,
-        full_name: profile?.full_name || null,
-        phone: profile?.phone || null,
+        full_name: (profile as any)?.full_name || null,
+        phone: (profile as any)?.phone || null,
         roles: userRoles?.map(r => r.role) || [],
-        kyc_status: kyc?.status || null,
-        is_active: profile?.is_active ?? true,
+        kyc_status: (kyc as any)?.status || null,
+        is_active: (profile as any)?.is_active ?? true,
       });
     } catch (error: any) {
       console.error("Error fetching user details:", error);

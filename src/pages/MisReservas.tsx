@@ -99,10 +99,10 @@ export default function MisReservas() {
       const reservationsWithOwners = await Promise.all(
         (data || []).map(async (res: any) => {
           const { data: ownerData } = await supabase
-            .from('profiles')
+            .from('v_profiles_basic' as any)
             .select('id, full_name, phone, kyc_status')
             .eq('id', res.owner_id)
-            .single();
+            .maybeSingle();
           
           return {
             ...res,

@@ -131,10 +131,10 @@ export default function ReservasPendientes() {
       const reservationsWithRenter = await Promise.all(
         (data || []).map(async (res: any) => {
           const { data: renterData } = await supabase
-            .from('profiles')
+            .from('v_profiles_basic' as any)
             .select('id, full_name, phone, kyc_status')
             .eq('id', res.renter_id)
-            .single();
+            .maybeSingle();
 
           return {
             ...res,

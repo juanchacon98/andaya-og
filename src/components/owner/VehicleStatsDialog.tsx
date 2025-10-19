@@ -123,19 +123,19 @@ export const VehicleStatsDialog = ({
       const reservationsWithProfiles = await Promise.all(
         (reservationsData || []).map(async (reservation) => {
           const { data: profile } = await supabase
-            .from("profiles")
+            .from("v_profiles_basic" as any)
             .select("full_name, phone")
             .eq("id", reservation.renter_id)
-            .single();
+            .maybeSingle();
 
           return {
             ...reservation,
             profiles: profile || undefined,
-          };
+          } as any;
         })
       );
 
-      setReservations(reservationsWithProfiles);
+      setReservations(reservationsWithProfiles as any);
 
       // Calculate stats
       const totalReservations = reservationsWithProfiles.length;

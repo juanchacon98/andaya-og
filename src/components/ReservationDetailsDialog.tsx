@@ -86,15 +86,15 @@ export function ReservationDetailsDialog({
       // Fetch owner and renter separately
       const [ownerResult, renterResult] = await Promise.all([
         supabase
-          .from('profiles')
+          .from('v_profiles_basic' as any)
           .select('id, full_name, phone, kyc_status')
           .eq('id', data.owner_id)
-          .single(),
+          .maybeSingle(),
         supabase
-          .from('profiles')
+          .from('v_profiles_basic' as any)
           .select('id, full_name, phone, kyc_status')
           .eq('id', data.renter_id)
-          .single(),
+          .maybeSingle(),
       ]);
 
       setReservation({

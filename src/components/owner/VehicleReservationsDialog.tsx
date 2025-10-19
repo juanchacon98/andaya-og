@@ -89,19 +89,19 @@ export const VehicleReservationsDialog = ({
       const reservationsWithProfiles = await Promise.all(
         (data || []).map(async (reservation) => {
           const { data: profile } = await supabase
-            .from("profiles")
+            .from("v_profiles_basic" as any)
             .select("full_name, phone")
             .eq("id", reservation.renter_id)
-            .single();
+            .maybeSingle();
 
           return {
             ...reservation,
             profiles: profile || undefined,
-          };
+          } as any;
         })
       );
 
-      setReservations(reservationsWithProfiles);
+      setReservations(reservationsWithProfiles as any);
     } catch (error) {
       console.error("Error fetching reservations:", error);
       toast.error("Error al cargar las reservas");

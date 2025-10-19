@@ -121,13 +121,13 @@ export default function UserDashboard() {
 
       // Fetch profile
       const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
+        .from('v_profiles_basic' as any)
+        .select('id, full_name, phone, kyc_status')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) throw profileError;
-      setProfile(profileData);
+      setProfile(profileData as any);
 
       // Fetch user roles
       const { data: rolesData, error: rolesError } = await supabase
@@ -178,10 +178,10 @@ export default function UserDashboard() {
       const upcomingWithOwners = await Promise.all(
         (upcomingData || []).map(async (res: any) => {
           const { data: ownerData } = await supabase
-            .from('profiles')
+            .from('v_profiles_basic' as any)
             .select('id, full_name, phone, kyc_status')
             .eq('id', res.owner_id)
-            .single();
+            .maybeSingle();
           
           return {
             ...res,
@@ -227,10 +227,10 @@ export default function UserDashboard() {
       const pastWithOwners = await Promise.all(
         (pastData || []).map(async (res: any) => {
           const { data: ownerData } = await supabase
-            .from('profiles')
+            .from('v_profiles_basic' as any)
             .select('id, full_name, phone, kyc_status')
             .eq('id', res.owner_id)
-            .single();
+            .maybeSingle();
           
           return {
             ...res,
