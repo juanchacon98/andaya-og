@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, DollarSign, Clock, User, Car, MessageCircle, AlertCircle } from "lucide-react";
+import { Calendar, MapPin, DollarSign, Clock, User, Car, MessageCircle, AlertCircle, CreditCard } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { formatBs } from "@/lib/currency";
@@ -10,6 +10,7 @@ import { createWhatsAppLink } from "@/lib/phone";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { PaymentMethodSelector } from "@/components/PaymentMethodSelector";
 
 interface ReservationDetailsDialogProps {
   open: boolean;
@@ -26,6 +27,8 @@ export function ReservationDetailsDialog({
 }: ReservationDetailsDialogProps) {
   const [reservation, setReservation] = useState(initialReservation);
   const [loading, setLoading] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   // Refetch reservation with full data when dialog opens
   useEffect(() => {
@@ -150,6 +153,39 @@ export function ReservationDetailsDialog({
         `Hola ${otherParty.full_name}, te contacto sobre la reserva ${reservation.id.slice(0, 8)}`
       )
     : null;
+
+  const handlePaymentComplete = async (method: "cashea" | "mercantil") => {
+    setProcessingPayment(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('simulate-payment', {
+        body: {
+          reservation_id: reservation.id,
+          method,
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success('Pago procesado exitosamente', {
+        description: 'Recibirás un correo con los detalles del pago',
+      });
+
+      // Refresh reservation data
+      await fetchFullReservationData();
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      toast.error('Error al procesar el pago', {
+        description: error.message || 'Intenta nuevamente',
+      });
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
+
+  // Check if payment button should be shown
+  const shouldShowPayButton = !isOwner && 
+    isApproved && 
+    (reservation.payment_status !== 'paid');
 
   // Contact visibility logic
   const getContactSection = () => {
@@ -385,7 +421,30 @@ export function ReservationDetailsDialog({
                   {formatBs(reservation.final_total_bs || reservation.total_price_bs || reservation.total || 0)}
                 </span>
               </div>
+
+              {/* Payment status badge */}
+              {reservation.payment_status && (
+                <div className="flex justify-between items-center pt-2 border-t">
+                  <span className="text-sm text-muted-foreground">Estado del pago</span>
+                  <Badge variant={reservation.payment_status === 'paid' ? 'default' : 'secondary'}>
+                    {reservation.payment_status === 'paid' ? 'Pagado' : 'Pendiente'}
+                  </Badge>
+                </div>
+              )}
             </div>
+
+            {/* Payment Button */}
+            {shouldShowPayButton && (
+              <Button
+                onClick={() => setShowPaymentModal(true)}
+                disabled={processingPayment}
+                className="w-full"
+                size="lg"
+              >
+                <CreditCard className="h-4 w-4 mr-2" />
+                Pagar reserva
+              </Button>
+            )}
           </div>
 
           {/* Información del otro usuario */}
@@ -409,6 +468,14 @@ export function ReservationDetailsDialog({
             )}
           </div>
         </div>
+
+        {/* Payment Method Selector Modal */}
+        <PaymentMethodSelector
+          open={showPaymentModal}
+          onOpenChange={setShowPaymentModal}
+          totalAmount={reservation.final_total_bs || reservation.total_price_bs || reservation.total || 0}
+          onPaymentComplete={handlePaymentComplete}
+        />
       </DialogContent>
     </Dialog>
   );

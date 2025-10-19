@@ -9,7 +9,7 @@ import { formatBs } from "@/lib/currency";
 
 interface CasheaPaymentOptionProps {
   totalAmount: number;
-  onApproved: (approved: boolean) => void;
+  onApproved: () => void;
 }
 
 type CasheaStep = "option" | "form" | "validating" | "approved";
@@ -37,174 +37,218 @@ export function CasheaPaymentOption({ totalAmount, onApproved }: CasheaPaymentOp
     await new Promise(resolve => setTimeout(resolve, 3000));
     
     setStep("approved");
-    onApproved(true);
+    onApproved();
   };
 
   const handleCancel = () => {
     setStep("option");
     setCedula("");
     setEmail("");
-    onApproved(false);
   };
 
-  return (
-    <Card className="border-2">
-      <CardContent className="p-4">
-        {step === "option" && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="font-semibold">Pagar con Cashea</p>
-                  <p className="text-xs text-muted-foreground">Inicial + 3 cuotas sin intereses</p>
-                </div>
-              </div>
-              <Badge variant="outline" className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900">
-                <span className="text-amber-800 dark:text-amber-200 text-xs">Demo</span>
-              </Badge>
+  if (step === "option") {
+    return (
+      <Card className="border-2 border-[#FFD400] hover:shadow-lg transition-shadow">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 rounded-lg bg-[#FFD400]/10">
+              <CreditCard className="h-8 w-8 text-[#FFD400]" />
             </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-foreground">Cashea</h3>
+              <p className="text-sm text-muted-foreground">
+                Pago inicial + 3 cuotas sin intereses (simulado)
+              </p>
+            </div>
+          </div>
 
-            <div className="rounded-lg border p-3 space-y-1 bg-secondary/50">
-              <p className="text-sm font-medium">Plan de pago:</p>
+          <div className="space-y-4">
+            <div className="p-3 rounded-lg bg-secondary/50 space-y-1">
+              <p className="text-sm font-medium text-foreground">Plan de pago:</p>
               <p className="text-xs text-muted-foreground">
-                • Inicial: {formatBs(initialPayment)}
+                • Inicial: {formatBs(initialPayment)} (25%)
               </p>
               <p className="text-xs text-muted-foreground">
                 • 3 cuotas de {formatBs(installment)} cada 7 días
               </p>
+              <p className="text-xs text-muted-foreground font-semibold pt-1 border-t mt-2">
+                Total: {formatBs(totalAmount)}
+              </p>
             </div>
 
-            <Button onClick={handleSelectCashea} variant="outline" className="w-full">
-              💜 Continuar con Cashea
+            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900">
+              <p className="text-xs text-blue-900 dark:text-blue-200 font-medium">
+                ⚠️ SIMULACIÓN PARA DEMO
+              </p>
+              <p className="text-xs text-blue-800 dark:text-blue-300 mt-1">
+                Este proceso es una simulación. No se procesarán pagos reales.
+              </p>
+            </div>
+
+            <Button
+              onClick={handleSelectCashea}
+              className="w-full bg-[#FFD400] hover:bg-[#FFD400]/90 text-black"
+              size="lg"
+            >
+              Pagar con Cashea
             </Button>
-          </div>
-        )}
-
-        {step === "form" && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <p className="font-semibold">Validar preaprobación</p>
-              <Badge variant="outline" className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900">
-                <span className="text-amber-800 dark:text-amber-200 text-xs">Simulación</span>
-              </Badge>
-            </div>
-
-            <p className="text-sm text-muted-foreground">
-              Cashea te permite pagar el alquiler en 4 cuotas sin intereses.
-            </p>
-
-            <form onSubmit={handleValidate} className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="cedula">Cédula de identidad</Label>
-                <Input
-                  id="cedula"
-                  placeholder="V-12345678"
-                  value={cedula}
-                  onChange={(e) => setCedula(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={handleCancel} className="flex-1">
-                  Cancelar
-                </Button>
-                <Button type="submit" className="flex-1">
-                  Validar preaprobación
-                </Button>
-              </div>
-            </form>
-
-            <p className="text-xs text-center text-muted-foreground italic">
-              Este proceso es una simulación. No se procesarán datos reales.
-            </p>
-          </div>
-        )}
-
-        {step === "validating" && (
-          <div className="flex flex-col items-center justify-center py-6 space-y-3">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm font-medium">Validando información con Cashea...</p>
-            <p className="text-xs text-muted-foreground">Esto puede tomar unos segundos</p>
-          </div>
-        )}
-
-        {step === "approved" && (
-          <div className="space-y-4">
-            <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 space-y-2">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-500 flex-shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <p className="font-medium text-green-800 dark:text-green-200">
-                    ✅ Preaprobado con Cashea
-                  </p>
-                  <p className="text-sm text-green-700 dark:text-green-300">
-                    Tu solicitud de financiamiento ha sido preaprobada.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-lg border p-4 space-y-3 bg-secondary/50">
-              <p className="font-medium">Desglose de pagos:</p>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Pago inicial (hoy):</span>
-                  <span className="font-semibold">{formatBs(initialPayment)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Cuota 1 (en 7 días):</span>
-                  <span className="font-semibold">{formatBs(installment)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Cuota 2 (en 14 días):</span>
-                  <span className="font-semibold">{formatBs(installment)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Cuota 3 (en 21 días):</span>
-                  <span className="font-semibold">{formatBs(installment)}</span>
-                </div>
-                <div className="flex justify-between pt-2 border-t font-bold">
-                  <span>Total:</span>
-                  <span>{formatBs(totalAmount)}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="text-xs text-muted-foreground space-y-1">
-              <p>• Sin intereses ni comisiones adicionales</p>
-              <p>• Débito automático cada 7 días</p>
-              <p>• Puedes liquidar anticipadamente sin penalización</p>
-            </div>
 
             <a 
               href="https://tugruero.com" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-xs text-primary hover:underline inline-flex items-center gap-1"
+              className="text-xs text-center text-muted-foreground hover:text-primary inline-flex items-center gap-1 justify-center w-full"
             >
               Conocer más sobre Cashea
               <ExternalLink className="h-3 w-3" />
             </a>
-
-            <Button onClick={handleCancel} variant="outline" className="w-full">
-              Usar otro método de pago
-            </Button>
           </div>
-        )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (step === "form") {
+    return (
+      <Card className="border-2 border-[#FFD400]">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-lg bg-[#FFD400]/10">
+              <CreditCard className="h-6 w-6 text-[#FFD400]" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Validar preaprobación</h3>
+              <p className="text-sm text-muted-foreground">Ingresa tus datos para continuar</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleValidate} className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Cashea te permite pagar el alquiler en 4 cuotas sin intereses.
+            </p>
+
+            <div className="space-y-2">
+              <Label htmlFor="cedula">Cédula de identidad</Label>
+              <Input
+                id="cedula"
+                placeholder="V-12345678"
+                value={cedula}
+                onChange={(e) => setCedula(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Correo electrónico</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="tu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={handleCancel} className="flex-1">
+                Cancelar
+              </Button>
+              <Button 
+                type="submit" 
+                className="flex-1 bg-[#FFD400] hover:bg-[#FFD400]/90 text-black"
+              >
+                Validar preaprobación
+              </Button>
+            </div>
+
+            <p className="text-xs text-center text-muted-foreground italic">
+              Este proceso es una simulación. No se procesarán datos reales.
+            </p>
+          </form>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (step === "validating") {
+    return (
+      <Card className="border-2 border-[#FFD400]">
+        <CardContent className="p-8">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="p-4 rounded-full bg-[#FFD400]/10">
+              <Loader2 className="h-12 w-12 text-[#FFD400] animate-spin" />
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-foreground mb-2">
+                Validando información...
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Verificando tu preaprobación con Cashea
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Este proceso puede tardar unos segundos
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // step === "approved"
+  return (
+    <Card className="border-2 border-green-500">
+      <CardContent className="p-8">
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <div className="p-4 rounded-full bg-green-500/10">
+            <CheckCircle2 className="h-12 w-12 text-green-600" />
+          </div>
+          <div className="text-center">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              ¡Preaprobado con Cashea!
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Tu solicitud de financiamiento ha sido preaprobada
+            </p>
+
+            <div className="p-4 rounded-lg bg-secondary/50 space-y-2 text-left">
+              <p className="font-medium text-sm mb-2">Desglose de pagos:</p>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Pago inicial (hoy)</span>
+                  <span className="font-semibold">{formatBs(initialPayment)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Cuota 1 (7 días)</span>
+                  <span className="font-semibold">{formatBs(installment)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Cuota 2 (14 días)</span>
+                  <span className="font-semibold">{formatBs(installment)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Cuota 3 (21 días)</span>
+                  <span className="font-semibold">{formatBs(installment)}</span>
+                </div>
+                <div className="flex justify-between pt-2 border-t">
+                  <span className="font-bold">Total</span>
+                  <span className="font-bold">{formatBs(totalAmount)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-xs text-left text-muted-foreground space-y-1 mt-4">
+              <p>✓ Sin intereses ni comisiones adicionales</p>
+              <p>✓ Débito automático cada 7 días</p>
+              <p>✓ Puedes liquidar anticipadamente sin penalización</p>
+            </div>
+
+            <p className="text-xs text-muted-foreground mt-4">
+              Recibirás un correo con los detalles del pago
+            </p>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
