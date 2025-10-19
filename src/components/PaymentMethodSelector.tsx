@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { CasheaPaymentOption } from "@/components/mock/CasheaPaymentOption";
 import { MercantilPaymentOption } from "@/components/mock/MercantilPaymentOption";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -39,9 +39,12 @@ export function PaymentMethodSelector({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" aria-describedby="payment-method-description">
         <DialogHeader>
           <DialogTitle className="text-2xl">Selecciona método de pago</DialogTitle>
+          <DialogDescription id="payment-method-description" className="sr-only">
+            Selecciona entre Cashea o Mercantil para simular tu pago en bolívares
+          </DialogDescription>
         </DialogHeader>
 
         <Alert className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
