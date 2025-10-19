@@ -370,9 +370,10 @@ export default function UserDashboard() {
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       
-      <main className="flex-1 container mx-auto px-4 py-3 sm:py-6 mt-16 sm:mt-20">
-        {/* Header with user summary */}
-        <Card className="mb-4 sm:mb-6 rounded-xl shadow-sm overflow-hidden">
+      {/* Header section with profile summary */}
+      <section aria-labelledby="perfil-header" className="bg-background border-b border-border">
+        <div className="container mx-auto px-4 pt-20 sm:pt-24 pb-3 sm:pb-4">
+          <Card className="rounded-xl shadow-sm overflow-hidden">
           <CardContent className="pt-4 sm:pt-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
               <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
@@ -432,8 +433,8 @@ export default function UserDashboard() {
           </CardContent>
         </Card>
 
-        {/* KYC Alert for Owners without verification */}
-        {isOwner && (!kycStatus || kycStatus !== 'verified') && (
+          {/* KYC Alert for Owners without verification */}
+          {isOwner && (!kycStatus || kycStatus !== 'verified') && (
           <Card className="border-amber-500 bg-amber-50 dark:bg-amber-950/20 rounded-xl shadow-sm overflow-hidden mb-4 sm:mb-6">
             <CardContent className="pt-4 sm:pt-6">
               <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
@@ -465,40 +466,70 @@ export default function UserDashboard() {
               </div>
             </CardContent>
           </Card>
-        )}
+          )}
+        </div>
+      </section>
 
-        {/* Navigation tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-0">
-          <div className="sticky top-16 sm:top-20 z-30 bg-slate-50/95 dark:bg-muted/95 backdrop-blur-md border-b border-slate-200 dark:border-border shadow-sm py-3">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 p-1.5 bg-white/90 dark:bg-background/90 rounded-lg transition-all duration-200">
-              <TabsTrigger value="reservas" className="gap-2 py-2.5 text-sm sm:text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+      {/* Sticky tabs navigation */}
+      <nav
+        aria-label="Secciones del perfil"
+        className="sticky top-[56px] z-30 bg-white/90 dark:bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-background/70 border-b border-slate-200 dark:border-border shadow-sm"
+      >
+        <div className="container mx-auto px-2 sm:px-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-0">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 p-1.5 bg-transparent h-12 rounded-none border-none"
+            >
+              <TabsTrigger 
+                value="reservas" 
+                className="gap-2 py-2 text-sm sm:text-base data-[state=active]:bg-primary data-[state=active]:text-white rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary/60"
+              >
                 <Calendar className="h-4 w-4 flex-shrink-0" />
                 <span className="hidden sm:inline">Mis reservas</span>
                 <span className="sm:hidden">Reservas</span>
               </TabsTrigger>
               {isOwner && (
-                <TabsTrigger value="vehiculos" className="gap-2 py-2.5 text-sm sm:text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <TabsTrigger 
+                  value="vehiculos" 
+                  className="gap-2 py-2 text-sm sm:text-base data-[state=active]:bg-primary data-[state=active]:text-white rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary/60"
+                >
                   <Car className="h-4 w-4 flex-shrink-0" />
                   <span className="hidden sm:inline">Mis vehículos</span>
                   <span className="sm:hidden">Vehículos</span>
                 </TabsTrigger>
               )}
-              <TabsTrigger value="favoritos" className="gap-2 py-2.5 text-sm sm:text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger 
+                value="favoritos" 
+                className="gap-2 py-2 text-sm sm:text-base data-[state=active]:bg-primary data-[state=active]:text-white rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary/60"
+              >
                 <Heart className="h-4 w-4 flex-shrink-0" />
                 <span className="hidden sm:inline">Favoritos</span>
                 <span className="sm:hidden">Favs</span>
               </TabsTrigger>
-              <TabsTrigger value="perfil" className="gap-2 py-2.5 text-sm sm:text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger 
+                value="perfil" 
+                className="gap-2 py-2 text-sm sm:text-base data-[state=active]:bg-primary data-[state=active]:text-white rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary/60"
+              >
                 <User className="h-4 w-4 flex-shrink-0" />
                 Perfil
               </TabsTrigger>
             </TabsList>
-          </div>
 
+          </Tabs>
+        </div>
+      </nav>
+
+      {/* Main content section */}
+      <main className="flex-1 container mx-auto px-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-0">
           {/* Reservations tab */}
-          <TabsContent value="reservas" className="space-y-4 sm:space-y-6 pt-5 sm:pt-6">
+          <TabsContent value="reservas" className="space-y-4 sm:space-y-6 pt-3 sm:pt-4">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 scroll-mt-32">Reservas próximas</h2>
+              <h1 
+                id="perfil-reservas-heading" 
+                className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-[104px] mb-3"
+              >
+                Reservas próximas
+              </h1>
               {upcomingReservations.length === 0 ? (
                 <Card>
                   <CardContent className="pt-6 text-center py-12">
@@ -612,7 +643,7 @@ export default function UserDashboard() {
             <Separator className="my-6 sm:my-8" />
 
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 scroll-mt-20">Historial de viajes</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-[104px] mb-3">Historial de viajes</h2>
               {pastReservations.length === 0 ? (
                 <Card>
                   <CardContent className="pt-6 text-center py-12">
@@ -681,9 +712,9 @@ export default function UserDashboard() {
 
           {/* Vehicles tab (only for owners) */}
           {isOwner && (
-            <TabsContent value="vehiculos" className="space-y-4 sm:space-y-6 pt-5 sm:pt-6">
+            <TabsContent value="vehiculos" className="space-y-4 sm:space-y-6 pt-3 sm:pt-4">
               <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
-                <h2 className="text-xl sm:text-2xl font-bold">Mis vehículos</h2>
+                <h1 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-[104px]">Mis vehículos</h1>
                 <Button className="min-h-[44px] text-xs sm:text-sm">
                   <Plus className="h-4 w-4 mr-1.5" />
                   <span className="hidden sm:inline">Agregar nuevo</span>
@@ -782,7 +813,8 @@ export default function UserDashboard() {
           )}
 
           {/* Favorites tab */}
-          <TabsContent value="favoritos" className="pt-5 sm:pt-6">
+          <TabsContent value="favoritos" className="pt-3 sm:pt-4">
+            <h1 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-[104px] mb-3">Favoritos</h1>
             <Card className="rounded-xl shadow-sm overflow-hidden">
               <CardContent className="pt-6 text-center py-12">
                 <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -795,10 +827,11 @@ export default function UserDashboard() {
           </TabsContent>
 
           {/* Profile tab */}
-          <TabsContent value="perfil" className="space-y-4 sm:space-y-6 pt-5 sm:pt-6">
+          <TabsContent value="perfil" className="space-y-4 sm:space-y-6 pt-3 sm:pt-4">
+            <h1 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-[104px] mb-3">Mi perfil</h1>
             <Card className="rounded-xl shadow-sm overflow-hidden">
               <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">Información personal</CardTitle>
+                <CardTitle className="text-base sm:text-lg">Información personal</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 sm:space-y-4">
                 <div>
@@ -836,7 +869,7 @@ export default function UserDashboard() {
             {/* KYC Status Card */}
             <Card className="rounded-xl shadow-sm overflow-hidden">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                   <Shield className="h-5 w-5 flex-shrink-0" />
                   <span className="break-words">Verificación de identidad (KYC)</span>
                 </CardTitle>
