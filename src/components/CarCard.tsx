@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Star } from "lucide-react";
+import { formatBs } from "@/lib/currency";
 
 interface CarCardProps {
   id: string;
@@ -46,7 +47,7 @@ const CarCard = ({ id, image, brand, model, year, pricePerDay, location, rating 
           
           <div className="flex items-baseline gap-1 pt-3 border-t border-border">
             <span className="text-2xl font-bold text-foreground">
-              ${pricePerDay?.toLocaleString() || 0}
+              {formatBs(pricePerDay || 0)}
             </span>
             <span className="text-sm text-muted-foreground">/ día</span>
           </div>
