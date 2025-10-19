@@ -180,6 +180,8 @@ All colors MUST be HSL.
   :root {
     /* Layout Variables */
     --app-header-h: 64px;
+    --navbar-h: 56px;  /* h-14 en móvil */
+    --tabs-h: 48px;    /* h-12 */
     
     /* AndaYa Brand Colors - Turo-inspired */
     --brand-purple: 270 60% 45%;      /* #6A1BB5 - Turo purple accent */
@@ -303,5 +305,16 @@ All colors MUST be HSL.
   /* Scroll margin to account for fixed header */
   h1, h2, h3, h4, h5, h6, [id] {
     scroll-margin-top: calc(var(--app-header-h) + 12px);
+  }
+  
+  /* Scroll margin for profile tabs (navbar + tabs) */
+  .scroll-mt-navbar-tabs {
+    scroll-margin-top: calc(var(--navbar-h) + var(--tabs-h));
+  }
+  
+  @media (min-width: 640px) {
+    .scroll-mt-navbar-tabs {
+      scroll-margin-top: calc(64px + var(--tabs-h)); /* h-16 en desktop */
+    }
   }
 }

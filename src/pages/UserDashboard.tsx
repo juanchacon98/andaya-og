@@ -526,7 +526,7 @@ export default function UserDashboard() {
             <div>
               <h1 
                 id="perfil-reservas-heading" 
-                className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-[104px] mb-3"
+                className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-navbar-tabs mb-3"
               >
                 Reservas próximas
               </h1>
@@ -643,7 +643,7 @@ export default function UserDashboard() {
             <Separator className="my-6 sm:my-8" />
 
             <div>
-              <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-[104px] mb-3">Historial de viajes</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-navbar-tabs mb-3">Historial de viajes</h2>
               {pastReservations.length === 0 ? (
                 <Card>
                   <CardContent className="pt-6 text-center py-12">
@@ -714,7 +714,7 @@ export default function UserDashboard() {
           {isOwner && (
             <TabsContent value="vehiculos" className="space-y-4 sm:space-y-6 pt-3 sm:pt-4">
               <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
-                <h1 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-[104px]">Mis vehículos</h1>
+                <h1 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-navbar-tabs">Mis vehículos</h1>
                 <Button className="min-h-[44px] text-xs sm:text-sm">
                   <Plus className="h-4 w-4 mr-1.5" />
                   <span className="hidden sm:inline">Agregar nuevo</span>
@@ -814,7 +814,7 @@ export default function UserDashboard() {
 
           {/* Favorites tab */}
           <TabsContent value="favoritos" className="pt-3 sm:pt-4">
-            <h1 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-[104px] mb-3">Favoritos</h1>
+            <h1 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-navbar-tabs mb-3">Favoritos</h1>
             <Card className="rounded-xl shadow-sm overflow-hidden">
               <CardContent className="pt-6 text-center py-12">
                 <Heart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -828,7 +828,7 @@ export default function UserDashboard() {
 
           {/* Profile tab */}
           <TabsContent value="perfil" className="space-y-4 sm:space-y-6 pt-3 sm:pt-4">
-            <h1 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-[104px] mb-3">Mi perfil</h1>
+            <h1 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-navbar-tabs mb-3">Mi perfil</h1>
             <Card className="rounded-xl shadow-sm overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-base sm:text-lg">Información personal</CardTitle>

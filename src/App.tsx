@@ -10,6 +10,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import AuthVerifySuccess from "./pages/AuthVerifySuccess";
 import Explore from "./pages/Explore";
 import MapExplore from "./pages/MapExplore";
 import CarDetail from "./pages/CarDetail";
@@ -60,6 +61,7 @@ function AppContent() {
             <Route path="/login" element={<Login />} />
             <Route path="/registro" element={<Register />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/auth/verify-success" element={<AuthVerifySuccess />} />
             <Route path="/explorar" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
             <Route path="/mapa" element={<ProtectedRoute><MapExplore /></ProtectedRoute>} />
             <Route path="/carro/:id" element={<ProtectedRoute><CarDetail /></ProtectedRoute>} />
