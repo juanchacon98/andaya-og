@@ -320,7 +320,7 @@ export function ReservationDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[calc(100%-1rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>Detalles de la Reserva</DialogTitle>
@@ -341,28 +341,28 @@ export function ReservationDetailsDialog({
 
           {/* Información del Vehículo */}
           <div className="space-y-3">
-            <h3 className="font-semibold flex items-center gap-2">
-              <Car className="h-5 w-5" />
+            <h3 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
+              <Car className="h-4 w-4 sm:h-5 sm:w-5" />
               Información del Vehículo
             </h3>
-            <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-secondary/50">
-              <div>
-                <p className="text-sm text-muted-foreground">Vehículo</p>
-                <p className="font-medium">{vehicle?.title || `${vehicle?.brand} ${vehicle?.model}`}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg bg-secondary/50 text-sm">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground">Vehículo</p>
+                <p className="font-medium break-words">{vehicle?.title || `${vehicle?.brand} ${vehicle?.model}`}</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Marca y Modelo</p>
-                <p className="font-medium">{vehicle?.brand} {vehicle?.model} {vehicle?.year}</p>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground">Marca y Modelo</p>
+                <p className="font-medium break-words">{vehicle?.brand} {vehicle?.model} {vehicle?.year}</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4 inline mr-1" />
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  <MapPin className="h-3 w-3 sm:h-4 sm:w-4 inline mr-1" />
                   Ubicación
                 </p>
-                <p className="font-medium">{vehicle?.city || "No especificada"}</p>
+                <p className="font-medium break-words">{vehicle?.city || "No especificada"}</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Placa</p>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground">Placa</p>
                 <p className="font-medium">{vehicle?.plate || "N/A"}</p>
               </div>
             </div>
@@ -370,17 +370,17 @@ export function ReservationDetailsDialog({
 
           {/* Fechas */}
           <div className="space-y-3">
-            <h3 className="font-semibold flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
+            <h3 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
+              <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
               Fechas de la Reserva
             </h3>
-            <div className="grid grid-cols-2 gap-4 p-4 rounded-lg bg-secondary/50">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4 inline mr-1" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg bg-secondary/50 text-sm">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  <Clock className="h-3 w-3 sm:h-4 sm:w-4 inline mr-1" />
                   Retiro
                 </p>
-                <p className="font-medium">
+                <p className="font-medium break-words text-xs sm:text-sm">
                   {reservation.start_at 
                     ? format(new Date(reservation.start_at), "PPP 'a las' HH:mm", { locale: es })
                     : reservation.start_date 
@@ -388,12 +388,12 @@ export function ReservationDetailsDialog({
                     : "No disponible"}
                 </p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4 inline mr-1" />
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  <Clock className="h-3 w-3 sm:h-4 sm:w-4 inline mr-1" />
                   Devolución
                 </p>
-                <p className="font-medium">
+                <p className="font-medium break-words text-xs sm:text-sm">
                   {reservation.end_at 
                     ? format(new Date(reservation.end_at), "PPP 'a las' HH:mm", { locale: es })
                     : reservation.end_date 

@@ -301,19 +301,19 @@ export const VehicleStatsDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh]">
+      <DialogContent className="w-[calc(100%-1rem)] sm:max-w-5xl max-h-[90vh] p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Estadísticas e Ingresos</DialogTitle>
           <DialogDescription>{vehicleTitle}</DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="stats" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="stats">Estadísticas</TabsTrigger>
-            <TabsTrigger value="requests">
+          <TabsList className="grid w-full grid-cols-2 h-auto">
+            <TabsTrigger value="stats" className="text-xs sm:text-sm py-2">Estadísticas</TabsTrigger>
+            <TabsTrigger value="requests" className="text-xs sm:text-sm py-2">
               Solicitudes
               {reservations.filter(r => r.status === "pending").length > 0 && (
-                <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center">
+                <Badge variant="destructive" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
                   {reservations.filter(r => r.status === "pending").length}
                 </Badge>
               )}
@@ -333,46 +333,46 @@ export const VehicleStatsDialog = ({
         ) : (
           <div className="space-y-6">
             {/* KPIs */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <Card>
-                <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">Reservas Totales</p>
+                <CardContent className="pt-3 sm:pt-4">
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">Reservas</p>
                   </div>
-                  <p className="text-2xl font-bold">{stats.totalReservations}</p>
+                  <p className="text-xl sm:text-2xl font-bold">{stats.totalReservations}</p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">Días Reservados</p>
+                <CardContent className="pt-3 sm:pt-4">
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                    <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">Días</p>
                   </div>
-                  <p className="text-2xl font-bold">{stats.totalDays}</p>
+                  <p className="text-xl sm:text-2xl font-bold">{stats.totalDays}</p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">Ingresos Totales</p>
+                <CardContent className="pt-3 sm:pt-4">
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                    <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">Total</p>
                   </div>
-                  <p className="text-2xl font-bold">
+                  <p className="text-base sm:text-2xl font-bold">
                     Bs {stats.totalRevenue.toLocaleString()}
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">Pendiente</p>
+                <CardContent className="pt-3 sm:pt-4">
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                    <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">Pendiente</p>
                   </div>
-                  <p className="text-2xl font-bold">
+                  <p className="text-base sm:text-2xl font-bold">
                     Bs {stats.pendingRevenue.toLocaleString()}
                   </p>
                 </CardContent>

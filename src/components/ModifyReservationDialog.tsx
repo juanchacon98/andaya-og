@@ -90,7 +90,7 @@ export function ModifyReservationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[calc(100%-1rem)] sm:max-w-md p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Modificar Reserva</DialogTitle>
         </DialogHeader>
@@ -103,12 +103,12 @@ export function ModifyReservationDialog({
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal",
+                    "w-full justify-start text-left font-normal text-xs sm:text-sm min-h-[44px]",
                     !startDate && "text-muted-foreground"
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, "PPP", { locale: es }) : "Selecciona una fecha"}
+                  <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{startDate ? format(startDate, "PPP", { locale: es }) : "Selecciona una fecha"}</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -131,12 +131,12 @@ export function ModifyReservationDialog({
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal",
+                    "w-full justify-start text-left font-normal text-xs sm:text-sm min-h-[44px]",
                     !endDate && "text-muted-foreground"
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? format(endDate, "PPP", { locale: es }) : "Selecciona una fecha"}
+                  <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{endDate ? format(endDate, "PPP", { locale: es }) : "Selecciona una fecha"}</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -153,12 +153,12 @@ export function ModifyReservationDialog({
           </div>
 
           {startDate && endDate && days > 0 && (
-            <div className="space-y-2 rounded-lg border p-4 bg-secondary/50">
-              <div className="flex justify-between text-sm">
+            <div className="space-y-2 rounded-lg border p-3 sm:p-4 bg-secondary/50 text-xs sm:text-sm">
+              <div className="flex justify-between">
                 <span>Bs {reservation?.daily_price?.toLocaleString()} × {days} días</span>
                 <span>Bs {subtotal.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between">
                 <span>Tarifa de servicio (10%)</span>
                 <span>Bs {serviceFee.toLocaleString()}</span>
               </div>
@@ -169,16 +169,16 @@ export function ModifyReservationDialog({
             </div>
           )}
 
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             La modificación de la reserva requerirá nueva aprobación del propietario.
           </p>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="flex-col sm:flex-row gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto min-h-[44px]">
             Cancelar
           </Button>
-          <Button onClick={handleModify} disabled={isLoading}>
+          <Button onClick={handleModify} disabled={isLoading} className="w-full sm:w-auto min-h-[44px]">
             {isLoading ? "Modificando..." : "Confirmar Modificación"}
           </Button>
         </DialogFooter>
