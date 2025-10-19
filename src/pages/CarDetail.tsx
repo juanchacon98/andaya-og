@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DateRangePicker } from "@/components/DateRangePicker";
-import { Star, MapPin, Users, Fuel, Settings, ArrowLeft, MessageCircle } from "lucide-react";
+import { Star, MapPin, Users, Fuel, Settings, ArrowLeft, MessageCircle, ChevronLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -289,15 +289,37 @@ const CarDetail = () => {
 
   const { days, subtotal, serviceFee, total } = calculateTotal();
 
+  const handleGoBack = () => {
+    // Si hay historial, volver atrás, si no, ir a explorar
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/explorar');
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Navbar />
       
+      {/* Botón flotante para móvil - visible solo en pantallas pequeñas */}
+      <button
+        onClick={handleGoBack}
+        className="fixed top-20 left-4 z-50 lg:hidden flex items-center justify-center h-10 w-10 rounded-full bg-background border-2 border-border shadow-lg hover:bg-accent transition-colors"
+        aria-label="Volver atrás"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+      
       <div className="container py-8">
-        <Link to="/explorar" className="mb-6 inline-flex items-center gap-2 text-primary hover:underline">
+        {/* Botón de escritorio */}
+        <button 
+          onClick={handleGoBack}
+          className="hidden lg:inline-flex mb-6 items-center gap-2 text-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary/60"
+        >
           <ArrowLeft className="h-4 w-4" />
-          Volver a explorar
-        </Link>
+          Volver atrás
+        </button>
         
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Main content */}
