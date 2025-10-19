@@ -441,6 +441,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_active: boolean | null
+          kyc_status: string | null
           phone: string | null
           preferred_currency: string | null
           preferred_provider: string | null
@@ -452,6 +453,7 @@ export type Database = {
           full_name?: string | null
           id: string
           is_active?: boolean | null
+          kyc_status?: string | null
           phone?: string | null
           preferred_currency?: string | null
           preferred_provider?: string | null
@@ -463,6 +465,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean | null
+          kyc_status?: string | null
           phone?: string | null
           preferred_currency?: string | null
           preferred_provider?: string | null
@@ -478,6 +481,7 @@ export type Database = {
           end_date: string
           id: string
           owner_id: string
+          payment_status: string | null
           renter_id: string
           service_fee: number
           start_date: string
@@ -493,6 +497,7 @@ export type Database = {
           end_date: string
           id?: string
           owner_id: string
+          payment_status?: string | null
           renter_id: string
           service_fee: number
           start_date: string
@@ -508,6 +513,7 @@ export type Database = {
           end_date?: string
           id?: string
           owner_id?: string
+          payment_status?: string | null
           renter_id?: string
           service_fee?: number
           start_date?: string
@@ -876,11 +882,44 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "vehicles_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "v_profiles_basic"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      v_profiles_basic: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string | null
+          kyc_status: string | null
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          kyc_status?: never
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          kyc_status?: never
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_get_metrics: {
@@ -907,6 +946,12 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      simulate_payment: {
+        Args:
+          | { p_method: string; p_reservation_id: string }
+          | { p_method: string; p_reservation_id: string }
+        Returns: Json
       }
     }
     Enums: {
