@@ -172,23 +172,25 @@ export function ReservationDetailsDialog({
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Contactar por WhatsApp
               </Button>
-              <p className="text-xs text-muted-foreground mt-1 text-center">
-                {otherParty.phone}
-              </p>
             </div>
           ) : (
-            <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg">
-              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-amber-900 dark:text-amber-200">
-                El {otherPartyLabel.toLowerCase()} no tiene un número de WhatsApp válido registrado
-              </p>
+            <div className="space-y-2">
+              <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg">
+                <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-amber-900 dark:text-amber-200">
+                  El {otherPartyLabel.toLowerCase()} no tiene un número de WhatsApp válido registrado.
+                </p>
+              </div>
+              <Button
+                onClick={() => {
+                  toast.info("Se ha notificado al propietario para actualizar su contacto");
+                }}
+                variant="outline"
+                className="w-full"
+              >
+                Solicitar contacto
+              </Button>
             </div>
-          )}
-
-          {otherParty?.kyc_status !== 'verified' && (
-            <p className="text-xs text-muted-foreground">
-              ℹ️ {otherPartyLabel} en proceso de verificación
-            </p>
           )}
         </div>
       );
