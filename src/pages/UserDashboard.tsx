@@ -715,7 +715,12 @@ export default function UserDashboard() {
             <TabsContent value="vehiculos" className="space-y-4 sm:space-y-6 pt-3 sm:pt-4">
               <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
                 <h1 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-foreground scroll-mt-navbar-tabs">Mis vehículos</h1>
-                <Button className="min-h-[44px] text-xs sm:text-sm">
+                <Button 
+                  className="min-h-[44px] text-xs sm:text-sm relative z-10"
+                  onClick={() => navigate('/owner/vehicles/new')}
+                  data-umami-event="owner_add_vehicle_click"
+                  aria-label="Agregar nuevo vehículo"
+                >
                   <Plus className="h-4 w-4 mr-1.5" />
                   <span className="hidden sm:inline">Agregar nuevo</span>
                   <span className="sm:hidden">Nuevo</span>
