@@ -20,6 +20,7 @@ const AdminDashboard = () => {
     incidents: 0
   });
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     checkAdminAccess();
@@ -49,40 +50,36 @@ const AdminDashboard = () => {
   };
 
   const fetchStats = async () => {
+    const wasRefreshing = isRefreshing;
     try {
-      // Get first and last day of current month
-      const now = new Date();
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
+      setIsRefreshing(true);
+      
+      // Call the centralized RPC function
+      const { data, error } = await supabase.rpc('admin_get_metrics');
+      
+      if (error) {
+        console.error("Error fetching metrics:", error);
+        toast.error("Error al cargar las estadísticas del dashboard");
+        return;
+      }
 
-      const [usersRes, vehiclesRes, reservationsRes, paymentsRes, kycRes, incidentsRes] = await Promise.all([
-        // FIX: Only count active users
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_active", true),
-        supabase.from("vehicles").select("id", { count: "exact", head: true }),
-        // Active reservations (approved status)
-        supabase.from("reservations").select("id", { count: "exact", head: true }).eq("status", "approved"),
-        // FIX: Only payments from current month
-        supabase.from("payments")
-          .select("amount_total")
-          .gte("created_at", firstDayOfMonth)
-          .lte("created_at", lastDayOfMonth),
-        supabase.from("kyc_verifications").select("user_id", { count: "exact", head: true }).eq("status", "pending"),
-        // FIX: Only open incidents
-        supabase.from("incidents").select("id", { count: "exact", head: true }).eq("status", "open")
-      ]);
+      if (!data || data.length === 0) {
+        toast.error("No se pudieron obtener las métricas");
+        return;
+      }
 
-      const totalRevenue = paymentsRes.data?.reduce((sum, p) => sum + Number(p.amount_total), 0) || 0;
-
+      const metrics = data[0];
+      
       setStats({
-        users: usersRes.count || 0,
-        vehicles: vehiclesRes.count || 0,
-        activeReservations: reservationsRes.count || 0,
-        totalRevenue: totalRevenue,
-        pendingVerifications: kycRes.count || 0,
-        incidents: incidentsRes.count || 0
+        users: Number(metrics.total_users) || 0,
+        vehicles: Number(metrics.total_vehicles) || 0,
+        activeReservations: Number(metrics.active_reservations) || 0,
+        totalRevenue: Number(metrics.revenue_month_bs) || 0,
+        pendingVerifications: Number(metrics.pending_kyc) || 0,
+        incidents: Number(metrics.open_incidents) || 0
       });
       
-      if (!loading) {
+      if (wasRefreshing) {
         toast.success("Dashboard actualizado");
       }
     } catch (error) {
@@ -90,37 +87,42 @@ const AdminDashboard = () => {
       toast.error("Error al cargar las estadísticas");
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
   const statCards = [
     {
-      title: "Usuarios Activos",
+      title: "Usuarios Registrados",
       value: stats.users,
       icon: Users,
       color: "text-blue-600 bg-blue-50",
-      link: "/admin/usuarios"
+      link: "/admin/usuarios",
+      description: "Total en auth.users"
     },
     {
-      title: "Vehículos Registrados",
+      title: "Vehículos Totales",
       value: stats.vehicles,
       icon: Car,
       color: "text-green-600 bg-green-50",
-      link: "/admin/vehiculos"
+      link: "/admin/vehiculos",
+      description: "Todos los estados"
     },
     {
       title: "Reservas en Curso",
       value: stats.activeReservations,
       icon: Calendar,
       color: "text-purple-600 bg-purple-50",
-      link: "/admin/reservas"
+      link: "/admin/reservas",
+      description: "Pendientes y aprobadas"
     },
     {
-      title: "Ingresos del Mes",
+      title: "Ingresos del Mes (Bs)",
       value: formatBs(stats.totalRevenue),
       icon: DollarSign,
       color: "text-yellow-600 bg-yellow-50",
-      link: "/admin/pagos"
+      link: "/admin/pagos",
+      description: "Mes actual"
     }
   ];
 
@@ -164,8 +166,13 @@ const AdminDashboard = () => {
               Vista general de la plataforma AndaYa
             </p>
           </div>
-          <Button onClick={fetchStats} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
+          <Button 
+            onClick={fetchStats} 
+            variant="outline" 
+            size="sm"
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
             Actualizar
           </Button>
         </div>
@@ -187,7 +194,10 @@ const AdminDashboard = () => {
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground font-medium">{stat.title}</p>
                   <p className="text-3xl font-bold text-foreground">{stat.value}</p>
-                  {stat.title === "Ingresos del Mes" && stats.totalRevenue > 0 && (
+                  {stat.description && (
+                    <p className="text-xs text-muted-foreground">{stat.description}</p>
+                  )}
+                  {stat.title.includes("Ingresos") && stats.totalRevenue > 0 && (
                     <ExchangeRateDisplay amountBs={stats.totalRevenue} />
                   )}
                 </div>

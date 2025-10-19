@@ -883,6 +883,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          active_reservations: number
+          open_incidents: number
+          pending_kyc: number
+          revenue_month_bs: number
+          total_users: number
+          total_vehicles: number
+        }[]
+      }
       assign_initial_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
