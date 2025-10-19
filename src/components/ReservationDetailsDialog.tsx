@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, DollarSign, Clock, User, Car, MessageCircle, AlertCircle, CreditCard } from "lucide-react";
@@ -320,14 +320,17 @@ export function ReservationDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100%-1rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+      <DialogContent className="w-[calc(100%-1rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6" aria-describedby="reserva-desc">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>Detalles de la Reserva</DialogTitle>
             {loading && (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-r-transparent" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-r-transparent" aria-label="Cargando" />
             )}
           </div>
+          <DialogDescription id="reserva-desc" className="sr-only">
+            Fechas, costos y datos del propietario de la reserva
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">

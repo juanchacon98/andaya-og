@@ -468,8 +468,8 @@ export default function UserDashboard() {
         )}
 
         {/* Navigation tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          <div className="sticky bg-background z-40 shadow-sm top-16 sm:top-20">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-0">
+          <div className="sticky top-0 z-20 bg-white/90 dark:bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-background/70 border-b border-slate-200 dark:border-border">
             <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 p-1 transition-all duration-200">
               <TabsTrigger value="reservas" className="gap-1.5 sm:gap-2 py-2 text-sm sm:text-base">
                 <Calendar className="h-4 w-4" />
@@ -496,9 +496,9 @@ export default function UserDashboard() {
           </div>
 
           {/* Reservations tab */}
-          <TabsContent value="reservas" className="space-y-4 sm:space-y-6 mt-3">
+          <TabsContent value="reservas" className="space-y-4 sm:space-y-6 pt-3 sm:pt-4">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Reservas próximas</h2>
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 scroll-mt-20">Reservas próximas</h2>
               {upcomingReservations.length === 0 ? (
                 <Card>
                   <CardContent className="pt-6 text-center py-12">
@@ -512,90 +512,98 @@ export default function UserDashboard() {
               ) : (
                 <div className="grid gap-3 sm:gap-4">
                   {upcomingReservations.map((reservation) => (
-                    <Card key={reservation.id} className="rounded-xl shadow-sm overflow-hidden">
-                      <CardContent className="pt-4 sm:pt-6 max-w-full">
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                          <div className="flex-shrink-0">
-                            <div className="w-full sm:w-40 md:w-48 h-28 sm:h-32 bg-muted rounded-lg flex items-center justify-center">
-                              <Car className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
-                            </div>
+                    <div key={reservation.id} className="rounded-2xl border border-slate-200 dark:border-border bg-white dark:bg-card shadow-sm overflow-hidden">
+                      <div className="p-4 sm:p-5">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[140px_1fr]">
+                          {/* Media */}
+                          <div className="aspect-[16/9] sm:aspect-auto sm:h-[100px] rounded-xl bg-slate-100 dark:bg-muted overflow-hidden flex items-center justify-center">
+                            <Car className="h-10 w-10 text-slate-400 dark:text-muted-foreground" aria-hidden="true" />
                           </div>
                           
-                          <div className="flex-1 space-y-2 sm:space-y-3 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0 flex-1">
-                                <h3 className="text-base sm:text-lg md:text-xl font-semibold break-words" style={{ fontSize: '1.1rem', lineHeight: '1.5rem' }}>
-                                  {reservation.vehicles.title}
-                                </h3>
-                                <p className="text-xs sm:text-sm text-muted-foreground break-words">
-                                  {reservation.vehicles.brand} {reservation.vehicles.model}
-                                </p>
-                              </div>
-                              <div className="flex-shrink-0">
-                                {getStatusBadge(reservation.status)}
-                              </div>
+                          {/* Details */}
+                          <div className="px-0 sm:px-1 min-w-0">
+                            <div className="flex items-start gap-2">
+                              <h3 className="text-[clamp(0.95rem,2.5vw,1.05rem)] font-medium leading-tight line-clamp-1 flex-1">
+                                {reservation.vehicles.title}
+                              </h3>
+                              <span className={`ml-auto shrink-0 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                reservation.status === 'approved' ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-200 dark:ring-emerald-800' :
+                                reservation.status === 'pending' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-800' :
+                                'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 ring-1 ring-rose-200 dark:ring-rose-800'
+                              }`}>
+                                {reservation.status === 'approved' ? 'Activa' : 
+                                 reservation.status === 'pending' ? 'Pendiente' : 
+                                 reservation.status === 'cancelled' ? 'Cancelada' : 'Finalizada'}
+                              </span>
                             </div>
                             
-                            <Separator />
+                            <p className="text-xs sm:text-sm text-slate-600 dark:text-muted-foreground mt-0.5 line-clamp-1">
+                              {reservation.vehicles.brand} {reservation.vehicles.model}
+                            </p>
                             
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                <span className="break-words">Desde: {new Date(reservation.start_date).toLocaleDateString('es-VE')}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                <span className="break-words">Hasta: {new Date(reservation.end_date).toLocaleDateString('es-VE')}</span>
-                              </div>
+                            <ul className="mt-2 space-y-1.5">
+                              <li className="flex items-center gap-2 text-[13px] sm:text-sm text-slate-700 dark:text-foreground">
+                                <Clock className="h-4 w-4 text-slate-500 dark:text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                                <span>Desde: {new Date(reservation.start_date).toLocaleDateString('es-VE')}</span>
+                              </li>
+                              <li className="flex items-center gap-2 text-[13px] sm:text-sm text-slate-700 dark:text-foreground">
+                                <Clock className="h-4 w-4 text-slate-500 dark:text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                                <span>Hasta: {new Date(reservation.end_date).toLocaleDateString('es-VE')}</span>
+                              </li>
                               {reservation.vehicles.city && (
-                                <div className="flex items-center gap-2">
-                                  <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                  <span className="break-words">{reservation.vehicles.city}</span>
-                                </div>
+                                <li className="flex items-center gap-2 text-[13px] sm:text-sm text-slate-700 dark:text-foreground">
+                                  <MapPin className="h-4 w-4 text-slate-500 dark:text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                                  <span className="line-clamp-1">{reservation.vehicles.city}</span>
+                                </li>
                               )}
-                              <div className="flex items-center gap-2">
-                                <CreditCard className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                <span className="font-semibold">${reservation.total}</span>
-                              </div>
-                            </div>
+                              <li className="flex items-center gap-2 text-[13px] sm:text-sm">
+                                <CreditCard className="h-4 w-4 text-slate-500 dark:text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                                <span className="font-semibold text-slate-900 dark:text-foreground">
+                                  Bs {new Intl.NumberFormat('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(reservation.total)}
+                                </span>
+                              </li>
+                            </ul>
                             
-                            <div className="flex flex-wrap gap-2 pt-2">
+                            <div className="flex flex-wrap gap-2 mt-3">
                               {reservation.status === 'pending' && (
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  className="min-h-[44px] text-xs sm:text-sm"
+                                  className="h-9 px-3 text-sm rounded-lg"
                                   onClick={() => handleModify(reservation)}
+                                  aria-label="Modificar reserva"
                                 >
-                                  <Edit className="h-4 w-4 mr-1.5" />
+                                  <Edit className="h-4 w-4 mr-1.5" aria-hidden="true" />
                                   Modificar
                                 </Button>
                               )}
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                className="min-h-[44px] text-xs sm:text-sm"
+                                className="h-9 px-3 text-sm rounded-lg"
                                 onClick={() => handleViewDetails(reservation)}
+                                aria-label="Ver detalles de la reserva"
                               >
-                                <Eye className="h-4 w-4 mr-1.5" />
+                                <Eye className="h-4 w-4 mr-1.5" aria-hidden="true" />
                                 Ver detalles
                               </Button>
                               {reservation.status === 'pending' && (
                                 <Button 
                                   variant="destructive" 
                                   size="sm"
-                                  className="min-h-[44px] text-xs sm:text-sm"
+                                  className="h-9 px-3 text-sm rounded-lg"
                                   onClick={() => handleCancelClick(reservation.id)}
+                                  aria-label="Cancelar reserva"
                                 >
-                                  <X className="h-4 w-4 mr-1.5" />
+                                  <X className="h-4 w-4 mr-1.5" aria-hidden="true" />
                                   Cancelar
                                 </Button>
                               )}
                             </div>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
@@ -604,7 +612,7 @@ export default function UserDashboard() {
             <Separator className="my-6 sm:my-8" />
 
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Historial de viajes</h2>
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 scroll-mt-20">Historial de viajes</h2>
               {pastReservations.length === 0 ? (
                 <Card>
                   <CardContent className="pt-6 text-center py-12">
@@ -615,39 +623,56 @@ export default function UserDashboard() {
               ) : (
                 <div className="grid gap-3 sm:gap-4">
                   {pastReservations.map((reservation) => (
-                    <Card key={reservation.id} className="rounded-xl shadow-sm overflow-hidden">
-                      <CardContent className="pt-4 sm:pt-6 max-w-full">
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                          <div className="flex-shrink-0">
-                            <div className="w-full sm:w-28 md:w-32 h-20 sm:h-24 bg-muted rounded-lg flex items-center justify-center">
-                              <Car className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
-                            </div>
+                    <div key={reservation.id} className="rounded-2xl border border-slate-200 dark:border-border bg-white dark:bg-card shadow-sm overflow-hidden">
+                      <div className="p-4 sm:p-5">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[120px_1fr]">
+                          {/* Media */}
+                          <div className="aspect-[16/9] sm:aspect-auto sm:h-[80px] rounded-xl bg-slate-100 dark:bg-muted overflow-hidden flex items-center justify-center">
+                            <Car className="h-8 w-8 text-slate-400 dark:text-muted-foreground" aria-hidden="true" />
                           </div>
                           
-                          <div className="flex-1 min-w-0">
+                          {/* Details */}
+                          <div className="px-0 sm:px-1 min-w-0">
                             <div className="flex items-start justify-between gap-2 mb-2">
                               <div className="min-w-0 flex-1">
-                                <h3 className="font-semibold text-sm sm:text-base break-words">{reservation.vehicles.title}</h3>
-                                <p className="text-xs sm:text-sm text-muted-foreground break-words">
+                                <h3 className="text-[clamp(0.9rem,2.5vw,1rem)] font-medium leading-tight line-clamp-1">
+                                  {reservation.vehicles.title}
+                                </h3>
+                                <p className="text-xs sm:text-sm text-slate-600 dark:text-muted-foreground mt-0.5">
                                   {new Date(reservation.start_date).toLocaleDateString('es-VE')} - {new Date(reservation.end_date).toLocaleDateString('es-VE')}
                                 </p>
                               </div>
-                              <div className="flex-shrink-0">
-                                {getStatusBadge(reservation.status)}
-                              </div>
+                              <span className={`ml-auto shrink-0 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                reservation.status === 'finished' ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 ring-1 ring-slate-200 dark:ring-slate-700' :
+                                'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 ring-1 ring-rose-200 dark:ring-rose-800'
+                              }`}>
+                                {reservation.status === 'finished' ? 'Finalizada' : 'Cancelada'}
+                              </span>
                             </div>
                             
                             <div className="flex flex-wrap gap-2 mt-3">
-                              <Button variant="outline" size="sm" className="min-h-[44px] text-xs sm:text-sm">
-                                <Star className="h-4 w-4 mr-1.5" />
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="h-9 px-3 text-sm rounded-lg"
+                                aria-label="Calificar reserva"
+                              >
+                                <Star className="h-4 w-4 mr-1.5" aria-hidden="true" />
                                 Calificar
                               </Button>
-                              <Button variant="outline" size="sm" className="min-h-[44px] text-xs sm:text-sm">Ver recibo</Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="h-9 px-3 text-sm rounded-lg"
+                                aria-label="Ver recibo"
+                              >
+                                Ver recibo
+                              </Button>
                             </div>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
