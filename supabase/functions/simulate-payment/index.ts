@@ -142,12 +142,11 @@ serve(async (req) => {
       );
     }
 
-    // Update reservation payment_status
+    // Update reservation payment_status only
     const { error: updateError } = await supabaseClient
       .from('reservations')
       .update({ 
-        payment_status: 'paid',
-        status: 'active'
+        payment_status: 'simulated'
       })
       .eq('id', reservation_id);
 
