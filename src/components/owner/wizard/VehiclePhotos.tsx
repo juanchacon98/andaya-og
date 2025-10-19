@@ -1,8 +1,18 @@
 import { useState } from "react";
-import { Upload, X, ImageIcon } from "lucide-react";
+import { Upload, X, ImageIcon, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface VehiclePhotosProps {
   vehicleId?: string;
@@ -12,6 +22,7 @@ interface VehiclePhotosProps {
 
 export function VehiclePhotos({ vehicleId, photos, onPhotosChange }: VehiclePhotosProps) {
   const [uploading, setUploading] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -66,9 +77,63 @@ export function VehiclePhotos({ vehicleId, photos, onPhotosChange }: VehiclePhot
     }
   };
 
-  const removePhoto = (index: number) => {
-    const newPhotos = photos.filter((_, i) => i !== index);
+  const handleDeleteConfirm = async () => {
+    if (deleteIndex === null) return;
+
+    try {
+      const photoUrl = photos[deleteIndex];
+      
+      // If photo is already uploaded to storage, delete it
+      if (photoUrl.includes('supabase.co') && vehicleId) {
+        try {
+          const url = new URL(photoUrl);
+          const path = url.pathname.split('/vehicle_photos/')[1];
+          
+          if (path) {
+            const { error: storageError } = await supabase.storage
+              .from('vehicle_photos')
+              .remove([path]);
+            
+            if (storageError) {
+              console.error('Error deleting from storage:', storageError);
+            }
+
+            // Also delete from database if exists
+            const { error: dbError } = await supabase
+              .from('vehicle_photos')
+              .delete()
+              .eq('vehicle_id', vehicleId)
+              .eq('url', photoUrl);
+            
+            if (dbError) {
+              console.error('Error deleting from database:', dbError);
+            }
+          }
+        } catch (error) {
+          console.error('Error parsing photo URL:', error);
+        }
+      }
+
+      // Remove from state
+      const newPhotos = photos.filter((_, i) => i !== deleteIndex);
+      onPhotosChange(newPhotos);
+      toast.success('Foto eliminada');
+    } catch (error) {
+      console.error('Error deleting photo:', error);
+      toast.error('Error al eliminar foto');
+    } finally {
+      setDeleteIndex(null);
+    }
+  };
+
+  const movePhoto = (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= photos.length) return;
+
+    const newPhotos = [...photos];
+    [newPhotos[index], newPhotos[newIndex]] = [newPhotos[newIndex], newPhotos[index]];
     onPhotosChange(newPhotos);
+    toast.success('Orden actualizado');
   };
 
   return (
@@ -109,18 +174,49 @@ export function VehiclePhotos({ vehicleId, photos, onPhotosChange }: VehiclePhot
                 alt={`Foto ${index + 1}`}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-2 right-2">
+              
+              {/* Actions overlay */}
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                {/* Reorder buttons */}
+                <div className="flex gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => movePhoto(index, 'up')}
+                    disabled={index === 0}
+                    className="min-h-[44px] min-w-[44px]"
+                    aria-label="Mover arriba"
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => movePhoto(index, 'down')}
+                    disabled={index === photos.length - 1}
+                    className="min-h-[44px] min-w-[44px]"
+                    aria-label="Mover abajo"
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                {/* Delete button */}
                 <Button
                   variant="destructive"
-                  size="icon"
-                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => removePhoto(index)}
+                  size="sm"
+                  onClick={() => setDeleteIndex(index)}
+                  className="min-h-[44px]"
+                  aria-label="Eliminar foto"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4 mr-1" />
+                  Eliminar
                 </Button>
               </div>
+              
+              {/* Cover badge */}
               {index === 0 && (
-                <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded">
+                <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded">
                   Foto principal
                 </div>
               )}
@@ -134,6 +230,27 @@ export function VehiclePhotos({ vehicleId, photos, onPhotosChange }: VehiclePhot
           ⚠️ Necesitas al menos 6 fotos para publicar tu vehículo
         </p>
       )}
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={deleteIndex !== null} onOpenChange={() => setDeleteIndex(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar esta foto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. La foto se eliminará permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

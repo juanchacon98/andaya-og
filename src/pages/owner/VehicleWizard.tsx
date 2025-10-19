@@ -1,6 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Save, Send } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, Send, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -47,6 +57,7 @@ export default function VehicleWizard() {
     delivery_type: 'both',
   });
   const [photos, setPhotos] = useState<string[]>([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     checkPrerequisites();
@@ -156,6 +167,46 @@ export default function VehicleWizard() {
   const handlePrevious = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id || !user) return;
+
+    try {
+      // Check for active reservations
+      const { data: reservations } = await supabase
+        .from('reservations')
+        .select('id')
+        .eq('vehicle_id', id)
+        .in('status', ['approved' as any, 'pending'])
+        .gte('end_at', new Date().toISOString())
+        .limit(1);
+
+      if (reservations && reservations.length > 0) {
+        toast.error('No puedes eliminar: hay reservas activas o próximas');
+        return;
+      }
+
+      // Soft delete
+      const { error } = await supabase
+        .from('vehicles')
+        .update({ 
+          deleted_at: new Date().toISOString(),
+          status: 'paused'
+        })
+        .eq('id', id)
+        .eq('owner_id', user.id);
+
+      if (error) throw error;
+
+      toast.success('Vehículo eliminado correctamente');
+      navigate('/owner/vehicles');
+    } catch (error: any) {
+      console.error('Error deleting vehicle:', error);
+      toast.error('Error al eliminar: ' + error.message);
+    } finally {
+      setShowDeleteDialog(false);
     }
   };
 
@@ -388,16 +439,33 @@ export default function VehicleWizard() {
       <Navbar />
       
       <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto space-y-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/owner')}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold">Publicar mi vehículo</h1>
-              <p className="text-muted-foreground">Paso {currentStep} de {STEPS.length}</p>
+          <div className="max-w-3xl mx-auto space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon" onClick={() => navigate('/owner/vehicles')}>
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <div>
+                  <h1 className="text-3xl font-bold">
+                    {id ? 'Editar vehículo' : 'Publicar mi vehículo'}
+                  </h1>
+                  <p className="text-muted-foreground">Paso {currentStep} de {STEPS.length}</p>
+                </div>
+              </div>
+              
+              {/* Delete button (only in edit mode) */}
+              {id && (
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Eliminar</span>
+                </Button>
+              )}
             </div>
-          </div>
 
           <Progress value={(currentStep / STEPS.length) * 100} className="w-full" />
 
@@ -440,6 +508,27 @@ export default function VehicleWizard() {
           </Card>
         </div>
       </main>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar esta publicación?</AlertDialogTitle>
+            <AlertDialogDescription>
+              El vehículo será archivado y dejará de aparecer en búsquedas. No podrás eliminarlo si tiene reservas activas o próximas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Footer />
     </div>
