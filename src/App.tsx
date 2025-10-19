@@ -28,7 +28,6 @@ import AdminExchangeRates from "./pages/admin/AdminExchangeRates";
 import UserDashboard from "./pages/UserDashboard";
 import KYC from "./pages/KYC";
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
-import VehicleList from "./pages/owner/VehicleList";
 import VehicleWizard from "./pages/owner/VehicleWizard";
 import MisReservasAutos from "./pages/owner/MisReservasAutos";
 import ReservasPendientes from "./pages/owner/ReservasPendientes";
@@ -81,7 +80,6 @@ function AppContent() {
             <Route path="/reserva-exitosa" element={<ProtectedRoute><ReservationSuccess /></ProtectedRoute>} />
             <Route path="/kyc" element={<ProtectedRoute><KYC /></ProtectedRoute>} />
             <Route path="/owner" element={<ProtectedRoute><OwnerDashboard /></ProtectedRoute>} />
-            <Route path="/owner/vehicles" element={<ProtectedRoute><VehicleList /></ProtectedRoute>} />
             <Route path="/owner/vehicles/new" element={<ProtectedRoute><VehicleWizard /></ProtectedRoute>} />
             <Route path="/owner/vehicles/:id/edit" element={<ProtectedRoute><VehicleWizard /></ProtectedRoute>} />
             <Route path="/owner/reservas-pendientes" element={<ProtectedRoute><ReservasPendientes /></ProtectedRoute>} />

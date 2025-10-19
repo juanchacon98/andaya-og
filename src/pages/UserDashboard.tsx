@@ -23,6 +23,9 @@ import {
 import { ReservationDetailsDialog } from '@/components/ReservationDetailsDialog';
 import { ModifyReservationDialog } from '@/components/ModifyReservationDialog';
 import { VehicleStatsDialog } from '@/components/owner/VehicleStatsDialog';
+import { VehicleReservationsDialog } from '@/components/owner/VehicleReservationsDialog';
+import { VehicleEditDialog } from '@/components/owner/VehicleEditDialog';
+import { VehiclePhotosManager } from '@/components/owner/VehiclePhotosManager';
 import { YummyIntegrationBanner } from '@/components/mock/YummyIntegrationBanner';
 import { TuGrueroSimulator } from '@/components/mock/TuGrueroSimulator';
 import { fetchProfileWithFallback } from '@/lib/profileHelpers';
@@ -45,7 +48,9 @@ import {
   CheckCircle,
   AlertCircle,
   Shield,
-  Eye
+  Eye,
+  Trash2,
+  Image
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -79,6 +84,7 @@ interface Vehicle {
   year: number;
   price_bs: number;
   status: string;
+  type: string;
   rating_avg: number;
   city: string | null;
   reservations_30d?: number;
@@ -107,6 +113,16 @@ export default function UserDashboard() {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [showStatsDialog, setShowStatsDialog] = useState(false);
   const [reservationToCancel, setReservationToCancel] = useState<string | null>(null);
+  
+  // Vehicle management state
+  const [editVehicle, setEditVehicle] = useState<Vehicle | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [photosVehicle, setPhotosVehicle] = useState<Vehicle | null>(null);
+  const [photosOpen, setPhotosOpen] = useState(false);
+  const [reservationsVehicle, setReservationsVehicle] = useState<Vehicle | null>(null);
+  const [reservationsOpen, setReservationsOpen] = useState(false);
+  const [deleteVehicle, setDeleteVehicle] = useState<Vehicle | null>(null);
+  const [vehicleStatusFilter, setVehicleStatusFilter] = useState('all');
 
   useEffect(() => {
     if (user) {
@@ -346,6 +362,66 @@ export default function UserDashboard() {
       setShowCancelDialog(false);
       setReservationToCancel(null);
     }
+  };
+
+  // Vehicle management handlers
+  const handleEditVehicle = (vehicle: Vehicle) => {
+    setEditVehicle(vehicle);
+    setEditOpen(true);
+  };
+
+  const handleManagePhotos = (vehicle: Vehicle) => {
+    setPhotosVehicle(vehicle);
+    setPhotosOpen(true);
+  };
+
+  const handleViewVehicleReservations = (vehicle: Vehicle) => {
+    setReservationsVehicle(vehicle);
+    setReservationsOpen(true);
+  };
+
+  const handleDeleteVehicle = async () => {
+    if (!deleteVehicle || !user) return;
+
+    try {
+      // Check for active or future reservations
+      const { count } = await supabase
+        .from('reservations')
+        .select('*', { count: 'exact', head: true })
+        .eq('vehicle_id', deleteVehicle.id)
+        .in('status', ['approved', 'pending'])
+        .gte('end_at', new Date().toISOString());
+
+      if (count && count > 0) {
+        toast.error('No puedes eliminar un vehículo con reservas activas o próximas');
+        return;
+      }
+
+      // Soft delete
+      const { error } = await supabase
+        .from('vehicles')
+        .update({ 
+          deleted_at: new Date().toISOString(),
+          status: 'paused'
+        })
+        .eq('id', deleteVehicle.id)
+        .eq('owner_id', user.id);
+
+      if (error) throw error;
+
+      toast.success('Vehículo eliminado exitosamente');
+      fetchUserData();
+    } catch (error: any) {
+      console.error('Error deleting vehicle:', error);
+      toast.error('Error al eliminar: ' + error.message);
+    } finally {
+      setDeleteVehicle(null);
+    }
+  };
+
+  const filterVehiclesByStatus = (status: string) => {
+    if (status === 'all') return myVehicles;
+    return myVehicles.filter(v => v.status === status);
   };
 
   if (loading) {
@@ -720,6 +796,7 @@ export default function UserDashboard() {
                   onClick={() => navigate('/owner/vehicles/new')}
                   data-umami-event="owner_add_vehicle_click"
                   aria-label="Agregar nuevo vehículo"
+                  disabled={kycStatus !== 'verified'}
                 >
                   <Plus className="h-4 w-4 mr-1.5" />
                   <span className="hidden sm:inline">Agregar nuevo</span>
@@ -732,87 +809,153 @@ export default function UserDashboard() {
                   <CardContent className="pt-6 text-center py-12">
                     <Car className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <p className="text-muted-foreground mb-4">No tienes vehículos publicados</p>
-                    <Button onClick={() => navigate('/owner/vehicles/new')} className="min-h-[44px]">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Publicar mi primer vehículo
-                    </Button>
+                    {kycStatus === 'verified' ? (
+                      <Button onClick={() => navigate('/owner/vehicles/new')} className="min-h-[44px]">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Publicar mi primer vehículo
+                      </Button>
+                    ) : (
+                      <Button asChild className="min-h-[44px]">
+                        <Link to="/kyc">
+                          <Shield className="h-4 w-4 mr-2" />
+                          Completar verificación KYC
+                        </Link>
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-3 sm:gap-4">
-                  {myVehicles.map((vehicle) => (
-                    <Card key={vehicle.id} className="rounded-xl shadow-sm overflow-hidden">
-                      <CardContent className="pt-4 sm:pt-6 max-w-full">
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                          <div className="flex-shrink-0">
-                            <div className="w-full sm:w-40 md:w-48 h-28 sm:h-32 bg-muted rounded-lg flex items-center justify-center">
-                              <Car className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
-                            </div>
-                          </div>
-                          
-                          <div className="flex-1 space-y-2 sm:space-y-3 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0 flex-1">
-                                <h3 className="text-base sm:text-lg md:text-xl font-semibold break-words">{vehicle.title}</h3>
-                                <p className="text-xs sm:text-sm text-muted-foreground break-words">
-                                  {vehicle.brand} {vehicle.model} {vehicle.year}
-                                </p>
+                <>
+                  {/* Status filter tabs */}
+                  <Tabs value={vehicleStatusFilter} onValueChange={setVehicleStatusFilter} className="w-full">
+                    <TabsList className="grid w-full grid-cols-5 mb-4">
+                      <TabsTrigger value="all">
+                        Todos ({myVehicles.length})
+                      </TabsTrigger>
+                      <TabsTrigger value="active">
+                        Activos ({filterVehiclesByStatus('active').length})
+                      </TabsTrigger>
+                      <TabsTrigger value="pending_review">
+                        Pendientes ({filterVehiclesByStatus('pending_review').length})
+                      </TabsTrigger>
+                      <TabsTrigger value="paused">
+                        Pausados ({filterVehiclesByStatus('paused').length})
+                      </TabsTrigger>
+                      <TabsTrigger value="rejected">
+                        Rechazados ({filterVehiclesByStatus('rejected').length})
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value={vehicleStatusFilter} className="mt-0">
+                      <div className="grid gap-3 sm:gap-4">
+                        {filterVehiclesByStatus(vehicleStatusFilter).map((vehicle) => (
+                          <Card key={vehicle.id} className="rounded-xl shadow-sm overflow-hidden">
+                            <CardContent className="pt-4 sm:pt-6 max-w-full">
+                              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                                <div className="flex-shrink-0">
+                                  <div className="w-full sm:w-40 md:w-48 h-28 sm:h-32 bg-muted rounded-lg flex items-center justify-center">
+                                    <Car className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
+                                  </div>
+                                </div>
+                                
+                                <div className="flex-1 space-y-2 sm:space-y-3 min-w-0">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0 flex-1">
+                                      <h3 className="text-base sm:text-lg md:text-xl font-semibold break-words">{vehicle.title}</h3>
+                                      <p className="text-xs sm:text-sm text-muted-foreground break-words">
+                                        {vehicle.brand} {vehicle.model} {vehicle.year}
+                                      </p>
+                                    </div>
+                                    <div className="flex-shrink-0">
+                                      {getVehicleStatusBadge(vehicle.status)}
+                                    </div>
+                                  </div>
+                                  
+                                  <Separator />
+                                  
+                                  <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
+                                    <div className="min-w-0">
+                                      <p className="text-muted-foreground">Ubicación</p>
+                                      <p className="font-semibold break-words">{vehicle.city || 'No especificada'}</p>
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="text-muted-foreground">Precio/día</p>
+                                      <p className="font-semibold">Bs {vehicle.price_bs}</p>
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="text-muted-foreground">Reservas (30d)</p>
+                                      <p className="font-semibold">{vehicle.reservations_30d || 0}</p>
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="text-muted-foreground">Ingresos (30d)</p>
+                                      <p className="font-semibold">Bs {(vehicle.revenue_30d || 0).toLocaleString()}</p>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex flex-wrap gap-2 pt-2">
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      className="min-h-[44px] text-xs sm:text-sm"
+                                      onClick={() => handleViewVehicleReservations(vehicle)}
+                                      title="Ver reservas"
+                                    >
+                                      <Calendar className="h-4 w-4 mr-1.5" />
+                                      <span className="hidden sm:inline">Reservas</span>
+                                    </Button>
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      className="min-h-[44px] text-xs sm:text-sm"
+                                      onClick={() => handleManagePhotos(vehicle)}
+                                      title="Gestionar fotos"
+                                    >
+                                      <Image className="h-4 w-4 mr-1.5" />
+                                      <span className="hidden sm:inline">Fotos</span>
+                                    </Button>
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      className="min-h-[44px] text-xs sm:text-sm"
+                                      onClick={() => handleEditVehicle(vehicle)}
+                                      title="Editar detalles"
+                                    >
+                                      <Edit className="h-4 w-4 mr-1.5" />
+                                      <span className="hidden sm:inline">Editar</span>
+                                    </Button>
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      className="min-h-[44px] text-xs sm:text-sm"
+                                      onClick={() => {
+                                        setSelectedVehicle(vehicle);
+                                        setShowStatsDialog(true);
+                                      }}
+                                      title="Ver estadísticas"
+                                    >
+                                      <Eye className="h-4 w-4 mr-1.5" />
+                                      <span className="hidden sm:inline">Estadísticas</span>
+                                    </Button>
+                                    <Button 
+                                      variant="destructive" 
+                                      size="sm"
+                                      className="min-h-[44px] text-xs sm:text-sm"
+                                      onClick={() => setDeleteVehicle(vehicle)}
+                                      title="Eliminar vehículo"
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-1.5" />
+                                      <span className="hidden sm:inline">Eliminar</span>
+                                    </Button>
+                                  </div>
+                                </div>
                               </div>
-                              <div className="flex-shrink-0">
-                                {getVehicleStatusBadge(vehicle.status)}
-                              </div>
-                            </div>
-                            
-                            <Separator />
-                            
-                            <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
-                              <div className="min-w-0">
-                                <p className="text-muted-foreground">Ubicación</p>
-                                <p className="font-semibold break-words">{vehicle.city || 'No especificada'}</p>
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-muted-foreground">Precio/día</p>
-                                <p className="font-semibold">Bs {vehicle.price_bs}</p>
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-muted-foreground">Reservas (30d)</p>
-                                <p className="font-semibold">{vehicle.reservations_30d || 0}</p>
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-muted-foreground">Ingresos (30d)</p>
-                                <p className="font-semibold">Bs {(vehicle.revenue_30d || 0).toLocaleString()}</p>
-                              </div>
-                            </div>
-                            
-                            <div className="flex flex-wrap gap-2 pt-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                className="min-h-[44px] text-xs sm:text-sm"
-                                onClick={() => navigate(`/owner/vehicles/${vehicle.id}/edit`)}
-                              >
-                                <Edit className="h-4 w-4 mr-1.5" />
-                                Editar
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                className="min-h-[44px] text-xs sm:text-sm"
-                                onClick={() => {
-                                  setSelectedVehicle(vehicle);
-                                  setShowStatsDialog(true);
-                                }}
-                              >
-                                <Eye className="h-4 w-4 mr-1.5" />
-                                Ver estadísticas
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </>
               )}
             </TabsContent>
           )}
@@ -997,6 +1140,56 @@ export default function UserDashboard() {
           pricePerDay={selectedVehicle.price_bs}
         />
       )}
+
+      {/* Vehicle Management Dialogs */}
+      {editVehicle && (
+        <VehicleEditDialog
+          vehicle={editVehicle}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          onSuccess={fetchUserData}
+        />
+      )}
+
+      {photosVehicle && (
+        <VehiclePhotosManager
+          vehicleId={photosVehicle.id}
+          vehicleTitle={`${photosVehicle.brand} ${photosVehicle.model} ${photosVehicle.year}`}
+          open={photosOpen}
+          onOpenChange={setPhotosOpen}
+          onSuccess={fetchUserData}
+        />
+      )}
+
+      {reservationsVehicle && (
+        <VehicleReservationsDialog
+          open={reservationsOpen}
+          onOpenChange={setReservationsOpen}
+          vehicleId={reservationsVehicle.id}
+          vehicleTitle={`${reservationsVehicle.brand} ${reservationsVehicle.model} ${reservationsVehicle.year}`}
+        />
+      )}
+
+      {/* Delete Vehicle Confirmation Dialog */}
+      <AlertDialog open={!!deleteVehicle} onOpenChange={() => setDeleteVehicle(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar este vehículo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              El vehículo será archivado y dejará de aparecer en búsquedas. No podrás eliminarlo si tiene reservas activas o próximas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteVehicle}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

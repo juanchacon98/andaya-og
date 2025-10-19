@@ -272,7 +272,7 @@ export default function OwnerDashboard() {
               <CardDescription>Gestiona tus vehículos y reservas</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
-              <Link to="/owner/vehicles">
+              <Link to="/perfil">
                 <Button variant="outline" className="w-full justify-start gap-2">
                   <Car className="h-4 w-4" />
                   Ver mis vehículos
