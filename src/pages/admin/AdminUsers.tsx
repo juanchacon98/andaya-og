@@ -181,14 +181,20 @@ const AdminUsers = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Gestión de Usuarios</h1>
-            <p className="text-muted-foreground mt-1">
-              Administra todos los usuarios registrados en Supabase
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="space-y-1 min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+              Gestión de Usuarios
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Administra todos los usuarios registrados
             </p>
           </div>
-          <Button onClick={fetchAllUsers} variant="outline">
+          <Button 
+            onClick={fetchAllUsers} 
+            variant="outline"
+            className="shrink-0 self-start"
+          >
             <RefreshCw className="h-4 w-4 mr-2" />
             Actualizar
           </Button>
