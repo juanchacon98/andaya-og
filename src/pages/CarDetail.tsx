@@ -305,10 +305,10 @@ const CarDetail = () => {
       {/* Botón flotante para móvil - visible solo en pantallas pequeñas */}
       <button
         onClick={handleGoBack}
-        className="fixed top-20 left-4 z-50 lg:hidden flex items-center justify-center h-10 w-10 rounded-full bg-background border-2 border-border shadow-lg hover:bg-accent transition-colors"
+        className="fixed top-[88px] left-4 z-[60] lg:hidden flex items-center justify-center h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-all active:scale-95"
         aria-label="Volver atrás"
       >
-        <ChevronLeft className="h-5 w-5" />
+        <ChevronLeft className="h-6 w-6" />
       </button>
       
       <div className="container py-8">
