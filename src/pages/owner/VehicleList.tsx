@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Edit, Zap, AlertCircle, Calendar } from "lucide-react";
+import { Plus, Edit, Zap, AlertCircle, Calendar, Image, Trash2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,18 @@ import Footer from "@/components/Footer";
 import { toast } from "sonner";
 import { QuickEditVehicle } from "@/components/owner/QuickEditVehicle";
 import { VehicleReservationsDialog } from "@/components/owner/VehicleReservationsDialog";
+import { VehicleEditDialog } from "@/components/owner/VehicleEditDialog";
+import { VehiclePhotosManager } from "@/components/owner/VehiclePhotosManager";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Vehicle {
   id: string;
@@ -21,9 +33,12 @@ interface Vehicle {
   brand: string;
   model: string;
   year: number;
+  type: string;
   price_bs: number;
   status: string;
   city: string | null;
+  plate?: string;
+  description?: string;
   kilometraje: number | null;
   created_at: string;
 }
@@ -37,6 +52,11 @@ export default function VehicleList() {
   const [quickEditOpen, setQuickEditOpen] = useState(false);
   const [reservationsVehicle, setReservationsVehicle] = useState<Vehicle | null>(null);
   const [reservationsOpen, setReservationsOpen] = useState(false);
+  const [editVehicle, setEditVehicle] = useState<Vehicle | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [photosVehicle, setPhotosVehicle] = useState<Vehicle | null>(null);
+  const [photosOpen, setPhotosOpen] = useState(false);
+  const [deleteVehicle, setDeleteVehicle] = useState<Vehicle | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -105,6 +125,59 @@ export default function VehicleList() {
     setReservationsOpen(true);
   };
 
+  const handleEdit = (vehicle: Vehicle) => {
+    setEditVehicle(vehicle);
+    setEditOpen(true);
+  };
+
+  const handlePhotos = (vehicle: Vehicle) => {
+    setPhotosVehicle(vehicle);
+    setPhotosOpen(true);
+  };
+
+  const handleDeleteRequest = (vehicle: Vehicle) => {
+    setDeleteVehicle(vehicle);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteVehicle) return;
+
+    try {
+      // Check for active reservations
+      const { data: reservations } = await supabase
+        .from('reservations')
+        .select('id')
+        .eq('vehicle_id', deleteVehicle.id)
+        .in('status', ['approved' as any, 'pending'])
+        .gte('end_at', new Date().toISOString())
+        .limit(1);
+
+      if (reservations && reservations.length > 0) {
+        toast.error('No puedes eliminar: hay reservas activas o próximas');
+        setDeleteVehicle(null);
+        return;
+      }
+
+      // Soft delete
+      const { error } = await supabase
+        .from('vehicles')
+        .update({ 
+          deleted_at: new Date().toISOString(),
+          status: 'paused'
+        })
+        .eq('id', deleteVehicle.id);
+
+      if (error) throw error;
+
+      toast.success('Vehículo archivado correctamente');
+      fetchData();
+      setDeleteVehicle(null);
+    } catch (error: any) {
+      console.error('Error deleting vehicle:', error);
+      toast.error('Error al eliminar vehículo: ' + error.message);
+    }
+  };
+
   const VehicleTable = ({ vehicles }: { vehicles: Vehicle[] }) => (
     <Table>
       <TableHeader>
@@ -138,28 +211,47 @@ export default function VehicleList() {
               <TableCell>Bs {vehicle.price_bs}</TableCell>
               <TableCell>{getStatusBadge(vehicle.status)}</TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end gap-2 flex-wrap">
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => handleViewReservations(vehicle)}
                     title="Ver reservas"
+                    className="min-h-[44px]"
+                    aria-label="Ver reservas"
                   >
                     <Calendar className="h-4 w-4" />
                   </Button>
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => handleQuickEdit(vehicle)}
-                    title="Edición rápida"
+                    onClick={() => handlePhotos(vehicle)}
+                    title="Gestionar fotos"
+                    className="min-h-[44px]"
+                    aria-label="Gestionar fotos"
                   >
-                    <Zap className="h-4 w-4" />
+                    <Image className="h-4 w-4" />
                   </Button>
-                  <Link to={`/owner/vehicles/${vehicle.id}/edit`}>
-                    <Button variant="outline" size="sm" title="Edición completa">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </Link>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleEdit(vehicle)}
+                    title="Editar"
+                    className="min-h-[44px]"
+                    aria-label="Editar vehículo"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    onClick={() => handleDeleteRequest(vehicle)}
+                    title="Eliminar"
+                    className="min-h-[44px]"
+                    aria-label="Eliminar vehículo"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </TableCell>
             </TableRow>
@@ -313,6 +405,46 @@ export default function VehicleList() {
           vehicleTitle={`${reservationsVehicle.brand} ${reservationsVehicle.model} ${reservationsVehicle.year}`}
         />
       )}
+
+      {editVehicle && (
+        <VehicleEditDialog
+          vehicle={editVehicle}
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          onSuccess={fetchData}
+        />
+      )}
+
+      {photosVehicle && (
+        <VehiclePhotosManager
+          vehicleId={photosVehicle.id}
+          vehicleTitle={`${photosVehicle.brand} ${photosVehicle.model} ${photosVehicle.year}`}
+          open={photosOpen}
+          onOpenChange={setPhotosOpen}
+          onSuccess={fetchData}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteVehicle} onOpenChange={() => setDeleteVehicle(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar este vehículo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              El vehículo será archivado y dejará de aparecer en búsquedas. No podrás eliminarlo si tiene reservas activas o próximas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Footer />
     </div>
