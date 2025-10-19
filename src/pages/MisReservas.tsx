@@ -26,6 +26,7 @@ interface Reservation {
   start_date: string;
   end_date: string;
   status: string;
+  payment_status?: string | null;
   total: number;
   daily_price: number;
   subtotal: number;
@@ -325,6 +326,26 @@ export default function MisReservas() {
                           </div>
                         </div>
 
+                        {/* Estado de pago - badge visible */}
+                        {(reservation.payment_status === 'paid' || reservation.payment_status === 'simulated') && (
+                          <div className="mb-3 p-2 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded text-sm">
+                            <span className="inline-flex items-center gap-2">
+                              <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                              <strong className="text-green-800 dark:text-green-200">Pago confirmado ✅</strong>
+                            </span>
+                          </div>
+                        )}
+                        {reservation.status === 'approved' && 
+                         reservation.payment_status !== 'paid' && 
+                         reservation.payment_status !== 'simulated' && (
+                          <div className="mb-3 p-2 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900 rounded text-sm">
+                            <span className="inline-flex items-center gap-2">
+                              <span className="h-2 w-2 rounded-full bg-orange-500 animate-pulse"></span>
+                              <strong className="text-orange-800 dark:text-orange-200">Pago pendiente 💳</strong>
+                            </span>
+                          </div>
+                        )}
+
                         {/* Mensaje de estado */}
                         {reservation.status === 'pending' && (
                           <div className="mb-3 p-2 bg-amber-50 dark:bg-amber-950/20 rounded text-sm text-amber-800 dark:text-amber-200">
@@ -345,7 +366,11 @@ export default function MisReservas() {
                             onClick={() => handleViewDetails(reservation)}
                           >
                             <Eye className="h-4 w-4 mr-2" />
-                            Ver detalles
+                            {reservation.status === 'approved' && 
+                             reservation.payment_status !== 'paid' && 
+                             reservation.payment_status !== 'simulated' 
+                              ? 'Ver detalles y pagar' 
+                              : 'Ver detalles'}
                           </Button>
 
                           {canContactOwner(reservation.status) && (

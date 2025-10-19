@@ -193,19 +193,27 @@ export default function VehicleList() {
               <h1 className="text-3xl font-bold">Mis Vehículos</h1>
               <p className="text-muted-foreground">Gestiona tus publicaciones</p>
             </div>
-            {isKycVerified ? (
-              <Link to="/owner/vehicles/new">
-                <Button className="gap-2">
+            <div className="flex gap-2">
+              <Link to="/owner/mis-reservas-autos">
+                <Button variant="outline" className="gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Reservas de mis autos
+                </Button>
+              </Link>
+              {isKycVerified ? (
+                <Link to="/owner/vehicles/new">
+                  <Button className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Agregar nuevo vehículo
+                  </Button>
+                </Link>
+              ) : (
+                <Button disabled className="gap-2">
                   <Plus className="h-4 w-4" />
                   Agregar nuevo vehículo
                 </Button>
-              </Link>
-            ) : (
-              <Button disabled className="gap-2">
-                <Plus className="h-4 w-4" />
-                Agregar nuevo vehículo
-              </Button>
-            )}
+              )}
+            </div>
           </div>
 
           {vehicles.length === 0 && !isKycVerified && (
