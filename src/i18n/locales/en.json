@@ -1,0 +1,37 @@
+{
+  "nav": {
+    "admin": "Admin",
+    "explore": "Explore Cars",
+    "map": "View Map",
+    "profile": "My Profile",
+    "logout": "Log Out",
+    "login": "Log In",
+    "register": "Sign Up"
+  },
+  "home": {
+    "hero_title": "Rent the perfect car",
+    "hero_subtitle": "Thousands of cars available for your next trip",
+    "search_placeholder": "Where are you going?",
+    "search_button": "Search",
+    "pickup_label": "Pick-up",
+    "return_label": "Return",
+    "featured_vehicles": "Featured Vehicles",
+    "view_all": "View All Cars",
+    "no_vehicles": "No vehicles available at this time"
+  },
+  "common": {
+    "day": "day",
+    "days": "days",
+    "per_day": "per day",
+    "book_now": "Book Now",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back"
+  }
+}

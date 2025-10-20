@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Map, Menu, X, Shield } from "lucide-react";
+import { Map, Menu, X, Shield, Globe } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useSecureSignOut } from "@/hooks/useSecureSignOut";
+import { useTranslation } from "react-i18next";
 
 
 const Navbar = () => {
@@ -12,6 +13,13 @@ const Navbar = () => {
   const { user } = useAuth();
   const { signOut } = useSecureSignOut();
   const [isAdmin, setIsAdmin] = useState(false);
+  const { t, i18n } = useTranslation();
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'es' ? 'en' : 'es';
+    i18n.changeLanguage(newLang);
+    localStorage.setItem('language', newLang);
+  };
 
   useEffect(() => {
     checkAdminRole();
@@ -46,42 +54,52 @@ const Navbar = () => {
             <Link to="/admin">
               <Button variant="ghost" size="sm" className="text-sm lg:text-base text-primary">
                 <Shield className="h-4 w-4 mr-2" />
-                Admin
+                {t('nav.admin')}
               </Button>
             </Link>
           )}
           <Link to="/explorar">
             <Button variant="ghost" size="sm" className="text-sm lg:text-base">
-              Explorar carros
+              {t('nav.explore')}
             </Button>
           </Link>
           <Link to="/mapa">
             <Button variant="ghost" size="sm" className="text-sm lg:text-base">
               <Map className="h-4 w-4 mr-2" />
-              Ver mapa
+              {t('nav.map')}
             </Button>
           </Link>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={toggleLanguage}
+            className="text-sm lg:text-base"
+            title={i18n.language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+          >
+            <Globe className="h-4 w-4 mr-2" />
+            {i18n.language === 'es' ? 'EN' : 'ES'}
+          </Button>
           {user ? (
             <>
               <Link to="/perfil">
                 <Button variant="ghost" size="sm" className="text-sm lg:text-base">
-                  Mi perfil
+                  {t('nav.profile')}
                 </Button>
               </Link>
               <Button onClick={signOut} variant="outline" size="sm" className="text-sm lg:text-base">
-                Cerrar Sesión
+                {t('nav.logout')}
               </Button>
             </>
           ) : (
             <>
               <Link to="/login">
                 <Button variant="outline" size="sm" className="text-sm lg:text-base">
-                  Iniciar sesión
+                  {t('nav.login')}
                 </Button>
               </Link>
               <Link to="/registro">
                 <Button size="sm" className="text-sm lg:text-base">
-                  Registrarse
+                  {t('nav.register')}
                 </Button>
               </Link>
             </>
@@ -106,26 +124,35 @@ const Navbar = () => {
               <Link to="/admin" onClick={() => setIsOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start text-base text-primary" size="lg">
                   <Shield className="h-5 w-5 mr-2" />
-                  Panel Admin
+                  {t('nav.admin')}
                 </Button>
               </Link>
             )}
             <Link to="/explorar" onClick={() => setIsOpen(false)}>
               <Button variant="ghost" className="w-full justify-start text-base" size="lg">
-                Explorar carros
+                {t('nav.explore')}
               </Button>
             </Link>
             <Link to="/mapa" onClick={() => setIsOpen(false)}>
               <Button variant="ghost" className="w-full justify-start text-base" size="lg">
                 <Map className="h-5 w-5 mr-2" />
-                Ver mapa
+                {t('nav.map')}
               </Button>
             </Link>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-base" 
+              size="lg"
+              onClick={toggleLanguage}
+            >
+              <Globe className="h-5 w-5 mr-2" />
+              {i18n.language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+            </Button>
             {user ? (
               <>
                 <Link to="/perfil" onClick={() => setIsOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start text-base" size="lg">
-                    Mi perfil
+                    {t('nav.profile')}
                   </Button>
                 </Link>
                 <Button 
@@ -137,19 +164,19 @@ const Navbar = () => {
                   className="w-full text-base" 
                   size="lg"
                 >
-                  Cerrar Sesión
+                  {t('nav.logout')}
                 </Button>
               </>
             ) : (
               <>
                 <Link to="/login" onClick={() => setIsOpen(false)}>
                   <Button variant="outline" className="w-full text-base" size="lg">
-                    Iniciar sesión
+                    {t('nav.login')}
                   </Button>
                 </Link>
                 <Link to="/registro" onClick={() => setIsOpen(false)}>
                   <Button className="w-full text-base" size="lg">
-                    Registrarse
+                    {t('nav.register')}
                   </Button>
                 </Link>
               </>

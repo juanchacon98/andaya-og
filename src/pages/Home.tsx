@@ -10,6 +10,7 @@ import {
   Navigation,
   Package
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CarCard from "@/components/CarCard";
@@ -35,6 +36,7 @@ interface DateTimeRange {
 
 const Home = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [recommendedCars, setRecommendedCars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -192,7 +194,7 @@ const Home = () => {
                     disabled={!selectedLocation || !dateTimeRange.startDate || !dateTimeRange.endDate}
                   >
                     <Search className="h-5 w-5 mr-2" />
-                    Buscar
+                    {t('home.search_button')}
                   </Button>
                 </div>
               </div>
@@ -260,7 +262,7 @@ const Home = () => {
               </div>
             ) : recommendedCars.length === 0 ? (
               <div className="col-span-full text-center py-10">
-                <p className="text-lg text-muted-foreground">No hay vehículos disponibles en este momento</p>
+                <p className="text-lg text-muted-foreground">{t('home.no_vehicles')}</p>
               </div>
             ) : (
               recommendedCars.map((car) => (
@@ -276,7 +278,7 @@ const Home = () => {
                 variant="outline"
                 className="font-medium px-8"
               >
-                Ver todos los autos
+                {t('home.view_all')}
               </Button>
             </Link>
           </div>

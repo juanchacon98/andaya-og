@@ -1,0 +1,37 @@
+{
+  "nav": {
+    "admin": "Admin",
+    "explore": "Explorar carros",
+    "map": "Ver mapa",
+    "profile": "Mi perfil",
+    "logout": "Cerrar Sesión",
+    "login": "Iniciar sesión",
+    "register": "Registrarse"
+  },
+  "home": {
+    "hero_title": "Alquila el auto perfecto",
+    "hero_subtitle": "Miles de autos disponibles para tu próximo viaje",
+    "search_placeholder": "¿A dónde vas?",
+    "search_button": "Buscar",
+    "pickup_label": "Recogida",
+    "return_label": "Devolución",
+    "featured_vehicles": "Vehículos destacados",
+    "view_all": "Ver todos los autos",
+    "no_vehicles": "No hay vehículos disponibles en este momento"
+  },
+  "common": {
+    "day": "día",
+    "days": "días",
+    "per_day": "por día",
+    "book_now": "Reservar ahora",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "back": "Volver"
+  }
+}
