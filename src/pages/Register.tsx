@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { z } from "zod";
 import { RegistrationSuccess } from "@/components/RegistrationSuccess";
+import { useTranslation } from "react-i18next";
 import {
   Tooltip,
   TooltipContent,
@@ -65,6 +66,7 @@ const registerSchema = z.object({
 });
 
 const Register = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -132,21 +134,21 @@ const Register = () => {
       }
 
       toast({
-        title: "¡Cuenta creada!",
-        description: "Por favor verifica tu correo electrónico para continuar.",
+        title: t('auth.account_created'),
+        description: t('auth.verify_email'),
       });
 
       setRegistrationComplete(true);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast({
-          title: "Error de validación",
+          title: t('auth.validation_error'),
           description: error.errors[0].message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Error al registrarse",
+          title: t('auth.registration_error'),
           description: error.message || "Ocurrió un error durante el registro",
           variant: "destructive",
         });

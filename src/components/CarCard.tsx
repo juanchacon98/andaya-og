@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Star } from "lucide-react";
 import { formatBs } from "@/lib/currency";
+import { useTranslation } from "react-i18next";
 
 interface CarCardProps {
   id: string;
@@ -16,6 +17,8 @@ interface CarCardProps {
 }
 
 const CarCard = ({ id, image, brand, model, year, pricePerDay, location, rating }: CarCardProps) => {
+  const { t } = useTranslation();
+  
   return (
     <Link to={`/carro/${id}`} className="block">
       <Card className="overflow-hidden hover:shadow-lg transition-all duration-200 group border border-border bg-card">
@@ -36,7 +39,7 @@ const CarCard = ({ id, image, brand, model, year, pricePerDay, location, rating 
             </div>
             <div className="flex items-center gap-1 bg-secondary px-2 py-1 rounded-lg">
               <Star className="h-4 w-4 fill-primary text-primary" />
-              <span className="font-semibold text-sm">{rating > 0 ? rating : "N/A"}</span>
+              <span className="font-semibold text-sm">{rating > 0 ? rating : t('car_card.rating_na')}</span>
             </div>
           </div>
           
@@ -49,7 +52,7 @@ const CarCard = ({ id, image, brand, model, year, pricePerDay, location, rating 
             <span className="text-2xl font-bold text-foreground">
               {formatBs(pricePerDay || 0)}
             </span>
-            <span className="text-sm text-muted-foreground">/ día</span>
+            <span className="text-sm text-muted-foreground">{t('car_card.per_day')}</span>
           </div>
         </CardContent>
       </Card>

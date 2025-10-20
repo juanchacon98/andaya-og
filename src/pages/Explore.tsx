@@ -9,8 +9,10 @@ import Footer from "@/components/Footer";
 import CarCard from "@/components/CarCard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 const Explore = () => {
+  const { t } = useTranslation();
   const [location, setLocation] = useState("");
   const [vehicleType, setVehicleType] = useState("all");
   const [priceRange, setPriceRange] = useState([0]);
@@ -49,7 +51,7 @@ const Explore = () => {
       setCars(formattedVehicles);
     } catch (error: any) {
       console.error("Error fetching vehicles:", error);
-      toast.error("Error al cargar vehículos");
+      toast.error(t('explore.error_loading'));
     } finally {
       setLoading(false);
     }
@@ -68,42 +70,42 @@ const Explore = () => {
       <Navbar />
       
       <div className="container py-8" style={{ paddingTop: 'calc(var(--app-header-h) + 2rem)' }}>
-        <h1 className="mb-8 text-4xl font-bold">Explora vehículos disponibles</h1>
+        <h1 className="mb-8 text-4xl font-bold">{t('explore.title')}</h1>
         
         {/* Filters */}
         <div className="mb-8 rounded-lg border bg-card p-6">
           <div className="grid gap-6 md:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="location">Ubicación</Label>
+              <Label htmlFor="location">{t('explore.location_label')}</Label>
               <Input
                 id="location"
-                placeholder="¿Dónde buscas?"
+                placeholder={t('explore.location_placeholder')}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="vehicleType">Tipo de vehículo</Label>
+              <Label htmlFor="vehicleType">{t('explore.vehicle_type_label')}</Label>
               <Select value={vehicleType} onValueChange={setVehicleType}>
                 <SelectTrigger id="vehicleType">
-                  <SelectValue placeholder="Selecciona un tipo" />
+                  <SelectValue placeholder={t('explore.vehicle_type_placeholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="sedan">Sedán</SelectItem>
-                  <SelectItem value="suv">SUV</SelectItem>
-                  <SelectItem value="hatchback">Hatchback</SelectItem>
-                  <SelectItem value="van">Van</SelectItem>
-                  <SelectItem value="pickup">Pickup</SelectItem>
-                  <SelectItem value="coupe">Coupé</SelectItem>
-                  <SelectItem value="moto">Moto</SelectItem>
+                  <SelectItem value="all">{t('explore.vehicle_types.all')}</SelectItem>
+                  <SelectItem value="sedan">{t('explore.vehicle_types.sedan')}</SelectItem>
+                  <SelectItem value="suv">{t('explore.vehicle_types.suv')}</SelectItem>
+                  <SelectItem value="hatchback">{t('explore.vehicle_types.hatchback')}</SelectItem>
+                  <SelectItem value="van">{t('explore.vehicle_types.van')}</SelectItem>
+                  <SelectItem value="pickup">{t('explore.vehicle_types.pickup')}</SelectItem>
+                  <SelectItem value="coupe">{t('explore.vehicle_types.coupe')}</SelectItem>
+                  <SelectItem value="moto">{t('explore.vehicle_types.moto')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-            <Label htmlFor="price">Precio máximo por día: Bs. {priceRange[0] === 0 ? "Sin límite" : priceRange[0].toLocaleString()}</Label>
+            <Label htmlFor="price">{t('explore.price_label')}: Bs. {priceRange[0] === 0 ? t('explore.no_limit') : priceRange[0].toLocaleString()}</Label>
             <Slider
               id="price"
               min={0}
@@ -117,7 +119,7 @@ const Explore = () => {
           </div>
           
           <div className="mt-6 flex justify-end">
-            <Button>Aplicar filtros</Button>
+            <Button>{t('explore.apply_filters')}</Button>
           </div>
         </div>
 
@@ -126,18 +128,18 @@ const Explore = () => {
           <div className="flex justify-center items-center py-20">
             <div className="text-center">
               <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-              <p className="mt-2 text-sm text-muted-foreground">Cargando vehículos...</p>
+              <p className="mt-2 text-sm text-muted-foreground">{t('explore.loading')}</p>
             </div>
           </div>
         ) : (
           <>
             <div className="mb-4 text-muted-foreground">
-              Mostrando {filteredCars.length} vehículos
+              {t('explore.showing_vehicles', { count: filteredCars.length })}
             </div>
             
             {filteredCars.length === 0 ? (
               <div className="text-center py-20">
-                <p className="text-lg text-muted-foreground">No se encontraron vehículos que coincidan con tu búsqueda</p>
+                <p className="text-lg text-muted-foreground">{t('explore.no_results')}</p>
               </div>
             ) : (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

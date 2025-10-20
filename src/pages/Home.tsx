@@ -150,11 +150,11 @@ const Home = () => {
           <div className="max-w-4xl mx-auto text-center space-y-8">
             {/* Title */}
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white leading-tight">
-              Olvida la cola del alquiler
+              {t('home.hero_title')}
             </h1>
             
             <p className="text-xl sm:text-2xl text-white/90">
-              Alquila cualquier auto, donde quieras
+              {t('home.hero_subtitle')}
             </p>
             
             {/* Search Bar */}
@@ -163,12 +163,12 @@ const Home = () => {
                 {/* Location */}
                 <div className="md:col-span-1">
                   <label className="block text-sm font-medium text-muted-foreground mb-2">
-                    Dónde
+                    {t('home.search_location_label')}
                   </label>
                   <LocationAutocomplete
                     value={selectedLocation}
                     onChange={setSelectedLocation}
-                    placeholder="Ciudad, aeropuerto..."
+                    placeholder={t('home.search_placeholder')}
                     className="h-12 border-border"
                   />
                 </div>
@@ -176,7 +176,7 @@ const Home = () => {
                 {/* Date and Time Range */}
                 <div className="md:col-span-1">
                   <label className="block text-sm font-medium text-muted-foreground mb-2">
-                    Fechas y Horarios
+                    {t('home.search_dates_label')}
                   </label>
                   <SearchDateRangePicker
                     value={dateTimeRange}
@@ -208,7 +208,7 @@ const Home = () => {
                   size="lg"
                   className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-foreground font-medium px-8"
                 >
-                  Conoce AndaYa
+                  {t('home.learn_more')}
                 </Button>
               </Link>
             </div>
@@ -245,10 +245,10 @@ const Home = () => {
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="mb-10">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
-              Autos recomendados
+              {t('home.featured_vehicles')}
             </h2>
             <p className="text-muted-foreground text-lg">
-              Encuentra el vehículo perfecto para tu próximo viaje
+              {t('home.featured_subtitle')}
             </p>
           </div>
           
@@ -257,7 +257,7 @@ const Home = () => {
               <div className="col-span-full flex justify-center py-10">
                 <div className="text-center">
                   <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-                  <p className="mt-2 text-sm text-muted-foreground">Cargando vehículos...</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{t('home.loading_vehicles')}</p>
                 </div>
               </div>
             ) : recommendedCars.length === 0 ? (
@@ -290,19 +290,19 @@ const Home = () => {
         <div className="container px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              ¿Cómo funciona?
+              {t('home.how_it_works')}
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Alquilar un auto es fácil y rápido con AndaYa
+              {t('home.how_it_works_subtitle')}
             </p>
           </div>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
             {[
-              { number: "1", title: "Busca", description: "Encuentra el auto perfecto cerca de ti" },
-              { number: "2", title: "Reserva", description: "Elige las fechas y confirma tu reserva" },
-              { number: "3", title: "Recoge", description: "Coordina con el dueño y recoge el auto" },
-              { number: "4", title: "Disfruta", description: "¡Anda Ya! Disfruta tu viaje" },
+              { number: "1", title: t('home.step_1_title'), description: t('home.step_1_desc') },
+              { number: "2", title: t('home.step_2_title'), description: t('home.step_2_desc') },
+              { number: "3", title: t('home.step_3_title'), description: t('home.step_3_desc') },
+              { number: "4", title: t('home.step_4_title'), description: t('home.step_4_desc') },
             ].map((step) => (
               <div key={step.number} className="text-center">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground text-2xl font-bold mb-4">
@@ -320,10 +320,10 @@ const Home = () => {
       <section className="py-20 bg-primary text-primary-foreground">
         <div className="container px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-            ¿Listo para empezar?
+            {t('home.cta_title')}
           </h2>
           <p className="text-xl mb-8 text-primary-foreground/90 max-w-2xl mx-auto">
-            Únete a miles de venezolanos que ya están usando AndaYa
+            {t('home.cta_subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/registro">
@@ -331,7 +331,7 @@ const Home = () => {
                 size="lg" 
                 className="bg-white text-primary hover:bg-white/90 font-semibold px-8"
               >
-                Crear cuenta gratis
+                {t('home.cta_create_account')}
               </Button>
             </Link>
             <Link to="/explorar">
@@ -340,7 +340,7 @@ const Home = () => {
                 variant="outline"
                 className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary font-semibold px-8"
               >
-                Explorar autos
+                {t('home.cta_explore')}
               </Button>
             </Link>
           </div>

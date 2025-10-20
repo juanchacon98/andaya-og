@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 
 const loginSchema = z.object({
   email: z.string()
@@ -22,6 +23,7 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,22 +53,22 @@ const Login = () => {
       if (error) throw error;
 
       toast({
-        title: "Inicio de sesión exitoso",
-        description: "Bienvenido a AndaYa",
+        title: t('auth.login_success'),
+        description: t('auth.welcome'),
       });
       
       navigate("/");
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast({
-          title: "Error de validación",
+          title: t('auth.validation_error'),
           description: error.errors[0].message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Error al iniciar sesión",
-          description: "Credenciales inválidas. Por favor, intenta de nuevo.",
+          title: t('auth.login_error'),
+          description: t('auth.invalid_credentials'),
           variant: "destructive",
         });
       }
@@ -82,20 +84,20 @@ const Login = () => {
           <div className="mb-4 flex justify-center">
             <Car className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">Bienvenido a AndaYa</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('auth.welcome')}</CardTitle>
           <CardDescription>
-            Ingresa tus credenciales para continuar
+            {t('auth.enter_credentials')}
           </CardDescription>
         </CardHeader>
         
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Correo electrónico</Label>
+              <Label htmlFor="email">{t('auth.email')}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="tu@email.com"
+                placeholder={t('auth.email_placeholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -103,11 +105,11 @@ const Login = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password">{t('auth.password')}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder={t('auth.password_placeholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -116,20 +118,20 @@ const Login = () => {
             
             <div className="text-right">
               <Link to="/recuperar" className="text-sm text-primary hover:underline">
-                ¿Olvidaste tu contraseña?
+                {t('auth.forgot_password')}
               </Link>
             </div>
           </CardContent>
           
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Iniciando sesión..." : "Iniciar sesión"}
+              {loading ? t('auth.signing_in') : t('auth.sign_in')}
             </Button>
             
             <p className="text-center text-sm text-muted-foreground">
-              ¿No tienes cuenta?{" "}
+              {t('auth.no_account')}{" "}
               <Link to="/registro" className="text-primary hover:underline">
-                Regístrate aquí
+                {t('auth.register_here')}
               </Link>
             </p>
           </CardFooter>
