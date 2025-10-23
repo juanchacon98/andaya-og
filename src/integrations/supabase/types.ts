@@ -899,23 +899,20 @@ export type Database = {
           full_name: string | null
           id: string | null
           kyc_status: string | null
-          phone: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           full_name?: string | null
           id?: string | null
-          kyc_status?: never
-          phone?: string | null
+          kyc_status?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           full_name?: string | null
           id?: string | null
-          kyc_status?: never
-          phone?: string | null
+          kyc_status?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -923,7 +920,7 @@ export type Database = {
     }
     Functions: {
       admin_get_metrics: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           active_reservations: number
           open_incidents: number
@@ -940,6 +937,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_contact_info_for_reservation: {
+        Args: { p_reservation_id: string }
+        Returns: {
+          full_name: string
+          phone: string
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -947,12 +952,15 @@ export type Database = {
         }
         Returns: boolean
       }
-      simulate_payment: {
-        Args:
-          | { p_method: string; p_reservation_id: string }
-          | { p_method: string; p_reservation_id: string }
-        Returns: Json
-      }
+      simulate_payment:
+        | {
+            Args: { p_method: string; p_reservation_id: string }
+            Returns: Json
+          }
+        | {
+            Args: { p_method: string; p_reservation_id: string }
+            Returns: Json
+          }
     }
     Enums: {
       access_rule: "allow" | "deny"
